@@ -1,0 +1,26 @@
+.card-wrapper {
+	.error-text {
+		color: $error-hover;
+		margin-top: 15px;
+		margin-left: 10px;
+		font-size: 0.8em;
+	}
+	.buttons-wrapper {
+		margin-top: 20px;
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		button:nth-child(1) {
+			@include button-checkout();
+			width: 80px;
+			height: 30px;
+		}
+		button:nth-child(2) {
+			@include button();
+			font-size: 1.2em;
+			width: 100px;
+			height: 40px;
+		}
+	}
+}

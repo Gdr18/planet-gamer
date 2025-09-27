@@ -1,0 +1,40 @@
+.manager-sidebar-list-wrapper {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 30px;
+	padding: 30px;
+	@include background-black-grey();
+	.manager-item {
+		background-color: $gris-fuerte;
+		border-radius: 3px;
+		display: grid;
+		.manager-img {
+			margin-top: 15px;
+			img {
+				height: 100px;
+				width: 100%;
+				object-fit: contain;
+			}
+		}
+		.title-manager-wrapper {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			.title-manager {
+				color: $gris-mas-claro;
+				text-align: center;
+				font-size: 0.9em;
+			}
+			.actions-manager {
+				width: 100%;
+				display: flex;
+				justify-content: space-around;
+				margin-top: 10px;
+				.action-icon {
+					@include icon();
+					font-size: 1.5em;
+				}
+			}
+		}
+	}
+}

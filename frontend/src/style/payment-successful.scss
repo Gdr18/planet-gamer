@@ -1,0 +1,46 @@
+.success-wrapper {
+	background-color: $gris-claro;
+	border-radius: 3px;
+	padding: 20px;
+	@include white-shadow();
+	margin-bottom: 40px;
+	.branding {
+		display: flex;
+		align-items: center;
+		div {
+			font-family: 'Creepster', sans-serif;
+			color: $verde-marca;
+			font-size: 1.8em;
+			margin-right: 10px;
+		}
+	}
+	.header-success {
+		padding: 20px;
+		.success-icon-team {
+			display: flex;
+			align-items: center;
+			div {
+				margin-right: 5px;
+				span {
+					color: $morado;
+				}
+			}
+			.icon-rocket {
+				color: $verde-marca;
+				font-size: 1.5em;
+			}
+		}
+	}
+	.total-success {
+		padding: 20px;
+		span {
+			color: $morado;
+		}
+	}
+}
+
+@media (max-width: 700px) {
+	.success-wrapper {
+		margin: 100px 0px;
+	}
+}

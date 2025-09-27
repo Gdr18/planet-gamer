@@ -1,0 +1,152 @@
+.universal-title {
+	color: $gris-fuerte;
+	padding: 20px;
+	font-weight: 600;
+}
+
+.edit-icon {
+	@include icon2();
+}
+
+.profile-wrapper {
+	margin: 30px 0px;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	.profile-container {
+		min-width: 700px;
+		width: 900px;
+		@include background-black-grey();
+		padding: 60px;
+		border-radius: 3px;
+		@include white-shadow();
+		.profile-title-wrapper {
+			width: 100%;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			.profile-title {
+				font-family: 'Creepster', sans-serif;
+				color: $verde-marca;
+				font-size: 1.7em;
+			}
+			.admin-wrapper {
+				div {
+					color: $morado;
+				}
+				a {
+					div {
+						display: flex;
+						align-items: center;
+						margin-top: 10px;
+						font-family: 'Creepster', sans-serif;
+						color: $verde-marca;
+						font-size: 1.5em;
+						transition: 0.3s ease-in-out;
+						&:hover {
+							color: $verde-hover;
+						}
+					}
+				}
+			}
+		}
+		.form-wrapper {
+			background-color: $gris-claro;
+			padding: 40px;
+			width: 100%;
+			border-radius: 3px;
+			margin-top: 20px;
+			.form-title-wrapper {
+				display: flex;
+				align-items: center;
+			}
+			form {
+				display: grid;
+				gap: 10px;
+				.two-column {
+					@include two-column();
+				}
+				.one-column {
+					@include one-column();
+				}
+				.errorTag {
+					color: $error;
+					font-size: 0.8em;
+				}
+				input:enabled {
+					@include input();
+				}
+				.button-wrapper {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-top: 20px;
+					button:enabled {
+						@include button();
+						width: 120px;
+						height: 30px;
+					}
+					.unsubscribe {
+						font-size: 0.8em;
+						color: $error;
+						transition: 0.3s ease-in-out;
+						text-decoration: underline;
+						&:hover {
+							cursor: pointer;
+							color: $error-hover;
+						}
+					}
+				}
+			}
+			.orders-wrapper {
+				display: grid;
+				gap: 20px;
+				.order-item {
+					width: 100%;
+					padding: 10px;
+					display: flex;
+					justify-content: space-between;
+					@include background-black-grey();
+					font-size: 0.8em;
+					border-radius: 3px;
+					span {
+						color: $gris-claro;
+					}
+					.divs {
+						color: $gris-fuerte;
+						span {
+							color: $gris-claro;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 700px) {
+	.profile-wrapper {
+		margin: 0;
+		margin-bottom: 10px;
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		.profile-container {
+			padding: 5px;
+			width: 100%;
+			min-width: 0;
+			.admin-wrapper {
+				margin-top: 15px;
+			}
+			.form-wrapper {
+				padding: 5px;
+				.orders-wrapper {
+					.order-item {
+						font-size: 0.7em;
+					}
+				}
+			}
+		}
+	}
+}

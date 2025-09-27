@@ -1,0 +1,101 @@
+.contact-container {
+	width: 100%;
+	min-height: 85.8vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	.boxes {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 50px;
+		.universal {
+			padding: 15px;
+			height: 250px;
+			max-width: 400px;
+		}
+		.text {
+			@include background-black-grey();
+			@include white-shadow();
+			border-radius: 5px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			p {
+				font-size: 0.9rem;
+				text-align: center;
+			}
+		}
+
+		.complet-brand {
+			font-family: 'Creepster', sans-serif;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			div {
+				color: $verde-marca;
+				margin: 0;
+			}
+			div:first-child {
+				font-size: 2.5em;
+			}
+		}
+
+		.logo {
+			display: flex;
+			justify-content: center;
+		}
+
+		.contact {
+			@include background-black-grey();
+			@include white-shadow();
+			border-radius: 5px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: space-around;
+			.title-contact {
+				color: $morado;
+				font-family: 'Creepster', sans-serif;
+				font-size: 1.5em;
+			}
+			div {
+				font-size: 0.9em;
+				color: $gris-fuerte;
+				margin: 0;
+			}
+			.icons-rrss-wrapper {
+				width: 100%;
+				display: flex;
+				justify-content: space-around;
+				.icons-rrss {
+					@include icon();
+				}
+			}
+		}
+	}
+}
+
+@media (max-width: 700px) {
+	.contact-container {
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
+		.boxes {
+			grid-template-columns: 1fr;
+			.text {
+				order: 2;
+			}
+			.complet-brand {
+				order: 1;
+			}
+			.logo {
+				order: 3;
+			}
+			.contact {
+				order: 4;
+				margin-bottom: 40px;
+			}
+		}
+	}
+}
