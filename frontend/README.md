@@ -2,7 +2,7 @@
 
 Frontend Planet Gamer, e-commerce de videojuegos. Proyecto final "Full Stack Course by DevCamp & Bottega University".
 
-<img src="https://imgur.com/gallery/capturas-proyectos-IIxl8ur#aLjq6Ei" alt="Captura Planet Gamer"/>
+<img src="https://i.imgur.com/aLjq6Ei.png" alt="Captura Planet Gamer"/>
 
 <a href='https://planet-gamer-frontend.onrender.com'>Demo Planet Gamer</a>
 
