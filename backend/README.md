@@ -4,7 +4,7 @@ Backend de Planet Gamer (e\-commerce de videojuegos). Proyecto final del *Full S
 API construida con **Flask** y **SQLAlchemy** sobre **SQLite** (en producción base de datos PostgresSQL).  
 Estado: en desarrollo.
 
-<a href="https://planet-gamer-backend.fly.dev">Deploy (Fly.io)</a>
+<img src="https://imgur.com/gallery/capturas-proyectos-IIxl8ur#q94UiXR" alt="Captura Planet Gamer"/>
 
 ---
 
