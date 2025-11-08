@@ -21,16 +21,16 @@ user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
 
-user = Blueprint("user", __name__)
+users = Blueprint("users", __name__, url_prefix="/users")
 
 
-@user.route("/users", methods=["GET"])
+@users.route("/", methods=["GET"])
 def get_users():
     all_users = User.query.all()
     return users_schema.jsonify(all_users)
 
 
-@user.route("/user", methods=["POST"])
+@users.route("/", methods=["POST"])
 def add_user():
     user_data = request.json
 
@@ -46,7 +46,7 @@ def add_user():
     return user_schema.jsonify(new_user)
 
 
-@user.route("/user/<user_id>", methods=["GET", "DELETE", "PUT"])
+@users.route("/<user_id>", methods=["GET", "DELETE", "PUT"])
 def select_user(user_id):
     selected_user = User.query.get(user_id)
 

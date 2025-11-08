@@ -3,13 +3,13 @@ from flask_cors import CORS
 
 from .utils.instantiations import db, bcrypt, ma
 
-from .routes.address_route import address
-from .routes.basket_route import basket
-from .routes.user_route import user
-from .routes.game_route import game
-from .routes.user_role_route import role
-from .routes.order_route import order
-from .routes.order_details_route import order_details
+from .routes.addresses_route import address
+from .routes.baskets_route import basket
+from .routes.users_route import users
+from .routes.games_route import game
+from .routes.user_roles_route import role
+from .routes.orders_route import order
+from .routes.orders_details_route import order_details
 from .services.auth_service import auth
 
 # from .models.order_details_model import OrderDetails
@@ -34,7 +34,7 @@ def create_app(config):
     bcrypt.init_app(app)
     ma.init_app(app)
 
-    app.register_blueprint(user)
+    app.register_blueprint(users)
     app.register_blueprint(order)
     app.register_blueprint(order_details)
     app.register_blueprint(address)

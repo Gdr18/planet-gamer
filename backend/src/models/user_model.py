@@ -1,5 +1,4 @@
 from ..utils.instantiations import db
-from .user_role_model import UserRole
 
 
 class User(db.Model):
@@ -19,6 +18,8 @@ class User(db.Model):
 		self.password = password
 		self.surnames = surnames
 		self.phone_number = phone_number
+
+		from .user_role_model import UserRole
 
 		user_role = db.session.query(UserRole).filter_by(email=email).first()
 		self.role = user_role.role if user_role else None

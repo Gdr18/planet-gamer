@@ -19,10 +19,10 @@ class AddressSchema(ma.Schema):
 address_schema = AddressSchema()
 addresses_schema = AddressSchema(many=True)
 
-address = Blueprint("address", __name__)
+addresses = Blueprint("addresses", __name__, url_prefix="/addresses")
 
 
-@address.route("/address/<address_user_id>", methods=["POST"])
+@addresses.route("/<address_user_id>", methods=["POST"])
 def add_address(address_user_id):
     street = request.json["street"]
     second_line_street = request.json["second_line_street"]
@@ -52,13 +52,13 @@ def add_address(address_user_id):
         return address_schema.jsonify(address)
 
 
-@address.route("/address-user/<address_user_id>", methods=["GET"])
-def get_addresses(address_user_id):
-    address = Address.query.filter_by(address_user_id=address_user_id).first()
+@addresses.route("/users/<user_id>", methods=["GET"])
+def get_addresses(user_id):
+    address = Address.query.filter_by(address_user_id=user_id).first()
     return address_schema.jsonify(address)
 
 
-@address.route("/address/<id>", methods=["GET", "DELETE", "PUT"])
+@addresses.route("/<id>", methods=["GET", "DELETE", "PUT"])
 def select_address(id):
     if request.method == "GET":
         address = Address.query.get(id)
@@ -88,7 +88,7 @@ def select_address(id):
         return address_schema.jsonify(address)
 
 
-@address.route("/addresses", methods=["GET"])
+@addresses.route("/", methods=["GET"])
 def get_all_addresses():
     all_addresses = Address.query.all()
     result = addresses_schema.dump(all_addresses)
