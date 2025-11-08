@@ -7,7 +7,7 @@ from .routes.address_route import address
 from .routes.basket_route import basket
 from .routes.user_route import user
 from .routes.game_route import game
-from .routes.role_route import role
+from .routes.user_role_route import role
 from .routes.order_route import order
 from .routes.order_details_route import order_details
 from .services.auth_service import auth

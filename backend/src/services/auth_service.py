@@ -2,7 +2,7 @@ from flask import Blueprint, request, session
 
 from ..utils.instantiations import db, bcrypt
 from ..models.user_model import User
-from ..models.role_model import Role
+from ..models.user_role_model import UserRole
 from ..routes.user_route import user_schema
 
 auth = Blueprint("auth", __name__)
@@ -19,7 +19,7 @@ def login():
         name = request.json["name"]
 
         user_exists = User.query.filter_by(email=email).first()
-        user_role = Role.query.filter_by(email=email).first()
+        user_role = UserRole.query.filter_by(email=email).first()
 
         if user_exists:
             if not bcrypt.check_password_hash(user_exists.password, password):
@@ -30,7 +30,7 @@ def login():
                 return user_schema.jsonify(user_exists)
         elif user_exists is None and name != "":
             password = bcrypt.generate_password_hash(password).decode("utf-8")
-            role = user_role.type if user_role is not None else 3
+            role = user_role.role if user_role is not None else 3
 
             new_user = User(email, name, password, role)
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, session
 
 from ..utils.instantiations import ma, db
-from ..models.role_model import Role
+from ..models.user_role_model import UserRole
 from ..models.user_model import User
 
 
@@ -17,10 +17,10 @@ role = Blueprint("role", __name__)
 
 
 def updating_role():
-    usuarios_con_rol_actualizado = db.session.query(User, Role).join(Role, User.email == Role.email).filter(User.role != Role.type).all()
+    usuarios_con_rol_actualizado = db.session.query(User, UserRole).join(UserRole, User.email == UserRole.email).filter(User.role != UserRole.type).all()
 
     for usuario, rol in usuarios_con_rol_actualizado:
-        usuario.role = rol.type
+        usuario.role = rol.role
 
     db.session.commit()
 
@@ -29,7 +29,7 @@ def updating_role():
 def select_roles():
     # if "email" not in session and "role" not in session and session["role"] <= 2:
     #     return "You are not authorized", 403
-    all_roles = Role.query.all()
+    all_roles = UserRole.query.all()
     return roles_schema.jsonify(all_roles)
 
 
@@ -39,11 +39,11 @@ def select_role(id):
     # if "email" not in session and "role" not in session and "role" >= 2:
     #     return "You are not authorized", 403
     if request.method == "GET":
-        role = Role.query.get(id)
+        role = UserRole.query.get(id)
         return role_schema.jsonify(role)
 
     if request.method == "DELETE":
-        role = Role.query.get(id)
+        role = UserRole.query.get(id)
 
         db.session.delete(role)
         db.session.commit()
@@ -52,10 +52,10 @@ def select_role(id):
         return f"The role {id} was successfully deleted"
 
     if request.method == "PUT":
-        role = Role.query.get(id)
+        role = UserRole.query.get(id)
         type = request.json["type"]
 
-        role.type = type
+        role.role = type
 
         db.session.commit()
         updating_role()
@@ -70,12 +70,12 @@ def post_role():
     email = request.json["email"]
     type = request.json["type"]
 
-    new_role = Role(email, type)
+    new_role = UserRole(email, type)
 
     db.session.add(new_role)
     db.session.commit()
     updating_role()
 
-    role = Role.query.get(new_role.id)
+    role = UserRole.query.get(new_role.id)
 
     return role_schema.jsonify(role)
