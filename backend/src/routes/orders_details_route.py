@@ -34,7 +34,7 @@ def get_order_details():
     return orders_details_schema.jsonify(all_orders_details), 200
 
 
-@orders_details.route("/<order-details-id>", methods=["GET", "PUT", "DELETE"])
+@orders_details.route("/<order_details_id>", methods=["GET", "PUT", "DELETE"])
 def handle_order_details(order_details_id):
     order_details = OrderDetails.query.get(order_details_id)
     if request.method == "PUT":
@@ -50,7 +50,7 @@ def handle_order_details(order_details_id):
     return order_details_schema.jsonify(order_details), 200
 
 
-@orders_details.route("/orders/<order-id>", methods=["GET"])
+@orders_details.route("/orders/<order_id>", methods=["GET"])
 def get_orders_details(order_id):
     all_orders_details = OrderDetails.query.filter_by(details_order_id=order_id).all()
     return orders_details_schema.jsonify(all_orders_details), 200

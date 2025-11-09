@@ -1,11 +1,12 @@
 from flask import Blueprint, request, jsonify
+from marshmallow import fields
 
 from ..utils.instantiations import ma, db
 from ..models.game_model import Game
 
 
 class GameSchema(ma.Schema):
-    date = ma.fields.DateTime(format="%d-%m-%YT%H:%M:%S")
+    date = fields.DateTime(format="%d-%m-%YT%H:%M:%S")
 
     class Meta:
         fields = (
@@ -47,7 +48,7 @@ def add_game():
     return game_schema.jsonify(game), 201
 
 
-@games.route("/<game-id>", methods=["GET", "PUT", "DELETE"])
+@games.route("/<game_id>", methods=["GET", "PUT", "DELETE"])
 def handle_game(game_id):
     game = Game.query.get(game_id)
     if request.method == "PUT":

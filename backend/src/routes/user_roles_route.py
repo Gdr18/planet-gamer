@@ -36,7 +36,7 @@ def add_user_role():
     return role_schema.jsonify(role)
 
 
-@users_role.route("/<user-email>", methods=["GET", "PUT", "DELETE"])
+@users_role.route("/<user_email>", methods=["GET", "PUT", "DELETE"])
 def handle_role(user_email):
     user_role = UserRole.query.get(user_email)
 

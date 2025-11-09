@@ -1,4 +1,5 @@
 from flask import request, Blueprint, jsonify
+from marshmallow import fields
 
 from ..utils.instantiations import ma, db
 from ..models.user_model import User
@@ -6,7 +7,7 @@ from ..models.order_model import Order
 
 
 class OrderSchema(ma.Schema):
-    date = ma.fields.DateTime(format="%d-%m-%YT%H:%M:%S")
+    date = fields.DateTime(format="%d-%m-%YT%H:%M:%S")
 
     class Meta:
         fields = ("id", "total", "qty", "order_user_id", "order_address_id")

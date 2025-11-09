@@ -33,7 +33,7 @@ def add_item_basket():
     return baskets_schema.jsonify(items_basket)
 
 
-@items_basket.route("/<item-basket-id>", methods=["GET", "PUT", "DELETE"])
+@items_basket.route("/<item_basket_id>", methods=["GET", "PUT", "DELETE"])
 def handle_item_basket(item_basket_id):
     item_basket = ItemBasket.query.get(item_basket_id)
     if request.method == "PUT":
@@ -50,7 +50,7 @@ def handle_item_basket(item_basket_id):
     return basket_schema.jsonify(item_basket), 200
 
 
-@items_basket.route("/users/<user-id>", methods=["GET"])
+@items_basket.route("/users/<user_id>", methods=["GET"])
 def get_basket_user_id(user_id):
     # TODO: Cómo se hace un join para añadir info de juegos?
     user_basket = ItemBasket.query.filter_by(basket_user_id=user_id).all()

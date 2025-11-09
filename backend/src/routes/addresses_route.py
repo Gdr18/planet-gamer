@@ -22,74 +22,52 @@ addresses_schema = AddressSchema(many=True)
 addresses = Blueprint("addresses", __name__, url_prefix="/addresses")
 
 
-@addresses.route("/<address_user_id>", methods=["POST"])
-def add_address(address_user_id):
-    street = request.get_json()["street"]
-    second_line_street = request.get_json()["second_line_street"]
-    postal_code = request.get_json()["postal_code"]
-    city = request.get_json()["city"]
+@addresses.route("/", methods=["POST"])
+def add_address():
+    address_data = request.get_json()
 
-    user_address = Address.query.filter_by(address_user_id=address_user_id).first()
+    new_address = Address(**address_data)
 
-    if user_address is not None:
-        user_address.street = street
-        user_address.second_line_street = second_line_street
-        user_address.postal_code = postal_code
-        user_address.city = city
+    db.session.add(new_address)
+    db.session.commit()
 
-        db.session.commit()
-        return address_schema.jsonify(user_address)
-    else:
-        new_address = Address(
-            street, second_line_street, postal_code, city, address_user_id
-        )
+    address = Address.query.get(new_address.id)
 
-        db.session.add(new_address)
-        db.session.commit()
-
-        address = Address.query.get(new_address.id)
-
-        return address_schema.jsonify(address)
-
-
-@addresses.route("/users/<user_id>", methods=["GET"])
-def get_addresses(user_id):
-    address = Address.query.filter_by(address_user_id=user_id).first()
-    return address_schema.jsonify(address)
-
-
-@addresses.route("/<id>", methods=["GET", "DELETE", "PUT"])
-def select_address(id):
-    if request.method == "GET":
-        address = Address.query.get(id)
-        return address_schema.jsonify(address)
-
-    if request.method == "DELETE":
-        address = Address.query.get(id)
-
-        db.session.delete(address)
-        db.session.commit()
-
-        return f"The address {address.id} was successfully deleted"
-
-    if request.method == "PUT":
-        address = Address.query.get(id)
-        street = request.get_json()["street"]
-        second_line_street = request.get_json()["second_line_street"]
-        postal_code = request.get_json()["postal_code"]
-        city = request.get_json()["city"]
-
-        address.street = street
-        address.second_line_street = second_line_street
-        address.postal_code = postal_code
-        address.city = city
-
-        db.session.commit()
-        return address_schema.jsonify(address)
+    return address_schema.jsonify(address), 201
 
 
 @addresses.route("/", methods=["GET"])
-def get_all_addresses():
+def get_addresses():
     all_addresses = Address.query.all()
-    result = addresses_schema.dump(all_addresses)
-    return jsonify(result)
+    return addresses_schema.jsonify(all_addresses), 200
+
+
+@addresses.route("/<address_id>", methods=["GET", "DELETE", "PUT"])
+def handle_address(address_id):
+    address = Address.query.get(address_id)
+
+    if request.method == "DELETE":
+        db.session.delete(address)
+        db.session.commit()
+
+        return jsonify(msg="La dirección ha sido eliminada correctamente"), 200
+
+    if request.method == "PUT":
+        address_data = request.get_json()
+
+        # TODO: Falta filtrar resultados
+        address.street = address_data["street"]
+        address.second_line_street = address_data["second_line_street"]
+        address.postal_code = address_data["postal_code"]
+        address.city = address_data["city"]
+
+        db.session.commit()
+        return address_schema.jsonify(address), 200
+
+    return address_schema.jsonify(address), 200
+
+
+@addresses.route("/users/<user_id>", methods=["GET"])
+def get_addresses_user(user_id):
+    address = Address.query.filter_by(address_user_id=user_id).all()
+    return address_schema.jsonify(address), 200

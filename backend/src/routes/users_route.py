@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 
 from ..utils.instantiations import ma, db, bcrypt
 from ..models.user_model import User
@@ -30,9 +30,9 @@ def add_user():
         "utf-8"
     )
 
-    user_instance = User(**user_data)
+    new_user = User(**user_data)
 
-    db.session.add(user_instance)
+    db.session.add(new_user)
     db.session.commit()
 
     new_user = User.query.get(user_data.id)
@@ -41,27 +41,23 @@ def add_user():
 
 
 @users.route("/<user_id>", methods=["GET", "DELETE", "PUT"])
-def select_user(user_id):
-    selected_user = User.query.get(user_id)
+def handle_user(user_id):
+    user = User.query.get(user_id)
 
     if request.method == "DELETE":
-        db.session.delete(selected_user)
+        db.session.delete(user)
         db.session.commit()
-        return f"The user {user_id} was successfully deleted"
+        return jsonify(msg="El usuario ha sido eliminado correctamente"), 200
 
     elif request.method == "PUT":
         for key, value in request.get_json().items():
             if key == "password":
-                if value != "" and not bcrypt.check_password_hash(
-                    selected_user.password, value
-                ):
-                    selected_user.password = bcrypt.generate_password_hash(
-                        value
-                    ).decode("utf-8")
+                if value != "" and not bcrypt.check_password_hash(user.password, value):
+                    user.password = bcrypt.generate_password_hash(value).decode("utf-8")
             else:
-                setattr(selected_user, key, value)
+                setattr(user, key, value)
 
         db.session.commit()
-        return user_schema.jsonify(selected_user)
+        return user_schema.jsonify(user)
 
-    return user_schema.jsonify(selected_user)
+    return user_schema.jsonify(user)
