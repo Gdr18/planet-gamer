@@ -18,7 +18,7 @@ orders_details = Blueprint("orders_details", __name__, url_prefix="/orders-detai
 
 @orders_details.route("/", methods=["POST"])
 def add_order_details():
-    new_order_details = OrderDetails(**request.json)
+    new_order_details = OrderDetails(**request.get_json())
 
     db.session.add(new_order_details)
     db.session.commit()
@@ -38,7 +38,7 @@ def get_order_details():
 def handle_order_details(order_details_id):
     order_details = OrderDetails.query.get(order_details_id)
     if request.method == "PUT":
-        for key, value in request.json.items():
+        for key, value in request.get_json().items():
             setattr(order_details, key, value)
         db.session.commit()
 

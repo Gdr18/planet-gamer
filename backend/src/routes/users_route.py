@@ -6,15 +6,7 @@ from ..models.user_model import User
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = (
-            "id",
-            "name",
-            "email",
-            "password",
-            "surnames",
-            "phone_number",
-            "role"
-        )
+        fields = ("id", "name", "email", "password", "surnames", "phone_number", "role")
 
 
 user_schema = UserSchema()
@@ -32,9 +24,11 @@ def get_users():
 
 @users.route("/", methods=["POST"])
 def add_user():
-    user_data = request.json
+    user_data = request.get_json()
 
-    user_data["password"] = bcrypt.generate_password_hash(user_data["password"]).decode("utf-8")
+    user_data["password"] = bcrypt.generate_password_hash(user_data["password"]).decode(
+        "utf-8"
+    )
 
     user_instance = User(**user_data)
 
@@ -56,10 +50,14 @@ def select_user(user_id):
         return f"The user {user_id} was successfully deleted"
 
     elif request.method == "PUT":
-        for key, value in request.json.items():
+        for key, value in request.get_json().items():
             if key == "password":
-                if value != "" and not bcrypt.check_password_hash(selected_user.password, value):
-                    selected_user.password = bcrypt.generate_password_hash(value).decode("utf-8")
+                if value != "" and not bcrypt.check_password_hash(
+                    selected_user.password, value
+                ):
+                    selected_user.password = bcrypt.generate_password_hash(
+                        value
+                    ).decode("utf-8")
             else:
                 setattr(selected_user, key, value)
 

@@ -23,8 +23,8 @@ def get_roles():
 
 @users_role.route("/", methods=["POST"])
 def add_user_role():
-    email = request.json["email"]
-    role = request.json["role"]
+    email = request.get_json()["email"]
+    role = request.get_json()["role"]
 
     new_role = UserRole(email, role)
 
@@ -47,7 +47,7 @@ def handle_role(user_email):
         return f"The role was successfully deleted"
 
     if request.method == "PUT":
-        role = request.json["role"]
+        role = request.get_json()["role"]
 
         user_role.role = role
 

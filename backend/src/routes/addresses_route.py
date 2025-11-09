@@ -24,10 +24,10 @@ addresses = Blueprint("addresses", __name__, url_prefix="/addresses")
 
 @addresses.route("/<address_user_id>", methods=["POST"])
 def add_address(address_user_id):
-    street = request.json["street"]
-    second_line_street = request.json["second_line_street"]
-    postal_code = request.json["postal_code"]
-    city = request.json["city"]
+    street = request.get_json()["street"]
+    second_line_street = request.get_json()["second_line_street"]
+    postal_code = request.get_json()["postal_code"]
+    city = request.get_json()["city"]
 
     user_address = Address.query.filter_by(address_user_id=address_user_id).first()
 
@@ -74,10 +74,10 @@ def select_address(id):
 
     if request.method == "PUT":
         address = Address.query.get(id)
-        street = request.json["street"]
-        second_line_street = request.json["second_line_street"]
-        postal_code = request.json["postal_code"]
-        city = request.json["city"]
+        street = request.get_json()["street"]
+        second_line_street = request.get_json()["second_line_street"]
+        postal_code = request.get_json()["postal_code"]
+        city = request.get_json()["city"]
 
         address.street = street
         address.second_line_street = second_line_street

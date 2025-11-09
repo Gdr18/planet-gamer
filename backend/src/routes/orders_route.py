@@ -6,8 +6,10 @@ from ..models.order_model import Order
 
 
 class OrderSchema(ma.Schema):
+    date = ma.fields.DateTime(format="%d-%m-%YT%H:%M:%S")
+
     class Meta:
-        fields = ("id", "total", "qty", "order_user_id", "date", "order_address_id")
+        fields = ("id", "total", "qty", "order_user_id", "order_address_id")
 
 
 order_schema = OrderSchema()
@@ -38,7 +40,7 @@ def get_orders(user_id):
 
 @orders.route("/", methods=["POST"])
 def add_order():
-    new_order = Order(**request.json)
+    new_order = Order(**request.get_json())
 
     db.session.add(new_order)
     db.session.commit()
@@ -51,7 +53,7 @@ def add_order():
 def handle_order(order_id):
     order = Order.query.get(order_id)
     if request.method == "PUT":
-        for key, value in request.json.items():
+        for key, value in request.get_json().items():
             setattr(order, key, value)
 
         db.session.commit()
