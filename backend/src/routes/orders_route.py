@@ -1,4 +1,4 @@
-from flask import request, Blueprint
+from flask import request, Blueprint, jsonify
 
 from ..utils.instantiations import ma, db
 from ..models.user_model import User
@@ -13,44 +13,43 @@ class OrderSchema(ma.Schema):
 order_schema = OrderSchema()
 orders_schema = OrderSchema(many=True)
 
-order = Blueprint("order", __name__)
+orders = Blueprint("orders", __name__, url_prefix="/orders")
 
 
-@order.route("/orders", methods=["GET"])
+@orders.route("/", methods=["GET"])
 def select_orders():
     all_orders = Order.query.all()
     return orders_schema.jsonify(all_orders)
 
 
-@order.route("/orders/<order_user_id>", methods=["GET"])
-def get_orders(order_user_id):
-    user = User.query.get(order_user_id)
-    if user is not None:
-        orders = user.orders
-        for order in orders:
-            order.date = order.date.strftime("%d-%m-%Y, %H:%M:%S")
-        return orders_schema.jsonify(orders)
-    else:
-        return "User not found"
+@orders.route("/users/<user_id>", methods=["GET"])
+def get_orders(user_id):
+    # TODO: La consulta debería ser directa a Orders con el user_id
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify(msg="Usuario no encontrado"), 404
+
+    user_orders = user.orders
+    # TODO: Hacer conversión en OrderModel?
+    for order in user_orders:
+        order.date = order.date.strftime("%d-%m-%Y, %H:%M:%S")
+    return orders_schema.jsonify(user_orders), 200
 
 
-@order.route("/order", methods=["POST"])
-def post_order():
+@orders.route("/", methods=["POST"])
+def add_order():
     new_order = Order(**request.json)
 
     db.session.add(new_order)
     db.session.commit()
 
     order = Order.query.get(new_order.id)
-    return order_schema.jsonify(order)
+    return order_schema.jsonify(order), 201
 
 
-@order.route("/order/<id>", methods=["GET", "PUT", "DELETE"])
-def select_order(id):
-    order = Order.query.get(id)
-    if request.method == "GET":
-        return order_schema.jsonify(order)
-
+@orders.route("/<order_id>", methods=["GET", "PUT", "DELETE"])
+def handle_order(order_id):
+    order = Order.query.get(order_id)
     if request.method == "PUT":
         for key, value in request.json.items():
             setattr(order, key, value)
@@ -62,4 +61,6 @@ def select_order(id):
         db.session.delete(order)
         db.session.commit()
 
-        return f"The order {id} was successfully deleted"
+        return jsonify(msg="El pedido ha sido eliminado con éxito."), 200
+
+    return order_schema.jsonify(order), 200

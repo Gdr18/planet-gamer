@@ -21,6 +21,21 @@ def get_roles():
     return roles_schema.jsonify(all_roles)
 
 
+@users_role.route("/", methods=["POST"])
+def add_user_role():
+    email = request.json["email"]
+    role = request.json["role"]
+
+    new_role = UserRole(email, role)
+
+    db.session.add(new_role)
+    db.session.commit()
+
+    role = UserRole.query.get(new_role.email)
+
+    return role_schema.jsonify(role)
+
+
 @users_role.route("/<user-email>", methods=["GET", "PUT", "DELETE"])
 def handle_role(user_email):
     user_role = UserRole.query.get(user_email)
@@ -41,18 +56,3 @@ def handle_role(user_email):
         return role_schema.jsonify(user_role)
 
     return role_schema.jsonify(user_role)
-
-
-@users_role.route("/", methods=["POST"])
-def add_user_role():
-    email = request.json["email"]
-    role = request.json["role"]
-
-    new_role = UserRole(email, role)
-
-    db.session.add(new_role)
-    db.session.commit()
-
-    role = UserRole.query.get(new_role.email)
-
-    return role_schema.jsonify(role)

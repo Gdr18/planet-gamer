@@ -8,7 +8,7 @@ from .routes.baskets_route import basket
 from .routes.users_route import users
 from .routes.games_route import game
 from .routes.user_roles_route import users_role
-from .routes.orders_route import order
+from .routes.orders_route import orders
 from .routes.orders_details_route import order_details
 from src.routes.auth_route import auth
 
@@ -35,7 +35,7 @@ def create_app(config):
     ma.init_app(app)
 
     app.register_blueprint(users)
-    app.register_blueprint(order)
+    app.register_blueprint(orders)
     app.register_blueprint(order_details)
     app.register_blueprint(addresses)
     app.register_blueprint(basket)

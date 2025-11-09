@@ -14,7 +14,7 @@ class UserRole(db.Model):
         self.email = email
 
         if role not in ROLE_TYPES.keys():
-            raise ValueError("Proporcionado rol inválido")
+            raise ValueError("Rol inválido proporcionado.")
 
         self.role = ROLE_TYPES[role]
 
