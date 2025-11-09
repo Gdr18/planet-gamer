@@ -1,4 +1,4 @@
-from flask import request, Blueprint
+from flask import request, Blueprint, jsonify
 
 from ..utils.instantiations import db, ma
 from ..models.order_details_model import OrderDetails
@@ -13,11 +13,11 @@ order_details_schema = OrderDetailsSchema()
 orders_details_schema = OrderDetailsSchema(many=True)
 
 
-order_details = Blueprint("order_details", __name__)
+orders_details = Blueprint("orders_details", __name__, url_prefix="/orders-details")
 
 
-@order_details.route('/order-details', methods=['POST'])
-def posting_details():
+@orders_details.route("/", methods=["POST"])
+def add_order_details():
     new_order_details = OrderDetails(**request.json)
 
     db.session.add(new_order_details)
@@ -25,52 +25,32 @@ def posting_details():
 
     order_details = OrderDetails.query.get(new_order_details.id)
 
-    return order_details_schema.jsonify(order_details)
+    return order_details_schema.jsonify(order_details), 201
 
 
-@order_details.route('/order-details/<id>', methods=['GET', 'PUT', 'DELETE'])
-def select_order_details(id):
-    order_details = OrderDetails.query.get(id)
-    if request.method == 'GET':
-        return order_details_schema.jsonify(order_details)
+@orders_details.route("/", methods=["GET"])
+def get_order_details():
+    all_orders_details = OrderDetails.query.all()
+    return orders_details_schema.jsonify(all_orders_details), 200
 
-    if request.method == 'PUT':
+
+@orders_details.route("/<order-details-id>", methods=["GET", "PUT", "DELETE"])
+def handle_order_details(order_details_id):
+    order_details = OrderDetails.query.get(order_details_id)
+    if request.method == "PUT":
         for key, value in request.json.items():
             setattr(order_details, key, value)
         db.session.commit()
-        return order_details_schema.jsonify(order_details)
 
-    if request.method == 'DELETE':
+    if request.method == "DELETE":
         db.session.delete(order_details)
         db.session.commit()
-        return f'The order details with id {id} was deleted.'
+        return jsonify(msg="El pedido ha sido eliminado correctamente"), 200
+
+    return order_details_schema.jsonify(order_details), 200
 
 
-@order_details.route('/orders-details', methods=['GET'])
-def select_orders_details():
-    all_orders_details = OrderDetails.query.all()
-    return orders_details_schema.jsonify(all_orders_details)
-
-
-@order_details.route('/orders-details/<details_order_id>', methods=['GET', 'POST', 'DELETE'])
-def get_orders_details(details_order_id):
-    orders_details = OrderDetails.query.filter_by(details_order_id=details_order_id).all()
-    if request.method == 'GET':
-        return orders_details_schema.jsonify(orders_details)
-
-    if request.method == 'POST':
-        for order_details in request.json:
-            new_order_details = OrderDetails(details_order_id, **order_details)
-            db.session.add(new_order_details)
-
-        db.session.commit()
-        orders_details = OrderDetails.query.filter_by(details_order_id=details_order_id)
-
-        return orders_details_schema.jsonify(orders_details)
-
-    if request.method == 'DELETE':
-        for order_details in orders_details:
-            db.session.delete(order_details)
-
-        db.session.commit()
-        return f'The orders details with order_id {details_order_id} were deleted.'
+@orders_details.route("/orders/<order-id>", methods=["GET"])
+def get_orders_details(order_id):
+    all_orders_details = OrderDetails.query.filter_by(details_order_id=order_id).all()
+    return orders_details_schema.jsonify(all_orders_details), 200
