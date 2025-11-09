@@ -3,7 +3,7 @@ from flask_cors import CORS
 
 from .utils.instantiations import db, bcrypt, ma
 
-from .routes.addresses_route import address
+from .routes.addresses_route import addresses
 from .routes.baskets_route import basket
 from .routes.users_route import users
 from .routes.games_route import game
@@ -37,7 +37,7 @@ def create_app(config):
     app.register_blueprint(users)
     app.register_blueprint(order)
     app.register_blueprint(order_details)
-    app.register_blueprint(address)
+    app.register_blueprint(addresses)
     app.register_blueprint(basket)
     app.register_blueprint(game)
     app.register_blueprint(role)
