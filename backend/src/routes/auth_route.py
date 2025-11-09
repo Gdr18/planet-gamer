@@ -1,9 +1,9 @@
 from flask import Blueprint, request, session
 
-from ..utils.instantiations import db, bcrypt
-from ..models.user_model import User
-from ..models.user_role_model import UserRole
-from ..routes.users_route import user_schema
+from src.utils.instantiations import db, bcrypt
+from src.models.user_model import User
+from src.models.user_role_model import UserRole
+from src.routes.users_route import user_schema
 
 auth = Blueprint("auth", __name__)
 

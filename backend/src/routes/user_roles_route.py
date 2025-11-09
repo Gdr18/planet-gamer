@@ -1,81 +1,58 @@
-from flask import Blueprint, request, session
+from flask import Blueprint, request
 
 from ..utils.instantiations import ma, db
 from ..models.user_role_model import UserRole
-from ..models.user_model import User
 
 
 class RoleSchema(ma.Schema):
     class Meta:
-        fields = ("id", "email", "type")
+        fields = ("email", "role")
 
 
 role_schema = RoleSchema()
 roles_schema = RoleSchema(many=True)
 
-role = Blueprint("role", __name__)
+users_role = Blueprint("users_role", __name__, url_prefix="/users-role")
 
 
-def updating_role():
-    usuarios_con_rol_actualizado = db.session.query(User, UserRole).join(UserRole, User.email == UserRole.email).filter(User.role != UserRole.type).all()
-
-    for usuario, rol in usuarios_con_rol_actualizado:
-        usuario.role = rol.role
-
-    db.session.commit()
-
-
-@role.route('/roles', methods=['GET'])
-def select_roles():
-    # if "email" not in session and "role" not in session and session["role"] <= 2:
-    #     return "You are not authorized", 403
+@users_role.route("/", methods=["GET"])
+def get_roles():
     all_roles = UserRole.query.all()
     return roles_schema.jsonify(all_roles)
 
 
-@role.route("/role/<id>", methods=["GET", "PUT", "DELETE"])
-def select_role(id):
-    # TODO: Hay que comprobar si funciona la no autorización.
-    # if "email" not in session and "role" not in session and "role" >= 2:
-    #     return "You are not authorized", 403
-    if request.method == "GET":
-        role = UserRole.query.get(id)
-        return role_schema.jsonify(role)
+@users_role.route("/<user-email>", methods=["GET", "PUT", "DELETE"])
+def handle_role(user_email):
+    user_role = UserRole.query.get(user_email)
 
     if request.method == "DELETE":
-        role = UserRole.query.get(id)
-
-        db.session.delete(role)
+        db.session.delete(user_role)
         db.session.commit()
-        updating_role()
 
-        return f"The role {id} was successfully deleted"
+        return f"The role was successfully deleted"
 
     if request.method == "PUT":
-        role = UserRole.query.get(id)
-        type = request.json["type"]
+        role = request.json["role"]
 
-        role.role = type
+        user_role.role = role
 
         db.session.commit()
-        updating_role()
 
-        return role_schema.jsonify(role)
+        return role_schema.jsonify(user_role)
+
+    return role_schema.jsonify(user_role)
 
 
-@role.route("/role", methods=["POST"])
-def post_role():
-    # if "email" not in session and "role" not in session and session["role"] <= 2:
-    #     return "You are not authorized", 403
+@users_role.route("/", methods=["POST"])
+def add_user_role():
     email = request.json["email"]
-    type = request.json["type"]
+    role = request.json["role"]
 
-    new_role = UserRole(email, type)
+    new_role = UserRole(email, role)
 
     db.session.add(new_role)
     db.session.commit()
-    updating_role()
 
-    role = UserRole.query.get(new_role.id)
+    role = UserRole.query.get(new_role.email)
 
     return role_schema.jsonify(role)

@@ -7,10 +7,10 @@ from .routes.addresses_route import addresses
 from .routes.baskets_route import basket
 from .routes.users_route import users
 from .routes.games_route import game
-from .routes.user_roles_route import role
+from .routes.user_roles_route import users_role
 from .routes.orders_route import order
 from .routes.orders_details_route import order_details
-from .services.auth_service import auth
+from src.routes.auth_route import auth
 
 # from .models.order_details_model import OrderDetails
 # from .models.basket_model import Basket
@@ -40,7 +40,7 @@ def create_app(config):
     app.register_blueprint(addresses)
     app.register_blueprint(basket)
     app.register_blueprint(game)
-    app.register_blueprint(role)
+    app.register_blueprint(users_role)
     app.register_blueprint(auth)
 
     with app.app_context():
