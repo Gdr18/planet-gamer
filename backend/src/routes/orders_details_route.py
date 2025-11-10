@@ -49,7 +49,7 @@ def handle_order_details(order_details_id):
         order_details_schema.context = context
         order_details_schema.load(order_details_data)
 
-        for key, value in request.get_json().items():
+        for key, value in order_details_data.items():
             setattr(order_details, key, value)
 
         db.session.commit()

@@ -65,5 +65,5 @@ def handle_address(address_id):
 
 @addresses.route("/users/<user_id>", methods=["GET"])
 def get_addresses_user(user_id):
-    user_addresses = AddressModel.query.filter_by(address_user_id=user_id).all()
+    user_addresses = AddressModel.query.filter_by(user_id=user_id).all()
     return addresses_schema.jsonify(user_addresses), 200

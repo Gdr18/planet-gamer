@@ -1,47 +1,27 @@
 from flask import request, Blueprint, jsonify
-from marshmallow import fields
 
-from ..utils.instantiations import ma, db
-from ..models.user_model import UserModel
+from ..utils.instantiations import db
 from ..models.order_model import OrderModel
-
-
-class OrderSchema(ma.Schema):
-    date = fields.DateTime(dump_only=True, format="%d-%m-%YT%H:%M:%S")
-
-    class Meta:
-        fields = ("id", "total", "qty", "order_user_id", "order_address_id")
-
-
-order_schema = OrderSchema()
-orders_schema = OrderSchema(many=True)
+from ..schemas.order_schema import OrderSchema
 
 orders = Blueprint("orders", __name__, url_prefix="/orders")
 
+orders_schema = OrderSchema(many=True)
+
 
 @orders.route("/", methods=["GET"])
-def select_orders():
+def get_orders():
     all_orders = OrderModel.query.all()
     return orders_schema.jsonify(all_orders)
 
 
-@orders.route("/users/<user_id>", methods=["GET"])
-def get_orders(user_id):
-    # TODO: La consulta debería ser directa a Orders con el user_id
-    user = UserModel.query.get(user_id)
-    if user is None:
-        return jsonify(msg="Usuario no encontrado"), 404
-
-    user_orders = user.orders
-    # TODO: Hacer conversión en OrderModel?
-    for order in user_orders:
-        order.created_at = order.created_at.strftime("%d-%m-%Y, %H:%M:%S")
-    return orders_schema.jsonify(user_orders), 200
-
-
 @orders.route("/", methods=["POST"])
 def add_order():
-    new_order = OrderModel(**request.get_json())
+    order_data = request.get_json()
+
+    order_schema = OrderSchema(load_instance=True)
+
+    new_order = order_schema.load(order_data)
 
     db.session.add(new_order)
     db.session.commit()
@@ -53,8 +33,16 @@ def add_order():
 @orders.route("/<order_id>", methods=["GET", "PUT", "DELETE"])
 def handle_order(order_id):
     order = OrderModel.query.get(order_id)
+    order_schema = OrderSchema()
+
     if request.method == "PUT":
-        for key, value in request.get_json().items():
+        order_data = request.get_json()
+
+        context = {"mode": "update", "expected_user_id": order.user_id}
+        order_schema.context = context
+        order_schema.load(order_data)
+
+        for key, value in order_data.items():
             setattr(order, key, value)
 
         db.session.commit()
@@ -67,3 +55,9 @@ def handle_order(order_id):
         return jsonify(msg="El pedido ha sido eliminado con éxito."), 200
 
     return order_schema.jsonify(order), 200
+
+
+@orders.route("/users/<user_id>", methods=["GET"])
+def get_orders_users(user_id):
+    user_orders = OrderModel.query.filter_by(user_id=user_id).all()
+    return orders_schema.jsonify(user_orders), 200

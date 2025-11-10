@@ -6,12 +6,10 @@ from datetime import datetime
 
 class OrderModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    total = db.Column(
-        db.Numeric(precision=10, scale=2, asdecimal=False), nullable=False
-    )
-    date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    total = db.Column(db.Numeric(precision=10, scale=2, asdecimal=True), nullable=False)
     address_id = db.Column(db.Integer, db.ForeignKey("address_model.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"))
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     details = db.relationship(
         OrderDetailsModel, cascade="all, delete", backref="order", lazy=True
     )
