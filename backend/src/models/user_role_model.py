@@ -8,7 +8,7 @@ ROLE_TYPES = {"admin": 1, "staff": 2, "customer": 3}
 
 class UserRoleModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
     role = db.Column(db.Integer, default=ROLE_TYPES["customer"], nullable=False)
 
     def __init__(self, email, role=None):

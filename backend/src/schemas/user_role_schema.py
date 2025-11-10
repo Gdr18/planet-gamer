@@ -5,8 +5,12 @@ from ..models.user_role_model import UserRoleModel, ROLE_TYPES
 
 
 class UserRoleSchema(ma.SQLAlchemyAutoSchema):
-    email = ma.Email(required=True)
-    role = ma.Integer(required=True, validate=validate.OneOf(ROLE_TYPES.values()))
+    email = ma.Email(
+        required=True, unique=True, validate=validate.Length(max=100), allow_none=False
+    )
+    role = ma.Integer(
+        required=True, validate=validate.OneOf(ROLE_TYPES.values()), allow_none=False
+    )
 
     class Meta:
         model = UserRoleModel

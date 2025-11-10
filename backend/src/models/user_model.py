@@ -31,4 +31,4 @@ class UserModel(db.Model):
         from ..models.user_role_model import UserRoleModel
 
         user_role = db.session.query(UserRoleModel).filter_by(email=email).first()
-        self.role = user_role.user_roles if user_role else None
+        self.role = user_role.role if user_role else None
