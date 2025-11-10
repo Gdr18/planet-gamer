@@ -1,7 +1,7 @@
 from flask import request, Blueprint, jsonify
 
 from ..utils.instantiations import db, ma
-from ..models.order_details_model import OrderDetails
+from ..models.order_details_model import OrderDetailsModel
 
 
 class OrderDetailsSchema(ma.Schema):
@@ -18,25 +18,25 @@ orders_details = Blueprint("orders_details", __name__, url_prefix="/orders-detai
 
 @orders_details.route("/", methods=["POST"])
 def add_order_details():
-    new_order_details = OrderDetails(**request.get_json())
+    new_order_details = OrderDetailsModel(**request.get_json())
 
     db.session.add(new_order_details)
     db.session.commit()
 
-    order_details = OrderDetails.query.get(new_order_details.id)
+    order_details = OrderDetailsModel.query.get(new_order_details.id)
 
     return order_details_schema.jsonify(order_details), 201
 
 
 @orders_details.route("/", methods=["GET"])
 def get_order_details():
-    all_orders_details = OrderDetails.query.all()
+    all_orders_details = OrderDetailsModel.query.all()
     return orders_details_schema.jsonify(all_orders_details), 200
 
 
 @orders_details.route("/<order_details_id>", methods=["GET", "PUT", "DELETE"])
 def handle_order_details(order_details_id):
-    order_details = OrderDetails.query.get(order_details_id)
+    order_details = OrderDetailsModel.query.get(order_details_id)
     if request.method == "PUT":
         for key, value in request.get_json().items():
             setattr(order_details, key, value)
@@ -52,5 +52,7 @@ def handle_order_details(order_details_id):
 
 @orders_details.route("/orders/<order_id>", methods=["GET"])
 def get_orders_details(order_id):
-    all_orders_details = OrderDetails.query.filter_by(details_order_id=order_id).all()
+    all_orders_details = OrderDetailsModel.query.filter_by(
+        details_order_id=order_id
+    ).all()
     return orders_details_schema.jsonify(all_orders_details), 200

@@ -1,13 +1,13 @@
 from ..utils.instantiations import db
 
 
-class ItemBasket(db.Model):
+class ItemBasketModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     qty = db.Column(db.Integer, nullable=False)
-    item_game_id = db.Column(db.Integer, db.ForeignKey("game.id"))
-    item_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    game_id = db.Column(db.Integer, db.ForeignKey("game_model.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"))
 
-    def __init__(self, qty, basket_game_id, basket_user_id):
+    def __init__(self, qty, game_id, user_id):
         self.qty = qty
-        self.item_game_id = basket_game_id
-        self.item_user_id = basket_user_id
+        self.game_id = game_id
+        self.user_id = user_id

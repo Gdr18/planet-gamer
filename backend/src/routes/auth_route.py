@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from src.utils.instantiations import db, bcrypt
-from src.models.user_model import User
+from src.models.user_model import UserModel
 from src.routes.users_route import user_schema
 
 auth = Blueprint("auth", __name__, url_prefix="/auth")
@@ -16,7 +16,7 @@ def login():
     email = data_login["email"]
     password = data_login["password"]
 
-    user_exists = User.query.filter_by(email=email).first()
+    user_exists = UserModel.query.filter_by(email=email).first()
 
     if user_exists:
         if not bcrypt.check_password_hash(user_exists.password, password):

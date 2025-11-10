@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from ..utils.instantiations import ma, db, bcrypt
-from ..models.user_model import User
+from ..models.user_model import UserModel
 
 
 class UserSchema(ma.Schema):
@@ -18,7 +18,7 @@ users = Blueprint("users", __name__, url_prefix="/users")
 
 @users.route("/", methods=["GET"])
 def get_users():
-    all_users = User.query.all()
+    all_users = UserModel.query.all()
     return users_schema.jsonify(all_users)
 
 
@@ -30,19 +30,19 @@ def add_user():
         "utf-8"
     )
 
-    new_user = User(**user_data)
+    new_user = UserModel(**user_data)
 
     db.session.add(new_user)
     db.session.commit()
 
-    new_user = User.query.get(user_data.id)
+    new_user = UserModel.query.get(user_data.id)
 
     return user_schema.jsonify(new_user)
 
 
 @users.route("/<user_id>", methods=["GET", "DELETE", "PUT"])
 def handle_user(user_id):
-    user = User.query.get(user_id)
+    user = UserModel.query.get(user_id)
 
     if request.method == "DELETE":
         db.session.delete(user)

@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
 from ..utils.instantiations import ma, db
-from ..models.user_role_model import UserRole
+from ..models.user_role_model import UserRoleModel
 
 
 class RoleSchema(ma.Schema):
@@ -17,7 +17,7 @@ users_role = Blueprint("users_role", __name__, url_prefix="/users-role")
 
 @users_role.route("/", methods=["GET"])
 def get_roles():
-    all_roles = UserRole.query.all()
+    all_roles = UserRoleModel.query.all()
     return roles_schema.jsonify(all_roles)
 
 
@@ -26,19 +26,19 @@ def add_user_role():
     email = request.get_json()["email"]
     role = request.get_json()["role"]
 
-    new_role = UserRole(email, role)
+    new_role = UserRoleModel(email, role)
 
     db.session.add(new_role)
     db.session.commit()
 
-    role = UserRole.query.get(new_role.email)
+    role = UserRoleModel.query.get(new_role.email)
 
     return role_schema.jsonify(role)
 
 
 @users_role.route("/<user_email>", methods=["GET", "PUT", "DELETE"])
 def handle_role(user_email):
-    user_role = UserRole.query.get(user_email)
+    user_role = UserRoleModel.query.get(user_email)
 
     if request.method == "DELETE":
         db.session.delete(user_role)

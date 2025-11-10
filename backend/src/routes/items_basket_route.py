@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from ..utils.instantiations import ma, db
-from ..models.item_basket_model import ItemBasket
+from ..models.item_basket_model import ItemBasketModel
 
 items_basket = Blueprint("items_basket", __name__, url_prefix="/items-basket")
 
@@ -17,7 +17,7 @@ baskets_schema = BasketSchema(many=True)
 
 @items_basket.route("/", methods=["GET"])
 def get_item_basket():
-    all_items_basket = ItemBasket.query.all()
+    all_items_basket = ItemBasketModel.query.all()
     return baskets_schema.jsonify(all_items_basket)
 
 
@@ -25,7 +25,7 @@ def get_item_basket():
 def add_item_basket():
     basket_data = request.get_json()
 
-    new_basket = ItemBasket(**basket_data)
+    new_basket = ItemBasketModel(**basket_data)
 
     db.session.add(new_basket)
     db.session.commit()
@@ -35,7 +35,7 @@ def add_item_basket():
 
 @items_basket.route("/<item_basket_id>", methods=["GET", "PUT", "DELETE"])
 def handle_item_basket(item_basket_id):
-    item_basket = ItemBasket.query.get(item_basket_id)
+    item_basket = ItemBasketModel.query.get(item_basket_id)
     if request.method == "PUT":
         basket_data = request.get_json()
         for key, value in basket_data.items():
@@ -53,5 +53,5 @@ def handle_item_basket(item_basket_id):
 @items_basket.route("/users/<user_id>", methods=["GET"])
 def get_basket_user_id(user_id):
     # TODO: Cómo se hace un join para añadir info de juegos?
-    user_basket = ItemBasket.query.filter_by(basket_user_id=user_id).all()
+    user_basket = ItemBasketModel.query.filter_by(basket_user_id=user_id).all()
     return baskets_schema.jsonify(user_basket)
