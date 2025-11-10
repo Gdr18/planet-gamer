@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from marshmallow import fields
 
 from ..utils.instantiations import db
 from ..models.game_model import GameModel

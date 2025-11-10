@@ -7,6 +7,10 @@ class ItemBasketModel(db.Model):
     game_id = db.Column(db.Integer, db.ForeignKey("game_model.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"))
 
+    __table_args__ = (
+        db.UniqueConstraint("game_id", "user_id", name="unique_game_user"),
+    )
+
     def __init__(self, qty, game_id, user_id):
         self.qty = qty
         self.game_id = game_id
