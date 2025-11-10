@@ -1,19 +1,12 @@
 from flask import Blueprint, request, jsonify
 
-from ..utils.instantiations import ma, db, bcrypt
+from ..utils.instantiations import db, bcrypt
 from ..models.user_model import UserModel
-
-
-class UserSchema(ma.Schema):
-    class Meta:
-        fields = ("id", "name", "email", "password", "surnames", "phone_number", "role")
-
-
-user_schema = UserSchema()
-users_schema = UserSchema(many=True)
-
+from ..schemas.user_schema import UserSchema
 
 users = Blueprint("users", __name__, url_prefix="/users")
+
+users_schema = UserSchema(many=True)
 
 
 @users.route("/", methods=["GET"])
@@ -26,16 +19,22 @@ def get_users():
 def add_user():
     user_data = request.get_json()
 
-    user_data["password"] = bcrypt.generate_password_hash(user_data["password"]).decode(
+    context = {
+        "expected_password": user_data.get("password"),
+        "expected_role": user_data.get("role"),
+    }
+    user_schema = UserSchema(load_instance=True, context=context)
+
+    new_user = user_schema.load(user_data)
+
+    new_user.password = bcrypt.generate_password_hash(user_data["password"]).decode(
         "utf-8"
     )
-
-    new_user = UserModel(**user_data)
 
     db.session.add(new_user)
     db.session.commit()
 
-    new_user = UserModel.query.get(user_data.id)
+    new_user = UserModel.query.get(new_user.id)
 
     return user_schema.jsonify(new_user)
 
@@ -43,21 +42,33 @@ def add_user():
 @users.route("/<user_id>", methods=["GET", "DELETE", "PUT"])
 def handle_user(user_id):
     user = UserModel.query.get(user_id)
+    user_schema = UserSchema()
 
-    if request.method == "DELETE":
-        db.session.delete(user)
-        db.session.commit()
-        return jsonify(msg="El usuario ha sido eliminado correctamente"), 200
+    if request.method == "PUT":
+        user_data = request.get_json()
 
-    elif request.method == "PUT":
-        for key, value in request.get_json().items():
+        context = {
+            "expected_password": user_data.get("password"),
+            "expected_role": user.role,
+        }
+        user_schema.context = context
+        user_schema.load(user_data)
+
+        for key, value in user_data.items():
             if key == "password":
-                if value != "" and not bcrypt.check_password_hash(user.password, value):
+                if not bcrypt.check_password_hash(user.password, value) and (
+                    user.password != value
+                ):
                     user.password = bcrypt.generate_password_hash(value).decode("utf-8")
             else:
                 setattr(user, key, value)
 
         db.session.commit()
         return user_schema.jsonify(user)
+
+    elif request.method == "DELETE":
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify(msg="El usuario ha sido eliminado correctamente"), 200
 
     return user_schema.jsonify(user)

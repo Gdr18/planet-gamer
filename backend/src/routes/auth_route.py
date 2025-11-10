@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 
 from src.utils.instantiations import db, bcrypt
 from src.models.user_model import UserModel
-from src.routes.users_route import user_schema
 
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 

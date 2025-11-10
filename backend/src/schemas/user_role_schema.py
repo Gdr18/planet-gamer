@@ -5,7 +5,7 @@ from ..models.user_role_model import UserRoleModel, ROLE_TYPES
 
 
 class UserRoleSchema(ma.SQLAlchemyAutoSchema):
-    email = ma.String(required=True, validate=validate.Email())
+    email = ma.Email(required=True)
     role = ma.Integer(required=True, validate=validate.OneOf(ROLE_TYPES.values()))
 
     class Meta:
