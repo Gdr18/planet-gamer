@@ -7,16 +7,13 @@ ROLE_TYPES = {"admin": 1, "staff": 2, "customer": 3}
 
 
 class UserRoleModel(db.Model):
-    email = db.Column(db.String(50), primary_key=True)
-    role = db.Column(db.Integer, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(50), unique=True, nullable=False)
+    role = db.Column(db.Integer, default=ROLE_TYPES["customer"], nullable=False)
 
-    def __init__(self, email, role):
+    def __init__(self, email, role=None):
         self.email = email
-
-        if role not in ROLE_TYPES.keys():
-            raise ValueError("Rol inválido proporcionado.")
-
-        self.role = ROLE_TYPES[role]
+        self.role = role
 
 
 @event.listens_for(UserRoleModel, "after_insert")
@@ -24,11 +21,11 @@ class UserRoleModel(db.Model):
 def sync_with_user(mapper, connection, target):
     user = db.session.query(UserModel).filter_by(email=target.email).first()
     if user:
-        user.users_role = target.users_role
+        user.role = target.role
 
 
 @event.listens_for(UserRoleModel, "after_delete")
 def set_role_default(mapper, connection, target):
     user = db.session.query(UserModel).filter_by(email=target.email).first()
     if user:
-        user.users_role = ROLE_TYPES["customer"]
+        user.role = ROLE_TYPES["customer"]

@@ -42,7 +42,6 @@ def handle_order_details(order_details_id):
         order_details_data = request.get_json()
 
         context = {
-            "mode": "update",
             "expected_game_id": order_details.game_id,
             "expected_order_id": order_details.order_id,
         }

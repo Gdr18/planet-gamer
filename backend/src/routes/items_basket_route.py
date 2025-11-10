@@ -40,7 +40,6 @@ def handle_item_basket(item_basket_id):
         item_basket_data = request.get_json()
 
         context = {
-            "mode": "update",
             "expected_game_id": item_basket.game_id,
             "expected_user_id": item_basket.user_id,
         }

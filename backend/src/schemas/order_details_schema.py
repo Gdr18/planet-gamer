@@ -14,12 +14,10 @@ class OrderDetailsSchema(ma.SQLAlchemyAutoSchema):
 
     @pre_load
     def validate_data(self, data, **kwargs):
-        mode = self.context.get("mode")
-        if mode == "update":
-            expected_game_id = self.context.get("expected_game_id")
-            expected_order_id = self.context.get("expected_order_id")
-            if expected_game_id and (str(data["game_id"]) != str(expected_game_id)):
-                raise ValidationError("No se puede modificar el campo 'game_id'.")
-            if expected_order_id and (str(data["order_id"]) != str(expected_order_id)):
-                raise ValidationError("No se puede modificar el campo 'order_id'.")
+        expected_game_id = self.context["expected_game_id"]
+        expected_order_id = self.context["expected_order_id"]
+        if expected_game_id and (str(data.get("game_id")) != str(expected_game_id)):
+            raise ValidationError("No se puede modificar el campo 'game_id'.")
+        if expected_order_id and (str(data.get("order_id")) != str(expected_order_id)):
+            raise ValidationError("No se puede modificar el campo 'order_id'.")
         return data

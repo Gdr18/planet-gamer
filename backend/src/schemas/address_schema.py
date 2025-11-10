@@ -14,7 +14,7 @@ class AddressSchema(ma.SQLAlchemyAutoSchema):
     def validate_address_user_id(self, data, **kwargs):
         expected_address_user_id = self.context.get("expected_address_user_id")
         if expected_address_user_id and (
-            str(data["address_user_id"]) != str(expected_address_user_id)
+            str(data.get("address_user_id")) != str(expected_address_user_id)
         ):
             raise ValidationError("No se puede modificar el campo 'address_user_id'.")
         return data

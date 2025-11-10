@@ -7,13 +7,10 @@ from .routes.addresses_route import addresses
 from .routes.items_basket_route import items_basket
 from .routes.users_route import users
 from .routes.games_route import games
-from .routes.user_roles_route import users_role
+from .routes.user_roles_route import user_roles
 from .routes.orders_route import orders
 from .routes.orders_details_route import orders_details
 from src.routes.auth_route import auth
-
-# from .models.order_details_model import OrderDetails
-# from .models.basket_model import Basket
 
 
 app = Flask(__name__, static_url_path="")
@@ -40,7 +37,7 @@ def create_app(config):
     app.register_blueprint(addresses)
     app.register_blueprint(items_basket)
     app.register_blueprint(games)
-    app.register_blueprint(users_role)
+    app.register_blueprint(user_roles)
     app.register_blueprint(auth)
 
     with app.app_context():

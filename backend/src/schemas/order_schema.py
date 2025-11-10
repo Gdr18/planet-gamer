@@ -15,9 +15,7 @@ class OrderSchema(ma.SQLAlchemyAutoSchema):
 
     @pre_load
     def validate_data(self, data, **kwargs):
-        mode = self.context.get("mode")
-        if mode == "update":
-            expected_user_id = self.context.get("expected_user_id")
-            if expected_user_id and (str(data["user_id"]) != str(expected_user_id)):
-                raise ValidationError("No se puede modificar el campo 'user_id'.")
+        expected_user_id = self.context.get("expected_user_id")
+        if expected_user_id and (str(data.get("user_id")) != str(expected_user_id)):
+            raise ValidationError("No se puede modificar el campo 'user_id'.")
         return data

@@ -40,7 +40,6 @@ def handle_address(address_id):
         address_data = request.get_json()
 
         context = {
-            "mode": "update",
             "expected_id": address_id,
             "expected_address_user_id": address.user_id,
         }

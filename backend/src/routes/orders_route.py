@@ -38,7 +38,7 @@ def handle_order(order_id):
     if request.method == "PUT":
         order_data = request.get_json()
 
-        context = {"mode": "update", "expected_user_id": order.user_id}
+        context = {"expected_user_id": order.user_id}
         order_schema.context = context
         order_schema.load(order_data)
 

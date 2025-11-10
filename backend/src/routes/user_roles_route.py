@@ -1,58 +1,60 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 
-from ..utils.instantiations import ma, db
+from ..utils.instantiations import db
 from ..models.user_role_model import UserRoleModel
+from ..schemas.user_role_schema import UserRoleSchema
+
+user_roles = Blueprint("user_roles", __name__, url_prefix="/user-roles")
+
+roles_schema = UserRoleSchema(many=True)
 
 
-class RoleSchema(ma.Schema):
-    class Meta:
-        fields = ("email", "role")
+@user_roles.route("/", methods=["GET"])
+def get_user_roles():
+    all_user_roles = UserRoleModel.query.all()
+    return roles_schema.jsonify(all_user_roles)
 
 
-role_schema = RoleSchema()
-roles_schema = RoleSchema(many=True)
-
-users_role = Blueprint("users_role", __name__, url_prefix="/users-role")
-
-
-@users_role.route("/", methods=["GET"])
-def get_roles():
-    all_roles = UserRoleModel.query.all()
-    return roles_schema.jsonify(all_roles)
-
-
-@users_role.route("/", methods=["POST"])
+@user_roles.route("/", methods=["POST"])
 def add_user_role():
-    email = request.get_json()["email"]
-    role = request.get_json()["role"]
+    user_role_data = request.get_json()
 
-    new_role = UserRoleModel(email, role)
+    user_role_schema = UserRoleSchema(load_instance=True)
 
-    db.session.add(new_role)
+    new_user_role = user_role_schema.load(user_role_data)
+
+    db.session.add(new_user_role)
     db.session.commit()
 
-    role = UserRoleModel.query.get(new_role.email)
+    role = UserRoleModel.query.get(new_user_role.id)
 
-    return role_schema.jsonify(role)
+    return user_role_schema.jsonify(role)
 
 
-@users_role.route("/<user_email>", methods=["GET", "PUT", "DELETE"])
-def handle_role(user_email):
-    user_role = UserRoleModel.query.get(user_email)
+@user_roles.route("/<user_role_id>", methods=["GET", "PUT", "DELETE"])
+def handle_user_role(user_role_id):
+    user_role = UserRoleModel.query.get(user_role_id)
+    user_role_schema = UserRoleSchema()
+
+    if request.method == "PUT":
+        user_role_data = request.get_json()
+
+        context = {
+            "expected_email": user_role.email,
+        }
+        user_role_schema.context = context
+        user_role_schema.load(user_role_data)
+
+        user_role.role = user_role_data["role"]
+
+        db.session.commit()
+
+        return user_role_schema.jsonify(user_role)
 
     if request.method == "DELETE":
         db.session.delete(user_role)
         db.session.commit()
 
-        return f"The role was successfully deleted"
+        return jsonify(msg="El rol del usuario se ha eliminado correctamente."), 200
 
-    if request.method == "PUT":
-        role = request.get_json()["role"]
-
-        user_role.role = role
-
-        db.session.commit()
-
-        return role_schema.jsonify(user_role)
-
-    return role_schema.jsonify(user_role)
+    return user_role_schema.jsonify(user_role)
