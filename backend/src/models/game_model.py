@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from ..utils.instantiations import db
+from ..models.order_details_model import OrderDetails
 
 
 class Game(db.Model):
@@ -15,7 +16,7 @@ class Game(db.Model):
     img = db.Column(db.String(150), unique=True, nullable=False)
     stock = db.Column(db.Integer, nullable=False, default=100)
     date = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    details = db.relationship("OrderDetails", backref="game", lazy=True)
+    details = db.relationship(OrderDetails, backref="game", lazy=True)
 
     def __init__(
         self,

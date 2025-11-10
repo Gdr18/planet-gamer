@@ -1,5 +1,8 @@
 from ..utils.instantiations import db
 
+from ..models.address_model import Address
+from ..models.order_model import Order
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -10,9 +13,9 @@ class User(db.Model):
     surnames = db.Column(db.String(100))
     phone_number = db.Column(db.String(9))
     addresses = db.relationship(
-        "Address", cascade="all, delete", backref="user", lazy=True
+        Address, cascade="all, delete", backref="user", lazy=True
     )
-    orders = db.relationship("Order", cascade="all, delete", backref="user", lazy=True)
+    orders = db.relationship(Order, cascade="all, delete", backref="user", lazy=True)
 
     def __init__(self, email, name, password, surnames=None, phone_number=None):
         self.email = email
