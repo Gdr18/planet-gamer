@@ -66,5 +66,5 @@ def handle_item_basket(item_basket_id):
 @items_basket.route("/users/<user_id>", methods=["GET"])
 def get_basket_user_id(user_id):
     # TODO: Cómo se hace un join para añadir info de juegos?
-    user_basket = ItemBasketModel.query.filter_by(basket_user_id=user_id).all()
+    user_basket = ItemBasketModel.query.filter_by(user_id=user_id).all()
     return baskets_schema.jsonify(user_basket)
