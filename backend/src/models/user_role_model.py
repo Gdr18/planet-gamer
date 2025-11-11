@@ -1,6 +1,6 @@
 from sqlalchemy import event, update
 
-from ..utils.instantiations import db
+from src.services.db_service import db
 from .user_model import UserModel
 
 ROLE_TYPES = {"admin": 1, "staff": 2, "customer": 3}

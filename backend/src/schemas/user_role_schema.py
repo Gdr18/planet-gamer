@@ -1,6 +1,6 @@
 from marshmallow import validate, pre_load, ValidationError
 
-from ..utils.instantiations import ma
+from src.services.db_service import ma
 from ..models.user_role_model import UserRoleModel, ROLE_TYPES
 
 

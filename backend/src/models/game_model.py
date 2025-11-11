@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ..utils.instantiations import db
+from src.services.db_service import db
 from ..models.order_details_model import OrderDetailsModel
 
 

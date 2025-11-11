@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from ..utils.instantiations import db, bcrypt
+from src.services.db_service import db, bcrypt
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema
 
@@ -21,7 +21,6 @@ def add_user():
 
     context = {
         "expected_password": user_data.get("password"),
-        "expected_role": user_data.get("role"),
     }
     user_schema = UserSchema(load_instance=True, context=context)
 
@@ -49,7 +48,6 @@ def handle_user(user_id):
 
         context = {
             "expected_password": user_data.get("password"),
-            "expected_role": user.role,
         }
         user_schema.context = context
         user_schema.load(user_data)

@@ -1,6 +1,6 @@
 from marshmallow import ValidationError, pre_load
 
-from ..utils.instantiations import ma
+from src.services.db_service import ma
 from ..models.item_basket_model import ItemBasketModel
 
 

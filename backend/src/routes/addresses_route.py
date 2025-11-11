@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from ..utils.instantiations import db
+from ..services.db_service import db
 from ..schemas.address_schema import AddressSchema
 from ..models.address_model import AddressModel
 

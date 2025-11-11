@@ -1,6 +1,6 @@
 from flask import request, Blueprint, jsonify
 
-from ..utils.instantiations import db
+from src.services.db_service import db
 from ..models.order_model import OrderModel
 from ..schemas.order_schema import OrderSchema
 

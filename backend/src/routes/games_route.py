@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from ..schemas import game_schema
-from ..utils.instantiations import db
+from src.services.db_service import db
 from ..models.game_model import GameModel
 from ..schemas.game_schema import GameSchema
 

@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 from dotenv import load_dotenv
 
@@ -15,6 +16,7 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     CORS_SUPPORTS_CREDENTIALS = True
     SECRET_KEY = os.getenv("SECRET_KEY")
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
 
 
 class DevelopmentConfig(Config):
@@ -33,3 +35,5 @@ ConfigModeEnum = {
 
 CONFIG = ConfigModeEnum[os.getenv("CONFIG_MODE")]
 PORT = int(os.getenv("PORT", 5000))
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = int(os.getenv("REDIS_PORT"))

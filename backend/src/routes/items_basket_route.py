@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from ..utils.instantiations import db
+from src.services.db_service import db
 from ..models.item_basket_model import ItemBasketModel
 from ..schemas.item_basket_schema import ItemBasketSchema
 

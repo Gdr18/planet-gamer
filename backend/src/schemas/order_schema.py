@@ -1,6 +1,6 @@
 from marshmallow import pre_load, ValidationError
 
-from ..utils.instantiations import ma
+from src.services.db_service import ma
 from ..models.order_model import OrderModel
 
 

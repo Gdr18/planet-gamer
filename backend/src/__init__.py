@@ -1,17 +1,16 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 
-from .utils.instantiations import db, bcrypt, ma
-
 from .routes.addresses_route import addresses
-from .routes.items_basket_route import items_basket
-from .routes.users_route import users
+from .routes.auth_route import auth
 from .routes.games_route import games
-from .routes.user_roles_route import user_roles
-from .routes.orders_route import orders
+from .routes.items_basket_route import items_basket
 from .routes.orders_details_route import orders_details
-from src.routes.auth_route import auth
-
+from .routes.orders_route import orders
+from .routes.user_roles_route import user_roles
+from .routes.users_route import users
+from .services.auth_service import jwt
+from .services.db_service import db, bcrypt, ma
 
 app = Flask(__name__, static_url_path="")
 
@@ -30,6 +29,7 @@ def create_app(config):
     cors.init_app(app)
     bcrypt.init_app(app)
     ma.init_app(app)
+    jwt.init_app(app)
 
     app.register_blueprint(users)
     app.register_blueprint(orders)
@@ -41,8 +41,6 @@ def create_app(config):
     app.register_blueprint(auth)
 
     with app.app_context():
-        # OrderDetails.__table__.drop(bind=db.engine)
-        # Game.__table__.drop(bind=db.engine)
         db.create_all()
 
     return app

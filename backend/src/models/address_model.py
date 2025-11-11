@@ -1,4 +1,4 @@
-from ..utils.instantiations import db
+from src.services.db_service import db
 from ..models.order_model import OrderModel
 
 

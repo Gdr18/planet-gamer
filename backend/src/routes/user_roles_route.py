@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from ..utils.instantiations import db
+from src.services.db_service import db
 from ..models.user_role_model import UserRoleModel
 from ..schemas.user_role_schema import UserRoleSchema
 

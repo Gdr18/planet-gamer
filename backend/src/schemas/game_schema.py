@@ -1,4 +1,4 @@
-from ..utils.instantiations import ma
+from src.services.db_service import ma
 from ..models.game_model import GameModel
 
 
