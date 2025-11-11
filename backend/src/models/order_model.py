@@ -10,7 +10,7 @@ class OrderModel(db.Model):
     address_id = db.Column(db.Integer, db.ForeignKey("address_model.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    details = db.relationship(
+    order_details = db.relationship(
         OrderDetailsModel, cascade="all, delete", backref="order", lazy=True
     )
 

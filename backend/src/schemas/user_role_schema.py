@@ -19,6 +19,10 @@ class UserRoleSchema(ma.SQLAlchemyAutoSchema):
     @pre_load
     def validate_email(self, data, **kwargs):
         expected_email = self.context.get("expected_email")
-        if expected_email and (str(expected_email) != str(data.get("email"))):
+        if (
+            expected_email
+            and data.get("email")
+            and (str(expected_email) != str(data.get("email")))
+        ):
             raise ValidationError("No se puede modificar el campo 'email'.")
         return data

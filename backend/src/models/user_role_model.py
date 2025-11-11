@@ -1,4 +1,4 @@
-from sqlalchemy import event
+from sqlalchemy import event, update
 
 from ..utils.instantiations import db
 from .user_model import UserModel
@@ -19,13 +19,19 @@ class UserRoleModel(db.Model):
 @event.listens_for(UserRoleModel, "after_insert")
 @event.listens_for(UserRoleModel, "after_update")
 def sync_with_user(mapper, connection, target):
-    user = db.session.query(UserModel).filter_by(email=target.email).first()
-    if user:
-        user.role = target.role
+    stmt = (
+        update(UserModel)
+        .where(UserModel.email == target.email)
+        .values(role=target.role)
+    )
+    connection.execute(stmt)
 
 
 @event.listens_for(UserRoleModel, "after_delete")
 def set_role_default(mapper, connection, target):
-    user = db.session.query(UserModel).filter_by(email=target.email).first()
-    if user:
-        user.role = ROLE_TYPES["customer"]
+    stmt = (
+        update(UserModel)
+        .where(UserModel.email == target.email)
+        .values(role=ROLE_TYPES["customer"])
+    )
+    connection.execute(stmt)
