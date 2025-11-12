@@ -37,3 +37,4 @@ CONFIG = ConfigModeEnum[os.getenv("CONFIG_MODE")]
 PORT = int(os.getenv("PORT", 5000))
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = int(os.getenv("REDIS_PORT"))
+API_KEY_STRIPE = os.getenv("API_KEY_STRIPE")
