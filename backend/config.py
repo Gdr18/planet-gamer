@@ -6,31 +6,30 @@ from dotenv import load_dotenv
 load_dotenv(".env.dev")
 
 
+# TODO: COHERENCIA EN LAS VARIABLES DE ENTORNO
+
 class Config:
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SESSION_PERMANENT = True
-    SESSION_TYPE = "filesystem"
-    PERMANENT_SESSION_LIFETIME = 4000
-    SESSION_COOKIE_SAMESITE = "None"
-    SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_HTTPONLY = True
-    CORS_SUPPORTS_CREDENTIALS = True
-    SECRET_KEY = os.getenv("SECRET_KEY")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
+	SQLALCHEMY_TRACK_MODIFICATIONS = False
+	CORS_SUPPORTS_CREDENTIALS = True
+	SECRET_KEY = os.getenv("SECRET_KEY")
+	JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+	JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
+	# TODO: Configurar variable de entorno para producción
+	STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 
 class DevelopmentConfig(Config):
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
+	DEBUG = True
+	SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
 
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
+	SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
 
 
 ConfigModeEnum = {
-    "development": DevelopmentConfig,
-    "production": ProductionConfig,
+	"development": DevelopmentConfig,
+	"production": ProductionConfig,
 }
 
 CONFIG = ConfigModeEnum[os.getenv("CONFIG_MODE")]
