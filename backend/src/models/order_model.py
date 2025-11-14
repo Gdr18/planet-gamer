@@ -19,7 +19,7 @@ class OrderModel(db.Model):
 		ItemOrderModel, cascade="all, delete", backref="order", lazy=True
 	)
 	
-	def __init__(self, total, address_id, user_id, status="pendent", payment_id=None):
+	def __init__(self, total, address_id, user_id, status="pending", payment_id=None):
 		self.total = total
 		self.address_id = address_id
 		self.user_id = user_id

@@ -9,52 +9,52 @@ user_roles = Blueprint("user_roles", __name__, url_prefix="/user-roles")
 roles_schema = UserRoleSchema(many=True)
 
 
-@user_roles.route("/", methods=["GET"])
+@user_roles.route("", methods=["GET"])
 def get_user_roles():
-    all_user_roles = UserRoleModel.query.all()
-    return roles_schema.jsonify(all_user_roles)
+	all_user_roles = UserRoleModel.query.all()
+	return roles_schema.jsonify(all_user_roles)
 
 
-@user_roles.route("/", methods=["POST"])
+@user_roles.route("", methods=["POST"])
 def add_user_role():
-    user_role_data = request.get_json()
-
-    user_role_schema = UserRoleSchema(load_instance=True)
-
-    new_user_role = user_role_schema.load(user_role_data)
-
-    db.session.add(new_user_role)
-    db.session.commit()
-
-    role = UserRoleModel.query.get(new_user_role.id)
-
-    return user_role_schema.jsonify(role)
+	user_role_data = request.get_json()
+	
+	user_role_schema = UserRoleSchema(load_instance=True)
+	
+	new_user_role = user_role_schema.load(user_role_data)
+	
+	db.session.add(new_user_role)
+	db.session.commit()
+	
+	role = UserRoleModel.query.get(new_user_role.id)
+	
+	return user_role_schema.jsonify(role)
 
 
 @user_roles.route("/<user_role_id>", methods=["GET", "PUT", "DELETE"])
 def handle_user_role(user_role_id):
-    user_role = UserRoleModel.query.get(user_role_id)
-    user_role_schema = UserRoleSchema()
-
-    if request.method == "PUT":
-        user_role_data = request.get_json()
-
-        context = {
-            "expected_email": user_role.email,
-        }
-        user_role_schema.context = context
-        user_role_schema.load(user_role_data)
-
-        user_role.role = user_role_data["role"]
-
-        db.session.commit()
-
-        return user_role_schema.jsonify(user_role)
-
-    if request.method == "DELETE":
-        db.session.delete(user_role)
-        db.session.commit()
-
-        return jsonify(msg="El rol del usuario se ha eliminado correctamente."), 200
-
-    return user_role_schema.jsonify(user_role)
+	user_role = UserRoleModel.query.get(user_role_id)
+	user_role_schema = UserRoleSchema()
+	
+	if request.method == "PUT":
+		user_role_data = request.get_json()
+		
+		context = {
+			"expected_email": user_role.email,
+		}
+		user_role_schema.context = context
+		user_role_schema.load(user_role_data)
+		
+		user_role.role = user_role_data["role"]
+		
+		db.session.commit()
+		
+		return user_role_schema.jsonify(user_role)
+	
+	if request.method == "DELETE":
+		db.session.delete(user_role)
+		db.session.commit()
+		
+		return jsonify(msg="El rol del usuario se ha eliminado correctamente."), 200
+	
+	return user_role_schema.jsonify(user_role)

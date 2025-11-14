@@ -9,7 +9,7 @@ items_order_schema = ItemOrderSchema(many=True)
 items_order = Blueprint("items_order", __name__, url_prefix="/items-order")
 
 
-@items_order.route("/", methods=["POST"])
+@items_order.route("", methods=["POST"])
 def add_item_order():
 	item_order_data = request.get_json()
 	
@@ -23,7 +23,7 @@ def add_item_order():
 	return item_order_schema.jsonify(new_item_order), 201
 
 
-@items_order.route("/", methods=["GET"])
+@items_order.route("", methods=["GET"])
 def get_item_order():
 	all_items_order = ItemOrderModel.query.all()
 	return items_order_schema.jsonify(all_items_order), 200

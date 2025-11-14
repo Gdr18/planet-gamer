@@ -6,22 +6,26 @@ from ..models.order_model import OrderModel
 stripe.api_key = API_KEY_STRIPE
 
 
-def create_payment(order_instance: OrderModel) -> stripe.PaymentIntent:
+def create_payment_intent(order_instance: OrderModel) -> stripe.PaymentIntent:
 	payment_attr = {
 		"amount": int(order_instance.total * 100),
 		"currency": "eur",
 		"payment_method_types": ["card"],
 		"metadata": {
-			"user_id_db": order_instance.user_id,
-			"order_id_db": order_instance.id
+			"user_id": order_instance.user_id,
+			"order_id": order_instance.id
 		},
 	}
 	
 	return stripe.PaymentIntent.create(**payment_attr)
 
 
-def confirm_payment(payment_intent_id: str, payment_method_id: str | None) -> stripe.PaymentIntent:
+def confirm_payment_intent(payment_intent_id: str, payment_method_id: str | None) -> stripe.PaymentIntent:
 	return stripe.PaymentIntent.confirm(payment_intent_id, payment_method=payment_method_id)
+
+
+def get_payment_intent(payment_intent_id: str) -> stripe.PaymentIntent:
+	return stripe.PaymentIntent.retrieve(payment_intent_id)
 
 
 def create_webhook_event(payload: bytes, sig_header: str, endpoint_secret: str) -> stripe.Event:

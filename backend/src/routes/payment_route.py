@@ -1,16 +1,16 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify, current_app
 
 from ..exceptions.custom_exceptions import ValidationCustomError, StripeCustomError
 from ..models.order_model import OrderModel
-from ..schemas.order_schema import OrderSchema
 from ..services.db_service import db
-from ..services.stripe_service import create_payment, confirm_payment
+from ..services.stripe_service import create_payment_intent, confirm_payment_intent, get_payment_intent, \
+	create_webhook_event
 
 payments = Blueprint("payments", __name__, url_prefix="/payments")
 
 
-@payments.route("/checkout", methods=["POST"])
-def checkout():
+@payments.route("", methods=["POST"])
+def add_payment():
 	data = request.get_json()
 	order_id = data.get("order_id")
 	payment_method = data.get("payment_method_id")
@@ -20,26 +20,75 @@ def checkout():
 	try:
 		order = OrderModel.query.get(order_id)
 		if not order:
+			# TODO: Cambiar a raise
 			return ValidationCustomError("not_found", "pedido").json_response()
 		
-		if not payment_method and not order.payment_id:
-			return StripeCustomError("required_payment_method").json_response()
-		
-		if not order.payment_id:
-			payment = create_payment(order)
+		if not order.payment_id and order.status != "paid":
+			payment = create_payment_intent(order)
 			order.payment_id = payment.id
+			db.session.commit()
 		
-		payment = confirm_payment(order.payment_id, payment_method)
+		payment = confirm_payment_intent(order.payment_id, payment_method)
 		
-		if not payment.status == "succeeded":
-			return StripeCustomError(payment.status, payment.client_secret).json_response()
+		payment_data = {
+			"payment_id": payment.id,
+			"client_secret": payment.client_secret,
+		}
 		
-		order.status = "paid"
-		order.expires_at = None
-		return OrderSchema().dump(order), 200
+		if payment.status not in ["succeeded", "requires_action", "processing"]:
+			# TODO: Cambiar a raise
+			return StripeCustomError(payment.status).json_response()
+		print(payment.status)
+		return jsonify(**payment_data, status=payment.status), 200
+	except Exception as e:
+		if order:
+			order.status = "failed"
+			db.session.commit()
+		raise e
+
+
+@payments.route("/<payment_id>", methods=["GET"])
+def get_payment(payment_id):
+	payment = get_payment_intent(payment_id)
+	response = {
+		"payment_id": payment.id,
+		"client_secret": payment.client_secret,
+		"status": payment.status
+	}
+	return jsonify(**response), 200
+
+
+@payments.route("/webhook", methods=["POST"])
+def stripe_webhook_handler():
+	payload = request.data
+	sig_header = request.headers.get("Stripe-Signature")
+	# TODO: Asignar variable de entorno en producción
+	endpoint_secret = current_app.config["STRIPE_WEBHOOK_SECRET"]
+	
+	order = None
+	payment = None
+	try:
+		event = create_webhook_event(payload, sig_header, endpoint_secret)
+		
+		payment = event.data.object
+		order = OrderModel.query.filter_by(payment_id=payment.get("id")).first()
+		if not order:
+			# TODO: Cambiar a raise
+			return ValidationCustomError("not_found", "pedido").json_response()
+		
+		if event.type == "payment_intent.succeeded":
+			order.status = "paid"
+			order.expires_at = None
+		elif event.type in ["payment_intent.requires_action", "payment_intent.processing"]:
+			order.status = "pending"
+		else:
+			order.status = "failed"
+		
+		db.session.commit()
+		
+		return jsonify(msg=f"Pago {payment.get("id")} procesado"), 200
+	except ValueError:
+		# TODO: Cambiar a raise
+		return ValidationCustomError("invalid_data", "payload").json_response()
 	except Exception as e:
 		raise e
-	finally:
-		if (order and not payment) or (payment and payment.status not in ["succeeded", "requires_action"]):
-			order.status = "failed"
-		db.session.commit()

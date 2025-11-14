@@ -3,7 +3,7 @@ from marshmallow import pre_load, ValidationError, validate
 from src.services.db_service import ma
 from ..models.order_model import OrderModel
 
-status_order = ["pendent", "paid", "failed"]
+status_order = ["pending", "paid", "failed"]
 
 
 class OrderSchema(ma.SQLAlchemyAutoSchema):
