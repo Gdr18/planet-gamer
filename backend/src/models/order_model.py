@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from ..models.order_details_model import OrderDetailsModel
+from ..models.item_order_model import ItemOrderModel
 from ..services.db_service import db
 
 
@@ -15,8 +15,8 @@ class OrderModel(db.Model):
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 	expires_at = db.Column(db.DateTime)
 	
-	order_details = db.relationship(
-		OrderDetailsModel, cascade="all, delete", backref="order", lazy=True
+	items = db.relationship(
+		ItemOrderModel, cascade="all, delete", backref="order", lazy=True
 	)
 	
 	def __init__(self, total, address_id, user_id, status="pendent", payment_id=None):

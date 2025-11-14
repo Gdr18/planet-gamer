@@ -5,7 +5,7 @@ from .routes.addresses_route import addresses
 from .routes.auth_route import auth
 from .routes.games_route import games
 from .routes.items_basket_route import items_basket
-from .routes.orders_details_route import orders_details
+from .routes.items_order_route import items_order
 from .routes.orders_route import orders
 from .routes.payment_route import payments
 from .routes.user_roles_route import user_roles
@@ -34,7 +34,7 @@ def create_app(config):
 	
 	app.register_blueprint(users)
 	app.register_blueprint(orders)
-	app.register_blueprint(orders_details)
+	app.register_blueprint(items_order)
 	app.register_blueprint(addresses)
 	app.register_blueprint(items_basket)
 	app.register_blueprint(games)

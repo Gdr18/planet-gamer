@@ -1,14 +1,14 @@
 from marshmallow import pre_load, ValidationError
 
 from src.services.db_service import ma
-from ..models.order_details_model import OrderDetailsModel
+from ..models.item_order_model import ItemOrderModel
 
 
-class OrderDetailsSchema(ma.SQLAlchemyAutoSchema):
+class ItemOrderSchema(ma.SQLAlchemyAutoSchema):
 	price = ma.Decimal(as_string=True, places=2, required=True, allow_none=False)
 	
 	class Meta:
-		model = OrderDetailsModel
+		model = ItemOrderModel
 		include_fk = True
 		dump_only = ["id"]
 	
