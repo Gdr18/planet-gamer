@@ -1,6 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
+from stripe import StripeError
 
+from .exceptions.custom_exceptions import StripeCustomError, ValidationCustomError
+from .exceptions.handlers import stripe_errors_handler, validation_error_handler
 from .routes.addresses_route import addresses
 from .routes.auth_route import auth
 from .routes.games_route import games
@@ -25,6 +28,11 @@ def welcome():
 
 def create_app(config):
 	app.config.from_object(config)
+	
+	app.register_error_handler(StripeError, stripe_errors_handler)
+	app.register_error_handler(StripeCustomError, stripe_errors_handler)
+	
+	app.register_error_handler(ValidationCustomError, validation_error_handler)
 	
 	db.init_app(app)
 	cors.init_app(app)

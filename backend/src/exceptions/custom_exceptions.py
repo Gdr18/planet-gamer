@@ -2,22 +2,22 @@ from flask import jsonify
 
 
 class StripeCustomError(Exception):
-	def __init__(self, status: str):
-		self.status = status
+	def __init__(self, error: str):
+		self.error = error
 		self.code = 400
 		
-		if status == "payment_failed":
-			self.message = "El pago ha fallado"
-		elif status == "requires_payment_method":
+		if error == "paid_rejected":
+			self.message = "Pago rechazado por Stripe"
+			self.code = 402
+		elif error == "requires_payment_method":
 			self.message = "Se requiere un método de pago"
-		elif status == "wrong_payment_method":
-			self.message = "Error con el método de pago"
+		elif error == "invalid_request":
+			self.message = "Solicitud inválida a Stripe"
 		else:
-			self.message = "Error inesperado de Stripe"
-			self.code = 500
+			self.message = "Estado no capturado de Stripe"
 	
 	def json_response(self):
-		return jsonify(status=self.status, msg=self.message), self.code
+		return jsonify(err=self.error, msg=self.message), self.code
 
 
 class ValidationCustomError(Exception):

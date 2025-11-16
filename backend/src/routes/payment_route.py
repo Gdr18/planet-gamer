@@ -20,10 +20,9 @@ def add_payment():
 	try:
 		order = OrderModel.query.get(order_id)
 		if not order:
-			# TODO: Cambiar a raise
-			return ValidationCustomError("not_found", "pedido").json_response()
+			raise ValidationCustomError("not_found", "pedido")
 		
-		if not order.payment_id and order.status != "paid":
+		if not order.payment_id and order.error != "paid":
 			payment = create_payment_intent(order)
 			order.payment_id = payment.id
 			db.session.commit()
@@ -36,9 +35,7 @@ def add_payment():
 		}
 		
 		if payment.status not in ["succeeded", "requires_action", "processing"]:
-			# TODO: Cambiar a raise
-			return StripeCustomError(payment.status).json_response()
-		print(payment.status)
+			raise StripeCustomError(payment.status)
 		return jsonify(**payment_data, status=payment.status), 200
 	except Exception as e:
 		if order:
@@ -73,22 +70,20 @@ def stripe_webhook_handler():
 		payment = event.data.object
 		order = OrderModel.query.filter_by(payment_id=payment.get("id")).first()
 		if not order:
-			# TODO: Cambiar a raise
-			return ValidationCustomError("not_found", "pedido").json_response()
+			raise ValidationCustomError("not_found", "pedido")
 		
 		if event.type == "payment_intent.succeeded":
-			order.status = "paid"
+			order.error = "paid"
 			order.expires_at = None
 		elif event.type in ["payment_intent.requires_action", "payment_intent.processing"]:
-			order.status = "pending"
+			order.error = "pending"
 		else:
-			order.status = "failed"
+			order.error = "failed"
 		
 		db.session.commit()
 		
 		return jsonify(msg=f"Pago {payment.get("id")} procesado"), 200
 	except ValueError:
-		# TODO: Cambiar a raise
-		return ValidationCustomError("invalid_data", "payload").json_response()
+		raise ValidationCustomError("invalid_data", "payload")
 	except Exception as e:
 		raise e
