@@ -1,10 +1,10 @@
 from flask import jsonify
 from stripe import CardError, InvalidRequestError
 
-from ..exceptions.custom_exceptions import StripeCustomError
+from ..exceptions.custom_exceptions import StripeCustomError, MarshmallowCustomError
 
 
-def stripe_errors_handler(error):
+def stripe_error_handler(error):
 	if isinstance(error, CardError):
 		return StripeCustomError("paid_rejected").json_response()
 	elif isinstance(error, InvalidRequestError):
@@ -15,5 +15,10 @@ def stripe_errors_handler(error):
 	return jsonify(err="stripe_error", msg=f"Error inesperado de Stripe: {error}"), 500
 
 
-def validation_error_handler(error):
+def validation_custom_error_handler(error):
 	return error.json_response()
+
+
+def marshmallow_validation_error_handler(error):
+	print(error.messages, "error")
+	return MarshmallowCustomError(error.messages).json_response()

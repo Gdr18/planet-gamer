@@ -9,13 +9,13 @@ items_basket = Blueprint("items_basket", __name__, url_prefix="/items-basket")
 baskets_schema = ItemBasketSchema(many=True)
 
 
-@items_basket.route("", methods=["GET"])
+@items_basket.route("/", methods=["GET"])
 def get_items_basket():
 	all_items_basket = ItemBasketModel.query.all()
 	return baskets_schema.jsonify(all_items_basket)
 
 
-@items_basket.route("", methods=["POST"])
+@items_basket.route("/", methods=["POST"])
 def add_item_basket():
 	item_basket_data = request.get_json()
 	

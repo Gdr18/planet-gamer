@@ -10,13 +10,13 @@ orders = Blueprint("orders", __name__, url_prefix="/orders")
 orders_schema = OrderSchema(many=True)
 
 
-@orders.route("", methods=["GET"])
+@orders.route("/", methods=["GET"])
 def get_orders():
 	all_orders = OrderModel.query.all()
 	return orders_schema.dump(all_orders)
 
 
-@orders.route("", methods=["POST"])
+@orders.route("/", methods=["POST"])
 def add_order():
 	order_data = request.get_json()
 	

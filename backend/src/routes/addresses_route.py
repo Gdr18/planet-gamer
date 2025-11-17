@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 
+from ..exceptions.custom_exceptions import ValidationCustomError
 from ..models.address_model import AddressModel
 from ..schemas.address_schema import AddressSchema
 from ..services.db_service import db
@@ -20,12 +21,10 @@ def add_address():
 	db.session.add(new_address)
 	db.session.commit()
 	
-	address = AddressModel.query.get(new_address.id)
-	
-	return address_schema.jsonify(address), 201
+	return address_schema.jsonify(new_address), 201
 
 
-@addresses.route("", methods=["GET"])
+@addresses.route("/", methods=["GET"])
 def get_addresses():
 	all_addresses = AddressModel.query.all()
 	return addresses_schema.jsonify(all_addresses), 200
@@ -34,6 +33,8 @@ def get_addresses():
 @addresses.route("/<address_id>", methods=["GET", "PUT", "DELETE"])
 def handle_address(address_id):
 	address = AddressModel.query.get(address_id)
+	if not address:
+		raise ValidationCustomError("not_found", "dirección")
 	address_schema = AddressSchema()
 	
 	if request.method == "PUT":
@@ -41,7 +42,7 @@ def handle_address(address_id):
 		
 		context = {
 			"expected_id": address_id,
-			"expected_address_user_id": address.user_id,
+			"expected_user_id": address.user_id,
 		}
 		address_schema.context = context
 		

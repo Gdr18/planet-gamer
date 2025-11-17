@@ -9,13 +9,13 @@ user_roles = Blueprint("user_roles", __name__, url_prefix="/user-roles")
 roles_schema = UserRoleSchema(many=True)
 
 
-@user_roles.route("", methods=["GET"])
+@user_roles.route("/", methods=["GET"])
 def get_user_roles():
 	all_user_roles = UserRoleModel.query.all()
 	return roles_schema.jsonify(all_user_roles)
 
 
-@user_roles.route("", methods=["POST"])
+@user_roles.route("/", methods=["POST"])
 def add_user_role():
 	user_role_data = request.get_json()
 	

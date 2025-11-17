@@ -9,13 +9,13 @@ users = Blueprint("users", __name__, url_prefix="/users")
 users_schema = UserSchema(many=True)
 
 
-@users.route("", methods=["GET"])
+@users.route("/", methods=["GET"])
 def get_users():
 	all_users = UserModel.query.all()
 	return users_schema.jsonify(all_users)
 
 
-@users.route("", methods=["POST"])
+@users.route("/", methods=["POST"])
 def add_user():
 	user_data = request.get_json()
 	

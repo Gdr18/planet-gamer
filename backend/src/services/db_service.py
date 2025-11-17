@@ -6,5 +6,5 @@ db = SQLAlchemy()
 
 ma = Marshmallow()
 
-# Completar lógica de bcrypt
+# TODO: Completar lógica de bcrypt
 bcrypt = Bcrypt()

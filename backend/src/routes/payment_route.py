@@ -9,7 +9,7 @@ from ..services.stripe_service import create_payment_intent, confirm_payment_int
 payments = Blueprint("payments", __name__, url_prefix="/payments")
 
 
-@payments.route("", methods=["POST"])
+@payments.route("/", methods=["POST"])
 def add_payment():
 	data = request.get_json()
 	order_id = data.get("order_id")

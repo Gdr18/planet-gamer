@@ -1,9 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
+from marshmallow import ValidationError
 from stripe import StripeError
 
 from .exceptions.custom_exceptions import StripeCustomError, ValidationCustomError
-from .exceptions.handlers import stripe_errors_handler, validation_error_handler
+from .exceptions.handlers import stripe_error_handler, validation_custom_error_handler, \
+	marshmallow_validation_error_handler
 from .routes.addresses_route import addresses
 from .routes.auth_route import auth
 from .routes.games_route import games
@@ -29,10 +31,11 @@ def welcome():
 def create_app(config):
 	app.config.from_object(config)
 	
-	app.register_error_handler(StripeError, stripe_errors_handler)
-	app.register_error_handler(StripeCustomError, stripe_errors_handler)
+	app.register_error_handler(StripeError, stripe_error_handler)
+	app.register_error_handler(StripeCustomError, stripe_error_handler)
 	
-	app.register_error_handler(ValidationCustomError, validation_error_handler)
+	app.register_error_handler(ValidationError, marshmallow_validation_error_handler)
+	app.register_error_handler(ValidationCustomError, validation_custom_error_handler)
 	
 	db.init_app(app)
 	cors.init_app(app)

@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 
 from src.services.db_service import db
 from ..models.game_model import GameModel
-from ..schemas import game_schema
 from ..schemas.game_schema import GameSchema
 
 games = Blueprint("games", __name__, url_prefix="/games")
@@ -11,13 +10,13 @@ game_schema = GameSchema()
 games_schema = GameSchema(many=True)
 
 
-@games.route("", methods=["GET"])
+@games.route("/", methods=["GET"])
 def get_games():
 	all_games = GameModel.query.all()
 	return games_schema.jsonify(all_games), 200
 
 
-@games.route("", methods=["POST"])
+@games.route("/", methods=["POST"])
 def add_game():
 	game_data = request.get_json()
 	game_schema_post = GameSchema(load_instance=True)
