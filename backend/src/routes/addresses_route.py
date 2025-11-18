@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from ..exceptions.custom_exceptions import ValidationCustomError
-from ..models.address_model import AddressModel
+from ..models.address_model import AddressModel, unset_previous_default
 from ..schemas.address_schema import AddressSchema
 from ..services.db_service import db
 
@@ -10,15 +10,18 @@ addresses_schema = AddressSchema(many=True)
 addresses = Blueprint("addresses", __name__, url_prefix="/addresses")
 
 
-@addresses.route("", methods=["POST"])
+@addresses.route("/", methods=["POST"])
 def add_address():
 	address_data = request.get_json()
-	context = {"mode": "create"}
-	address_schema = AddressSchema(load_instance=True, context=context)
+	address_schema = AddressSchema(load_instance=True)
 	
 	new_address = address_schema.load(address_data)
 	
 	db.session.add(new_address)
+	
+	if new_address.default:
+		unset_previous_default(new_address)
+	
 	db.session.commit()
 	
 	return address_schema.jsonify(new_address), 201
@@ -33,22 +36,26 @@ def get_addresses():
 @addresses.route("/<address_id>", methods=["GET", "PUT", "DELETE"])
 def handle_address(address_id):
 	address = AddressModel.query.get(address_id)
+	address_schema = AddressSchema(unknown="exclude")
 	if not address:
 		raise ValidationCustomError("not_found", "dirección")
-	address_schema = AddressSchema()
 	
 	if request.method == "PUT":
 		address_data = request.get_json()
 		
 		context = {
-			"expected_id": address_id,
 			"expected_user_id": address.user_id,
 		}
 		address_schema.context = context
 		
-		address_schema.load(address_data)
+		address_instance = address_schema.load(address_data)
 		
-		for key, value in address_data.items():
+		allowed_fields = address_schema.fields.keys()
+		for key, value in address_instance.items():
+			if key not in allowed_fields:
+				continue
+			if key == "default" and value is True:
+				unset_previous_default(address)
 			setattr(address, key, value)
 		
 		db.session.commit()

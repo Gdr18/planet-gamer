@@ -20,5 +20,5 @@ def validation_custom_error_handler(error):
 
 
 def marshmallow_validation_error_handler(error):
-	print(error.messages, "error")
+	print(error, "error")
 	return MarshmallowCustomError(error.messages).json_response()

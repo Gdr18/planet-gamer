@@ -52,8 +52,6 @@ class MarshmallowCustomError(Exception):
 				self.message += f"El campo '{field}' debe ser de tipo '{type_field}'. "
 			elif message[0].startswith("Unknown field."):
 				self.message += f"El campo '{field}' no es reconocido. "
-			elif message[0].startswith("No se puede"):
-				self.message += f"{message[0]} "
 			elif message[0].startswith("Length must be at least"):
 				length = message[0].split("Length must be at least ")[1].split(".")[0]
 				self.message += f"El campo '{field}' debe tener una longitud de {length} caracteres como mínimo. "
@@ -64,7 +62,7 @@ class MarshmallowCustomError(Exception):
 				values = message[0].split("One of: ")[1]
 				self.message += f"El campo '{field}' debe ser uno de los siguientes valores: {values}. "
 			else:
-				self.message += f"Error en el campo '{field}': {message[0]} "
+				self.message += f"{message[0]} "
 	
 	def json_response(self):
 		return jsonify(err=self.err, msg=self.message), self.code
