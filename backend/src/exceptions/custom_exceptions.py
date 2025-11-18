@@ -52,15 +52,19 @@ class MarshmallowCustomError(Exception):
 				self.message += f"El campo '{field}' debe ser de tipo '{type_field}'. "
 			elif message[0].startswith("Unknown field."):
 				self.message += f"El campo '{field}' no es reconocido. "
+			elif message[0].startswith("Length must be between"):
+				start_length = message[0].split("Length must be between ")[1].split(" ")[0]
+				finish_length = message[0].split("and ")[1].split(".")[0]
+				self.message += f"El campo '{field}' debe tener una longitud entre {start_length} y {finish_length} caracteres. "
 			elif message[0].startswith("Length must be at least"):
 				length = message[0].split("Length must be at least ")[1].split(".")[0]
 				self.message += f"El campo '{field}' debe tener una longitud de {length} caracteres como mínimo. "
 			elif message[0].startswith("Length must be at most"):
 				length = message[0].split("Length must be at most ")[1].split(".")[0]
 				self.message += f"El campo '{field}' debe tener una longitud de {length} caracteres como máximo. "
-			elif message[0].startswith("One of"):
-				values = message[0].split("One of: ")[1]
-				self.message += f"El campo '{field}' debe ser uno de los siguientes valores: {values}. "
+			elif message[0].startswith("Must be one of"):
+				values = message[0].split("Must be one of: ")[1]
+				self.message += f"El campo '{field}' debe contener uno de los siguientes valores: {values} "
 			else:
 				self.message += f"{message[0]} "
 	

@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify
 
 from src.services.db_service import db
+from ..exceptions.custom_exceptions import ValidationCustomError
 from ..models.game_model import GameModel
 from ..schemas.game_schema import GameSchema
 
 games = Blueprint("games", __name__, url_prefix="/games")
 
-game_schema = GameSchema()
 games_schema = GameSchema(many=True)
 
 
@@ -26,21 +26,25 @@ def add_game():
 	db.session.add(new_game)
 	db.session.commit()
 	
-	game = GameModel.query.get(new_game.id)
-	
-	return game_schema_post.jsonify(game), 201
+	return game_schema_post.jsonify(new_game), 201
 
 
 @games.route("/<game_id>", methods=["GET", "PUT", "DELETE"])
 def handle_game(game_id):
 	game = GameModel.query.get(game_id)
+	if not game:
+		raise ValidationCustomError("not_found", "videojuego")
+	game_schema = GameSchema()
+	
 	if request.method == "PUT":
 		data_game = request.get_json()
 		
-		game_schema.load(data_game)
+		game_instance = game_schema.load(data_game)
+		allowed_fields = GameSchema.fields.keys()
 		
-		for key, value in data_game.items():
-			setattr(game, key, value)
+		for key, value in game_instance.items():
+			if key in allowed_fields:
+				setattr(game, key, value)
 		
 		db.session.commit()
 		return game_schema.jsonify(game), 200
@@ -49,7 +53,7 @@ def handle_game(game_id):
 		db.session.delete(game)
 		db.session.commit()
 		
-		return jsonify(msg="El juego ha sido eliminado correctamente"), 200
+		return jsonify(msg="Videojuego eliminado correctamente"), 200
 	
 	return game_schema.jsonify(game), 200
 

@@ -17,25 +17,3 @@ class GameModel(db.Model):
 	stock = db.Column(db.Integer, nullable=False, default=20)
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 	details = db.relationship(ItemOrderModel, backref="game", lazy=True)
-	
-	def __init__(
-		self,
-		title,
-		description,
-		platform,
-		gender,
-		pegi,
-		release,
-		price,
-		img_url,
-		stock=None,
-	):
-		self.title = title
-		self.description = description
-		self.platform = platform
-		self.gender = gender
-		self.pegi = pegi
-		self.release = release
-		self.price = price
-		self.img_url = img_url
-		self.stock = stock
