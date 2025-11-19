@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from src.services.db_service import db
+from ..exceptions.custom_exceptions import ValidationCustomError
 from ..models.item_basket_model import ItemBasketModel
 from ..schemas.item_basket_schema import ItemBasketSchema
 
@@ -12,7 +13,7 @@ baskets_schema = ItemBasketSchema(many=True)
 @items_basket.route("/", methods=["GET"])
 def get_items_basket():
 	all_items_basket = ItemBasketModel.query.all()
-	return baskets_schema.jsonify(all_items_basket)
+	return baskets_schema.jsonify(all_items_basket), 200
 
 
 @items_basket.route("/", methods=["POST"])
@@ -26,15 +27,15 @@ def add_item_basket():
 	db.session.add(new_item_basket)
 	db.session.commit()
 	
-	item_basket = ItemBasketModel.query.get(new_item_basket.id)
-	
-	return item_basket_schema.jsonify(item_basket)
+	return item_basket_schema.jsonify(new_item_basket), 201
 
 
 @items_basket.route("/<item_basket_id>", methods=["GET", "PUT", "DELETE"])
 def handle_item_basket(item_basket_id):
 	item_basket = ItemBasketModel.query.get(item_basket_id)
 	item_basket_schema = ItemBasketSchema()
+	if not item_basket:
+		raise ValidationCustomError("not_found", "elemento de la cesta")
 	
 	if request.method == "PUT":
 		item_basket_data = request.get_json()
@@ -44,10 +45,15 @@ def handle_item_basket(item_basket_id):
 			"expected_user_id": item_basket.user_id,
 		}
 		item_basket_schema.context = context
+		item_basket_schema.load_instance = False
 		
-		item_basket_schema.load(item_basket_data)
+		item_basket_instance = item_basket_schema.load(item_basket_data)
+		allowed_fields = item_basket_schema.fields.keys()
+		print(allowed_fields, "allowed_fields")
 		
-		for key, value in item_basket_data.items():
+		for key, value in item_basket_instance.items():
+			if key not in allowed_fields or key == "id":
+				continue
 			setattr(item_basket, key, value)
 		
 		db.session.commit()

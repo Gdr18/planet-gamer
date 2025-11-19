@@ -40,11 +40,12 @@ def handle_game(game_id):
 		data_game = request.get_json()
 		
 		game_instance = game_schema.load(data_game)
-		allowed_fields = GameSchema.fields.keys()
+		allowed_fields = game_schema.fields.keys()
 		
 		for key, value in game_instance.items():
-			if key in allowed_fields:
-				setattr(game, key, value)
+			if key in allowed_fields or key == "id":
+				continue
+			setattr(game, key, value)
 		
 		db.session.commit()
 		return game_schema.jsonify(game), 200

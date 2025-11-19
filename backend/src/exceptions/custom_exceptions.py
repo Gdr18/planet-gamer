@@ -56,15 +56,14 @@ class MarshmallowCustomError(Exception):
 				start_length = message[0].split("Length must be between ")[1].split(" ")[0]
 				finish_length = message[0].split("and ")[1].split(".")[0]
 				self.message += f"El campo '{field}' debe tener una longitud entre {start_length} y {finish_length} caracteres. "
-			elif message[0].startswith("Length must be at least"):
-				length = message[0].split("Length must be at least ")[1].split(".")[0]
-				self.message += f"El campo '{field}' debe tener una longitud de {length} caracteres como mínimo. "
-			elif message[0].startswith("Length must be at most"):
-				length = message[0].split("Length must be at most ")[1].split(".")[0]
-				self.message += f"El campo '{field}' debe tener una longitud de {length} caracteres como máximo. "
+			elif message[0].startswith("Longer than maximum length"):
+				max_length = message[0].split("Longer than maximum length ")[1].split(".")[0]
+				self.message += f"El campo '{field}' no debe exceder los {max_length} caracteres. "
 			elif message[0].startswith("Must be one of"):
 				values = message[0].split("Must be one of: ")[1]
 				self.message += f"El campo '{field}' debe contener uno de los siguientes valores: {values} "
+			elif message[0].startswith("Field may not be null"):
+				self.message += f"El campo '{field}' no puede ser nulo. "
 			else:
 				self.message += f"{message[0]} "
 	

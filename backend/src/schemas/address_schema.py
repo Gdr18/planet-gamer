@@ -5,13 +5,14 @@ from ..models.address_model import AddressModel
 
 
 class AddressSchema(ma.SQLAlchemyAutoSchema):
-	second_line_street = ma.String(data_key="secondLineStreet", validate=validate.Length(max=50), allow_none=True)
+	second_line_street = ma.String(data_key="secondLineStreet", validate=validate.Length(min=1, max=50),
+	                               allow_none=True)
 	user_id = ma.Integer(required=True, data_key="userId")
 	city = ma.String(required=True, validate=validate.Length(min=1, max=40))
 	street = ma.String(required=True, validate=validate.Length(min=1, max=100))
 	postal_code = ma.String(required=True, data_key="postalCode",
-	                        validate=[validate.Length(equal=5), validate.Regexp(r"^\d{5}$",
-	                                                                            error="El campo 'postalCode' debe contener solo dígitos.")])
+	                        validate=validate.Regexp(r"^\d{5}$",
+	                                                 error="El campo 'postalCode' debe contener 5 dígitos."))
 	
 	class Meta:
 		model = AddressModel

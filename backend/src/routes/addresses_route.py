@@ -52,7 +52,7 @@ def handle_address(address_id):
 		
 		allowed_fields = address_schema.fields.keys()
 		for key, value in address_instance.items():
-			if key not in allowed_fields:
+			if key not in allowed_fields or key == "id":
 				continue
 			if key == "default" and value is True:
 				unset_previous_default(address)
