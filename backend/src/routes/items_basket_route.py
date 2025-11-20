@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from src.services.db_service import db
-from ..exceptions.custom_exceptions import ValidationCustomError
+from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.item_basket_model import ItemBasketModel
 from ..schemas.item_basket_schema import ItemBasketSchema
 
@@ -35,7 +35,7 @@ def handle_item_basket(item_basket_id):
 	item_basket = ItemBasketModel.query.get(item_basket_id)
 	item_basket_schema = ItemBasketSchema()
 	if not item_basket:
-		raise ValidationCustomError("not_found", "elemento de la cesta")
+		raise ValueCustomError("not_found", "elemento de la cesta")
 	
 	if request.method == "PUT":
 		item_basket_data = request.get_json()

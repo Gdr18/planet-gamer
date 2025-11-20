@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from ..exceptions.custom_exceptions import ValidationCustomError
+from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.address_model import AddressModel, unset_previous_default
 from ..schemas.address_schema import AddressSchema
 from ..services.db_service import db
@@ -38,7 +38,7 @@ def handle_address(address_id):
 	address = AddressModel.query.get(address_id)
 	address_schema = AddressSchema(unknown="exclude")
 	if not address:
-		raise ValidationCustomError("not_found", "dirección")
+		raise ValueCustomError("not_found", "dirección")
 	
 	if request.method == "PUT":
 		address_data = request.get_json()

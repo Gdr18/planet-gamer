@@ -20,7 +20,7 @@ class StripeCustomError(Exception):
 		return jsonify(err=self.error, msg=self.message), self.code
 
 
-class ValidationCustomError(Exception):
+class ValueCustomError(Exception):
 	def __init__(self, error: str, resource: str):
 		self.error = error
 		self.code = 500
@@ -37,28 +37,23 @@ class ValidationCustomError(Exception):
 		return jsonify(err=self.error, msg=self.message), self.code
 
 
-class MarshmallowCustomError(Exception):
+class DbCustomResponses(Exception):
 	def __init__(self, error: dict):
 		self.error = error
 		self.code = 400
 		self.message = ""
-		self.err = "validation_db"
+		self.err = "db_validation_error"
 		
 		for field, message in self.error.items():
 			if message[0] == "Missing data for required field.":
-				self.message += f"Falta el campo: '{field}'. "
+				self.message += f"Falta el campo '{field}'. "
 			elif message[0].startswith("Not a valid"):
 				type_field = message[0].split("Not a valid ")[1].split(".")[0]
 				self.message += f"El campo '{field}' debe ser de tipo '{type_field}'. "
-			elif message[0].startswith("Unknown field."):
-				self.message += f"El campo '{field}' no es reconocido. "
 			elif message[0].startswith("Length must be between"):
 				start_length = message[0].split("Length must be between ")[1].split(" ")[0]
 				finish_length = message[0].split("and ")[1].split(".")[0]
 				self.message += f"El campo '{field}' debe tener una longitud entre {start_length} y {finish_length} caracteres. "
-			elif message[0].startswith("Longer than maximum length"):
-				max_length = message[0].split("Longer than maximum length ")[1].split(".")[0]
-				self.message += f"El campo '{field}' no debe exceder los {max_length} caracteres. "
 			elif message[0].startswith("Must be one of"):
 				values = message[0].split("Must be one of: ")[1]
 				self.message += f"El campo '{field}' debe contener uno de los siguientes valores: {values} "

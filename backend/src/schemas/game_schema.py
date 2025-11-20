@@ -12,7 +12,8 @@ class GameSchema(ma.SQLAlchemyAutoSchema):
 	title = ma.String(required=True, validate=validate.Length(min=1, max=50))
 	created_at = ma.DateTime(dump_only=True, format="%d-%m-%Y %H:%M:%S", data_key="createdAt")
 	price = ma.Decimal(as_string=True, places=2, required=True,
-	                   validate=validate.Range(min=0.1, error="El campo 'price' debe ser un número positivo."))
+	                   validate=validate.Range(min=0.1,
+	                                           error="El campo 'price' debe ser un entero positivo mayor que cero."))
 	platform = ma.String(required=True, validate=validate.OneOf(platforms))
 	img_url = ma.String(required=True, data_key="imgUrl", validate=validate.Regexp(regex=r"^https?:\/\/\S+",
 	                                                                               error="El campo 'imgUrl' debe ser una URL válida."))
@@ -26,3 +27,5 @@ class GameSchema(ma.SQLAlchemyAutoSchema):
 	class Meta:
 		model = GameModel
 		dump_only = ["id", "created_at"]
+		unknown = "exclude"
+		include_relationships = True

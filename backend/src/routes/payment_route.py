@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 
-from ..exceptions.custom_exceptions import ValidationCustomError, StripeCustomError
+from ..exceptions.custom_exceptions import ValueCustomError, StripeCustomError
 from ..models.order_model import OrderModel
 from ..services.db_service import db
 from ..services.stripe_service import create_payment_intent, confirm_payment_intent, get_payment_intent, \
@@ -20,7 +20,7 @@ def add_payment():
 	try:
 		order = OrderModel.query.get(order_id)
 		if not order:
-			raise ValidationCustomError("not_found", "pedido")
+			raise ValueCustomError("not_found", "pedido")
 		
 		if not order.payment_id and order.error != "paid":
 			payment = create_payment_intent(order)
@@ -70,7 +70,7 @@ def stripe_webhook_handler():
 		payment = event.data.object
 		order = OrderModel.query.filter_by(payment_id=payment.get("id")).first()
 		if not order:
-			raise ValidationCustomError("not_found", "pedido")
+			raise ValueCustomError("not_found", "pedido")
 		
 		if event.type == "payment_intent.succeeded":
 			order.error = "paid"
@@ -84,6 +84,6 @@ def stripe_webhook_handler():
 		
 		return jsonify(msg=f"Pago {payment.get("id")} procesado"), 200
 	except ValueError:
-		raise ValidationCustomError("invalid_data", "payload")
+		raise ValueCustomError("invalid_data", "payload")
 	except Exception as e:
 		raise e

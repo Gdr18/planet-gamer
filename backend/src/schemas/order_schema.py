@@ -14,8 +14,8 @@ class OrderSchema(ma.SQLAlchemyAutoSchema):
 	
 	class Meta:
 		model = OrderModel
-		include_fk = True
 		dump_only = ["id"]
+		unknown = "exclude"
 	
 	@pre_load
 	def validate_data(self, data, **kwargs):

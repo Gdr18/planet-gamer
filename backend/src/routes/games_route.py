@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from src.services.db_service import db
-from ..exceptions.custom_exceptions import ValidationCustomError
+from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.game_model import GameModel
 from ..schemas.game_schema import GameSchema
 
@@ -33,7 +33,7 @@ def add_game():
 def handle_game(game_id):
 	game = GameModel.query.get(game_id)
 	if not game:
-		raise ValidationCustomError("not_found", "videojuego")
+		raise ValueCustomError("not_found", "videojuego")
 	game_schema = GameSchema()
 	
 	if request.method == "PUT":

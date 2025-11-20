@@ -15,6 +15,8 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 	class Meta:
 		model = UserModel
 		dump_only = ["id", "role"]
+		unknown = "exclude"
+		include_relationships = True
 	
 	@pre_load
 	def validate_values(self, data, **kwargs):
