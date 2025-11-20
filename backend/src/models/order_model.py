@@ -4,7 +4,7 @@ from ..models.item_order_model import ItemOrderModel
 from ..services.db_service import db
 
 
-# Eliminación de fila automática basándose en el campo 'expires_at' desde Supabase
+# TODO: Eliminación de fila automática basándose en el campo 'expires_at' desde Supabase
 class OrderModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	total = db.Column(db.Numeric(precision=10, scale=2, asdecimal=True), nullable=False)
@@ -15,7 +15,7 @@ class OrderModel(db.Model):
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 	expires_at = db.Column(db.DateTime)
 	
-	items = db.relationship(
+	items_order = db.relationship(
 		ItemOrderModel, cascade="all, delete", backref="order", lazy=True
 	)
 	
