@@ -21,7 +21,7 @@ class StripeCustomError(Exception):
 
 
 class ValueCustomError(Exception):
-	def __init__(self, error: str, resource: str):
+	def __init__(self, error: str, resource: str | None = None):
 		self.error = error
 		self.code = 500
 		self.message = None
@@ -32,6 +32,9 @@ class ValueCustomError(Exception):
 		elif self.error == "invalid_data":
 			self.message = f"{resource.capitalize()} inválido/a"
 			self.code = 400
+		elif self.error == "password_mismatch":
+			self.message = "La contraseña no coincide"
+			self.code = 401
 	
 	def json_response(self):
 		return jsonify(err=self.error, msg=self.message), self.code

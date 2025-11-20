@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from src.services.db_service import db, bcrypt
+from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema
 
@@ -33,14 +34,14 @@ def add_user():
 	db.session.add(new_user)
 	db.session.commit()
 	
-	new_user = UserModel.query.get(new_user.id)
-	
 	return user_schema.jsonify(new_user)
 
 
 @users.route("/<user_id>", methods=["GET", "DELETE", "PUT"])
 def handle_user(user_id):
 	user = UserModel.query.get(user_id)
+	if not user:
+		raise ValueCustomError("not_found", "usuario")
 	user_schema = UserSchema()
 	
 	if request.method == "PUT":
@@ -50,16 +51,15 @@ def handle_user(user_id):
 			"expected_password": user_data.get("password"),
 		}
 		user_schema.context = context
-		user_schema.load(user_data)
+		user_instance = user_schema.load(user_data)
 		
-		for key, value in user_data.items():
+		for key, value in user_instance.items():
 			if key == "password":
-				if not bcrypt.check_password_hash(user.password, value) and (
-					user.password != value
+				if not bcrypt.check_password_hash(user_instance.password, value) and (
+					user_instance.password != value
 				):
-					user.password = bcrypt.generate_password_hash(value).decode("utf-8")
-			else:
-				setattr(user, key, value)
+					user_instance.password = bcrypt.generate_password_hash(value).decode("utf-8")
+			setattr(user, key, value)
 		
 		db.session.commit()
 		return user_schema.jsonify(user)
@@ -67,6 +67,6 @@ def handle_user(user_id):
 	elif request.method == "DELETE":
 		db.session.delete(user)
 		db.session.commit()
-		return jsonify(msg="El usuario ha sido eliminado correctamente"), 200
+		return jsonify(msg="Usuario eliminado correctamente"), 200
 	
 	return user_schema.jsonify(user)

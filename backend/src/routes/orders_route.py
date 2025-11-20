@@ -1,6 +1,7 @@
 from flask import request, Blueprint, jsonify
 
 from src.services.db_service import db
+from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.order_model import OrderModel
 from ..schemas.item_order_schema import ItemOrderSchema
 from ..schemas.order_schema import OrderSchema
@@ -33,6 +34,8 @@ def add_order():
 @orders.route("/<order_id>", methods=["GET", "PUT", "DELETE"])
 def handle_order(order_id):
 	order = OrderModel.query.get(order_id)
+	if not order:
+		raise ValueCustomError("not_found", "pedido")
 	order_schema = OrderSchema()
 	
 	if request.method == "PUT":
@@ -40,9 +43,9 @@ def handle_order(order_id):
 		
 		context = {"expected_user_id": order.user_id}
 		order_schema.context = context
-		order_schema.load(order_data)
+		order_update = order_schema.load(order_data)
 		
-		for key, value in order_data.items():
+		for key, value in order_update.items():
 			setattr(order, key, value)
 		
 		db.session.commit()
@@ -52,7 +55,7 @@ def handle_order(order_id):
 		db.session.delete(order)
 		db.session.commit()
 		
-		return jsonify(msg="El pedido ha sido eliminado con éxito."), 200
+		return jsonify(msg="El pedido ha sido eliminado correctamente."), 200
 	
 	return order_schema.dump(order), 200
 
@@ -91,4 +94,4 @@ def add_order_with_items():
 		return jsonify(result), 201
 	except Exception as e:
 		db.session.rollback()
-		return jsonify(err="db_error", msg="Error al crear el pedido con ítems"), 500
+		raise e

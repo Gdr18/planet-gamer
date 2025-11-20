@@ -36,9 +36,9 @@ def get_addresses():
 @addresses.route("/<address_id>", methods=["GET", "PUT", "DELETE"])
 def handle_address(address_id):
 	address = AddressModel.query.get(address_id)
-	address_schema = AddressSchema(unknown="exclude")
 	if not address:
 		raise ValueCustomError("not_found", "dirección")
+	address_schema = AddressSchema()
 	
 	if request.method == "PUT":
 		address_data = request.get_json()
@@ -48,12 +48,9 @@ def handle_address(address_id):
 		}
 		address_schema.context = context
 		
-		address_instance = address_schema.load(address_data)
+		address_update = address_schema.load(address_data)
 		
-		allowed_fields = address_schema.fields.keys()
-		for key, value in address_instance.items():
-			if key not in allowed_fields or key == "id":
-				continue
+		for key, value in address_update.items():
 			if key == "default" and value is True:
 				unset_previous_default(address)
 			setattr(address, key, value)

@@ -33,9 +33,9 @@ def add_item_basket():
 @items_basket.route("/<item_basket_id>", methods=["GET", "PUT", "DELETE"])
 def handle_item_basket(item_basket_id):
 	item_basket = ItemBasketModel.query.get(item_basket_id)
-	item_basket_schema = ItemBasketSchema()
 	if not item_basket:
 		raise ValueCustomError("not_found", "elemento de la cesta")
+	item_basket_schema = ItemBasketSchema()
 	
 	if request.method == "PUT":
 		item_basket_data = request.get_json()
@@ -45,15 +45,10 @@ def handle_item_basket(item_basket_id):
 			"expected_user_id": item_basket.user_id,
 		}
 		item_basket_schema.context = context
-		item_basket_schema.load_instance = False
 		
-		item_basket_instance = item_basket_schema.load(item_basket_data)
-		allowed_fields = item_basket_schema.fields.keys()
-		print(allowed_fields, "allowed_fields")
+		item_basket_update = item_basket_schema.load(item_basket_data)
 		
-		for key, value in item_basket_instance.items():
-			if key not in allowed_fields or key == "id":
-				continue
+		for key, value in item_basket_update.items():
 			setattr(item_basket, key, value)
 		
 		db.session.commit()
@@ -71,6 +66,6 @@ def handle_item_basket(item_basket_id):
 
 @items_basket.route("/users/<user_id>", methods=["GET"])
 def get_basket_user_id(user_id):
-	# TODO: Cómo se hace un join para añadir info de juegos?
+	# TODO: Cómo se hace un join para añadir info de juegos? - backref game
 	user_basket = ItemBasketModel.query.filter_by(user_id=user_id).all()
 	return baskets_schema.jsonify(user_basket)

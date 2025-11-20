@@ -45,9 +45,10 @@ def handle_item_order(item_order_id):
 			"expected_order_id": item_order.order_id,
 		}
 		item_order_schema.context = context
-		item_order_updated = item_order_schema.load(item_order_data)
 		
-		for key, value in item_order_updated.items():
+		item_order_update = item_order_schema.load(item_order_data)
+		
+		for key, value in item_order_update.items():
 			setattr(item_order, key, value)
 		
 		db.session.commit()
