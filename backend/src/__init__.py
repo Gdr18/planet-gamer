@@ -5,8 +5,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from stripe import StripeError
 
 from .exceptions.custom_exceptions import StripeCustomError, ValueCustomError
-from .exceptions.handlers import stripe_error_handler, validation_custom_error_handler, \
-	db_validation_error_handler
+from .exceptions.handlers import stripe_error_handler, value_custom_error_handler, \
+	db_validation_error_handler, generic_error_handler
 from .routes.addresses_route import addresses
 from .routes.auth_route import auth
 from .routes.games_route import games
@@ -38,7 +38,8 @@ def create_app(config):
 	app.register_error_handler(ValidationError, db_validation_error_handler)
 	app.register_error_handler(SQLAlchemyError, db_validation_error_handler)
 	
-	app.register_error_handler(ValueCustomError, validation_custom_error_handler)
+	app.register_error_handler(ValueCustomError, value_custom_error_handler)
+	app.register_error_handler(Exception, generic_error_handler)
 	
 	db.init_app(app)
 	cors.init_app(app)
