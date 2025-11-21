@@ -15,7 +15,7 @@ class OrderModel(db.Model):
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 	expires_at = db.Column(db.DateTime)
 	
-	items_order = db.relationship(
+	items = db.relationship(
 		ItemOrderModel, cascade="all, delete", backref="order", lazy=True
 	)
 	

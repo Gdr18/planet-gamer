@@ -7,6 +7,7 @@ from ..schemas.user_role_schema import UserRoleSchema
 
 user_roles = Blueprint("user_roles", __name__, url_prefix="/user-roles")
 
+user_role_schema = UserRoleSchema()
 roles_schema = UserRoleSchema(many=True)
 
 
@@ -20,9 +21,8 @@ def get_user_roles():
 def add_user_role():
 	user_role_data = request.get_json()
 	
-	user_role_schema = UserRoleSchema(load_instance=True)
-	
-	new_user_role = user_role_schema.load(user_role_data)
+	validated_data = user_role_schema.load(user_role_data)
+	new_user_role = UserRoleModel(**validated_data)
 	
 	db.session.add(new_user_role)
 	db.session.commit()
@@ -35,7 +35,6 @@ def handle_user_role(user_role_id):
 	user_role = UserRoleModel.query.get(user_role_id)
 	if not user_role:
 		raise ValueCustomError("not_found", "rol de usuario")
-	user_role_schema = UserRoleSchema()
 	
 	if request.method == "PUT":
 		user_role_data = request.get_json()
@@ -56,6 +55,6 @@ def handle_user_role(user_role_id):
 		db.session.delete(user_role)
 		db.session.commit()
 		
-		return jsonify(msg="El rol del usuario se ha eliminado correctamente."), 200
+		return jsonify(msg="El rol de usuario se ha eliminado correctamente."), 200
 	
 	return user_role_schema.jsonify(user_role)

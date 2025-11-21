@@ -7,16 +7,28 @@ from ..models.user_model import UserModel
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
-	email = ma.Email(required=True, validate=validate.Length(max=100))
-	phone_number = ma.String(
-		validate=validate.Regexp(r"^(?:\+34\s?)?(6\d{8}|7[1-9]\d{7})$"),
+	email = ma.Email(required=True, validate=validate.Length(min=1, max=100,
+	                                                         error="El campo 'email' debe tener entre 1 y 100 caracteres."))
+	name = ma.String(required=True, validate=validate.Length(min=1, max=50,
+	                                                         error="El campo 'name' debe tener entre 1 y 50 caracteres."))
+	password = ma.String(required=True)
+	surnames = ma.String(
+		validate=validate.Length(min=1, max=100, error="El campo 'surnames' debe tener entre 1 y 100 caracteres."),
+		allow_none=True
 	)
+	phone_number = ma.String(
+		validate=validate.Regexp(regex=r"^(?:\+34\s?)?(6\d{8}|7[1-9]\d{7})$",
+		                         error="El campo 'phone_number' no cumple con el patrón, ejemplos válidos: '666666666' o '+34666666666'"),
+		allow_none=True
+	)
+	role = ma.Function(lambda obj: obj.role)
 	
 	class Meta:
 		model = UserModel
 		dump_only = ["id", "role"]
 		unknown = "exclude"
 		include_relationships = True
+		exclude = ["user_role"]
 	
 	@pre_load
 	def validate_values(self, data, **kwargs):
@@ -31,5 +43,5 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 		if not re.match(regex_password, expected_password) and not re.match(
 			regex_password_hash, expected_password
 		):
-			raise ValidationError("La contraseña no es válida")
+			raise ValidationError("El campo 'password' no cumple con el patrón y tampoco es una contraseña hasheada.")
 		return data

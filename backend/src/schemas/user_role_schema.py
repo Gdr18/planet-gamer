@@ -1,20 +1,23 @@
 from marshmallow import validate, pre_load, ValidationError
 
 from src.services.db_service import ma
-from ..models.user_role_model import UserRoleModel, ROLE_TYPES
+from ..models.user_model import ROLE_TYPES
+from ..models.user_role_model import UserRoleModel
 
 
-class UserRoleSchema(ma.SQLAlchemyAutoSchema):
+class UserRoleSchema(ma.SQLAlchemySchema):
 	email = ma.Email(
-		required=True, unique=True, validate=validate.Length(max=100), allow_none=False
+		required=True,
+		foreign_key="user_model.email",
+		primary_key=True,
+		validate=validate.Length(min=1, max=100, error="El campo 'email' debe tener entre 1 y 100 caracteres."),
 	)
 	role = ma.Integer(
-		required=True, validate=validate.OneOf(ROLE_TYPES.values()), allow_none=False
+		required=True, validate=validate.OneOf(ROLE_TYPES.values())
 	)
 	
 	class Meta:
 		model = UserRoleModel
-		dump_only = ["id"]
 		unknown = "exclude"
 	
 	@pre_load
@@ -25,5 +28,5 @@ class UserRoleSchema(ma.SQLAlchemyAutoSchema):
 			and data.get("email")
 			and (str(expected_email) != str(data.get("email")))
 		):
-			raise ValidationError("No se puede modificar el campo 'email'.")
+			raise ValidationError("El campo 'email' no se puede modificar.")
 		return data
