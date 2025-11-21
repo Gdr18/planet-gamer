@@ -80,7 +80,7 @@ def add_order_with_items():
 		db.session.flush()
 		
 		for item in items_data:
-			item["order_id"] = new_order.id
+			item["orderId"] = new_order.id
 			new_item = order_item_schema.load(item)
 			db.session.add(new_item)
 		

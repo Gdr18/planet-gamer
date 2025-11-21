@@ -5,7 +5,7 @@ from ..models.user_model import ROLE_TYPES
 from ..models.user_role_model import UserRoleModel
 
 
-class UserRoleSchema(ma.SQLAlchemySchema):
+class UserRoleSchema(ma.SQLAlchemyAutoSchema):
 	email = ma.Email(
 		required=True,
 		foreign_key="user_model.email",

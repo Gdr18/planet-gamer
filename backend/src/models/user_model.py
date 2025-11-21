@@ -15,10 +15,10 @@ class UserModel(db.Model):
 	surnames = db.Column(db.String(100))
 	phone_number = db.Column(db.String(12))
 	addresses = db.relationship(
-		AddressModel, cascade="all, delete", backref="user", lazy=True
+		AddressModel, cascade="all, delete", backref="user", lazy="subquery"
 	)
 	orders = db.relationship(
-		OrderModel, cascade="all, delete", backref="user", lazy=True
+		OrderModel, cascade="all, delete", backref="user", lazy="selectin"
 	)
 	user_role = db.relationship(
 		UserRoleModel, cascade="all, delete", backref="user", lazy="joined", uselist=False

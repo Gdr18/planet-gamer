@@ -10,7 +10,7 @@ class AddressModel(db.Model):
 	city = db.Column(db.String(40), nullable=False)
 	user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"), nullable=False)
 	default = db.Column(db.Boolean, nullable=True, default=False)
-	orders = db.relationship(OrderModel, backref="address", lazy=True)
+	orders = db.relationship(OrderModel, backref="address", lazy="noload")
 
 
 def unset_previous_default(model_instance: AddressModel) -> None:

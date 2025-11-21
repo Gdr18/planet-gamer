@@ -4,6 +4,9 @@ from marshmallow import pre_load, ValidationError, validate
 
 from src.services.db_service import ma
 from ..models.user_model import UserModel
+from ..schemas.address_schema import AddressSchema
+from ..schemas.order_schema import OrderSchema
+from ..schemas.user_role_schema import UserRoleSchema
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
@@ -22,13 +25,16 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 		allow_none=True
 	)
 	role = ma.Function(lambda obj: obj.role)
+	addresses = ma.Nested(AddressSchema, many=True)
+	orders = ma.Nested(OrderSchema, many=True)
+	user_role = ma.Nested(UserRoleSchema, exclude=["email"], uselist=False)
 	
 	class Meta:
 		model = UserModel
 		dump_only = ["id", "role"]
 		unknown = "exclude"
 		include_relationships = True
-		exclude = ["user_role"]
+		exclude = ["user_role", "addresses", "orders"]
 	
 	@pre_load
 	def validate_values(self, data, **kwargs):

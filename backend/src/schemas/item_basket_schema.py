@@ -6,9 +6,9 @@ from ..models.item_basket_model import ItemBasketModel
 
 class ItemBasketSchema(ma.SQLAlchemyAutoSchema):
 	qty = ma.Integer(required=True, validate=validate.Range(min=1, error="El campo 'qty' debe ser un entero positivo."))
-	game_id = ma.Integer(required=True, data_key="gameId",
+	game_id = ma.Integer(required=True, foreign_key="game_model.id", data_key="gameId",
 	                     validate=validate.Range(min=1, error="El campo 'game_id' debe ser un entero positivo."))
-	user_id = ma.Integer(required=True, data_key="userId",
+	user_id = ma.Integer(required=True, foreign_key="user_model.id", data_key="userId",
 	                     validate=validate.Range(min=1, error="El campo 'user_id' debe ser un entero positivo."))
 	
 	class Meta:

@@ -2,24 +2,27 @@ from marshmallow import ValidationError, pre_load, validate
 
 from src.services.db_service import ma
 from ..models.address_model import AddressModel
+from ..schemas.order_schema import OrderSchema
 
 
 class AddressSchema(ma.SQLAlchemyAutoSchema):
 	second_line_street = ma.String(data_key="secondLineStreet", validate=validate.Length(min=1, max=50),
 	                               allow_none=True)
-	user_id = ma.Integer(required=True, data_key="userId",
+	user_id = ma.Integer(foreign_key="user_model.id", required=True, data_key="userId",
 	                     validate=validate.Range(min=1, error="El campo 'userId' debe ser un entero positivo."))
 	city = ma.String(required=True, validate=validate.Length(min=1, max=40))
 	street = ma.String(required=True, validate=validate.Length(min=1, max=100))
 	postal_code = ma.String(required=True, data_key="postalCode",
 	                        validate=validate.Regexp(r"^\d{5}$",
 	                                                 error="El campo 'postalCode' debe contener 5 dígitos."))
+	orders = ma.Nested(OrderSchema, many=True, dump_only=True, exclude=["address_id", "user_id"])
 	
 	class Meta:
 		model = AddressModel
 		dump_only = ["id"]
 		unknown = "exclude"
 		include_relationships = True
+		exclude = ["orders"]
 	
 	@pre_load
 	def validate_user_id(self, data, **kwargs):
