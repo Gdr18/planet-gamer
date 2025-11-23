@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt, decode_token, jwt_required, current_user
 
-from ..exceptions.custom_exceptions import ValueCustomError
+from src.core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
+from src.core.responses.api_responses import response_success, msg_success
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema
 from ..services.auth_service import get_access_token, get_refresh_token
@@ -30,7 +31,7 @@ def registration():
 	db.session.add(new_user)
 	db.session.commit()
 	
-	return jsonify(msg="Usuario añadido correctamente"), 201
+	return response_success("el usuario", "registrado", 201)
 
 
 @auth.route("/login", methods=["POST"])
@@ -39,10 +40,10 @@ def login():
 	
 	user = UserModel.query.filter_by(email=login_data.get("email")).first()
 	if not user:
-		raise ValueCustomError("not_found", "usuario")
+		raise ResourceCustomError("not_found", "usuario")
 	
 	if not bcrypt.check_password_hash(user.password, login_data.get("password")):
-		raise ValueCustomError("password_mismatch")
+		raise AuthCustomError("password_mismatch")
 	
 	token = get_access_token(user.id, user.role)
 	refresh_token = get_refresh_token(user.id)
@@ -52,7 +53,7 @@ def login():
 	
 	return (
 		jsonify(
-			msg="Inicio de sesión correcto",
+			msg=msg_success("el usuario", "autenticado"),
 			access_token=token,
 			refresh_token=refresh_token,
 		),
@@ -65,12 +66,12 @@ def login():
 def login_with_refresh():
 	jti = get_jwt()["jti"]
 	if not exists_refresh_token(jti):
-		return jsonify(err="not_auth", msg="Token de refresco caducado"), 401
+		raise AuthCustomError("expired_token")
 	
 	access_token = get_access_token(current_user.id, current_user.role)
 	return (
 		jsonify(
-			msg="Token de acceso renovado correctamente",
+			msg=msg_success("el token de acceso", "renovado"),
 			access_token=access_token,
 		),
 		200,
@@ -82,4 +83,4 @@ def login_with_refresh():
 def logout():
 	token_info = get_jwt()
 	set_revoked_token(token_info)
-	return jsonify(msg="Cierre de sesión realizado correctamente"), 200
+	return response_success("la sesión", "cerrada")

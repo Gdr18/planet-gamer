@@ -4,9 +4,9 @@ from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from stripe import StripeError
 
-from .exceptions.custom_exceptions import StripeCustomError, ValueCustomError
-from .exceptions.handlers import stripe_error_handler, value_custom_error_handler, \
-	db_validation_error_handler, generic_error_handler
+from src.core.exceptions.custom_exceptions import StripeCustomError, ResourceCustomError, AuthCustomError
+from src.core.exceptions.handlers import stripe_error_handler, error_handler, db_validation_error_handler, \
+	generic_error_handler, db_error_handler
 from .routes.addresses_route import addresses
 from .routes.auth_route import auth
 from .routes.games_route import games
@@ -32,13 +32,15 @@ def welcome():
 def create_app(config):
 	app.config.from_object(config)
 	
+	app.register_error_handler(AuthCustomError, error_handler)
+	
 	app.register_error_handler(StripeError, stripe_error_handler)
 	app.register_error_handler(StripeCustomError, stripe_error_handler)
 	
 	app.register_error_handler(ValidationError, db_validation_error_handler)
-	app.register_error_handler(SQLAlchemyError, db_validation_error_handler)
+	app.register_error_handler(SQLAlchemyError, db_error_handler)
 	
-	app.register_error_handler(ValueCustomError, value_custom_error_handler)
+	app.register_error_handler(ResourceCustomError, error_handler)
 	app.register_error_handler(Exception, generic_error_handler)
 	
 	db.init_app(app)

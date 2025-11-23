@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 
+from src.core.exceptions.custom_exceptions import ResourceCustomError
+from src.core.responses.api_responses import response_success
 from src.services.db_service import db, bcrypt
-from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema
 
@@ -41,7 +42,7 @@ def add_user():
 def handle_user(user_id):
 	user = UserModel.query.get(user_id)
 	if not user:
-		raise ValueCustomError("not_found", "usuario")
+		raise ResourceCustomError("not_found", "usuario")
 	user_schema = UserSchema()
 	
 	if request.method == "PUT":
@@ -67,6 +68,6 @@ def handle_user(user_id):
 	elif request.method == "DELETE":
 		db.session.delete(user)
 		db.session.commit()
-		return jsonify(msg="Usuario eliminado correctamente"), 200
+		return response_success("el usuario", "eliminado")
 	
 	return user_schema.jsonify(user)

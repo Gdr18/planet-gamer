@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 
+from src.core.exceptions.custom_exceptions import ResourceCustomError
+from src.core.responses.api_responses import response_success
 from src.services.db_service import db
-from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.user_role_model import UserRoleModel
 from ..schemas.user_role_schema import UserRoleSchema
 
@@ -34,7 +35,7 @@ def add_user_role():
 def handle_user_role(user_role_id):
 	user_role = UserRoleModel.query.get(user_role_id)
 	if not user_role:
-		raise ValueCustomError("not_found", "rol de usuario")
+		raise ResourceCustomError("not_found", "rol de usuario")
 	
 	if request.method == "PUT":
 		user_role_data = request.get_json()
@@ -55,6 +56,6 @@ def handle_user_role(user_role_id):
 		db.session.delete(user_role)
 		db.session.commit()
 		
-		return jsonify(msg="El rol de usuario se ha eliminado correctamente."), 200
+		return response_success("el rol de usuario", "eliminado")
 	
 	return user_role_schema.jsonify(user_role)

@@ -1,7 +1,8 @@
 from flask import request, Blueprint, jsonify
 
+from src.core.exceptions.custom_exceptions import ResourceCustomError
+from src.core.responses.api_responses import response_success
 from src.services.db_service import db
-from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.order_model import OrderModel
 from ..schemas.item_order_schema import ItemOrderSchema
 from ..schemas.order_schema import OrderSchema
@@ -35,7 +36,7 @@ def add_order():
 def handle_order(order_id):
 	order = OrderModel.query.get(order_id)
 	if not order:
-		raise ValueCustomError("not_found", "pedido")
+		raise ResourceCustomError("not_found", "pedido")
 	order_schema = OrderSchema()
 	
 	if request.method == "PUT":
@@ -55,7 +56,7 @@ def handle_order(order_id):
 		db.session.delete(order)
 		db.session.commit()
 		
-		return jsonify(msg="El pedido ha sido eliminado correctamente."), 200
+		return response_success("el pedido", "eliminado")
 	
 	return order_schema.dump(order), 200
 

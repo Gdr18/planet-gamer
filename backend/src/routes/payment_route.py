@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, current_app
 
-from ..exceptions.custom_exceptions import ValueCustomError, StripeCustomError
+from src.core.exceptions.custom_exceptions import ResourceCustomError, StripeCustomError
+from src.core.responses.api_responses import response_success, payment_response_success
 from ..models.order_model import OrderModel
 from ..services.db_service import db
 from ..services.stripe_service import create_payment_intent, confirm_payment_intent, get_payment_intent, \
@@ -20,7 +21,7 @@ def add_payment():
 	try:
 		order = OrderModel.query.get(order_id)
 		if not order:
-			raise ValueCustomError("not_found", "pedido")
+			raise ResourceCustomError("not_found", "pedido")
 		
 		if not order.payment_id and order.error != "paid":
 			payment = create_payment_intent(order)
@@ -29,14 +30,9 @@ def add_payment():
 		
 		payment = confirm_payment_intent(order.payment_id, payment_method)
 		
-		payment_data = {
-			"payment_id": payment.id,
-			"client_secret": payment.client_secret,
-		}
-		
 		if payment.status not in ["succeeded", "requires_action", "processing"]:
 			raise StripeCustomError(payment.status)
-		return jsonify(**payment_data, status=payment.status), 200
+		return payment_response_success(payment.id, payment.client_secret, payment.status)
 	except Exception as e:
 		if order:
 			order.status = "failed"
@@ -47,12 +43,7 @@ def add_payment():
 @payments.route("/<payment_id>", methods=["GET"])
 def get_payment(payment_id):
 	payment = get_payment_intent(payment_id)
-	response = {
-		"payment_id": payment.id,
-		"client_secret": payment.client_secret,
-		"status": payment.status
-	}
-	return jsonify(**response), 200
+	return payment_response_success(payment.id, payment.client_secret, payment.status)
 
 
 @payments.route("/webhook", methods=["POST"])
@@ -70,7 +61,7 @@ def stripe_webhook_handler():
 		payment = event.data.object
 		order = OrderModel.query.filter_by(payment_id=payment.get("id")).first()
 		if not order:
-			raise ValueCustomError("not_found", "pedido")
+			raise ResourceCustomError("not_found", "pedido")
 		
 		if event.type == "payment_intent.succeeded":
 			order.error = "paid"
@@ -82,8 +73,8 @@ def stripe_webhook_handler():
 		
 		db.session.commit()
 		
-		return jsonify(msg=f"Pago {payment.get("id")} procesado"), 200
+		return response_success(f"el pago {payment.get("id")}", "procesado")
 	except ValueError:
-		raise ValueCustomError("invalid_data", "payload")
+		raise ResourceCustomError("invalid_data", "payload")
 	except Exception as e:
 		raise e

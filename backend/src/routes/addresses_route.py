@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 
-from ..exceptions.custom_exceptions import ValueCustomError
+from src.core.exceptions.custom_exceptions import ResourceCustomError
+from src.core.responses.api_responses import response_success
 from ..models.address_model import AddressModel, unset_previous_default
 from ..schemas.address_schema import AddressSchema
 from ..services.db_service import db
@@ -37,7 +38,7 @@ def get_addresses():
 def handle_address(address_id):
 	address = AddressModel.query.get(address_id)
 	if not address:
-		raise ValueCustomError("not_found", "dirección")
+		raise ResourceCustomError("not_found", "dirección")
 	address_schema = AddressSchema()
 	
 	if request.method == "PUT":
@@ -62,7 +63,7 @@ def handle_address(address_id):
 		db.session.delete(address)
 		db.session.commit()
 		
-		return jsonify(msg="La dirección ha sido eliminada correctamente"), 200
+		return response_success("la dirección", "eliminada")
 	
 	return address_schema.jsonify(address), 200
 

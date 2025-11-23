@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 
+from src.core.exceptions.custom_exceptions import ResourceCustomError
+from src.core.responses.api_responses import response_success
 from src.services.db_service import db
-from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.game_model import GameModel
 from ..schemas.game_schema import GameSchema
 
@@ -33,7 +34,7 @@ def add_game():
 def handle_game(game_id):
 	game = GameModel.query.get(game_id)
 	if not game:
-		raise ValueCustomError("not_found", "videojuego")
+		raise ResourceCustomError("not_found", "videojuego")
 	game_schema = GameSchema()
 	
 	if request.method == "PUT":
@@ -51,7 +52,7 @@ def handle_game(game_id):
 		db.session.delete(game)
 		db.session.commit()
 		
-		return jsonify(msg="Videojuego eliminado correctamente"), 200
+		return response_success("El videojuego", "eliminado")
 	
 	return game_schema.jsonify(game), 200
 

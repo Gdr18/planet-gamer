@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 
+from src.core.exceptions.custom_exceptions import ResourceCustomError
+from src.core.responses.api_responses import response_success
 from src.services.db_service import db
-from ..exceptions.custom_exceptions import ValueCustomError
 from ..models.item_basket_model import ItemBasketModel
 from ..schemas.item_basket_schema import ItemBasketSchema
 
@@ -34,7 +35,7 @@ def add_item_basket():
 def handle_item_basket(item_basket_id):
 	item_basket = ItemBasketModel.query.get(item_basket_id)
 	if not item_basket:
-		raise ValueCustomError("not_found", "elemento de la cesta")
+		raise ResourceCustomError("not_found", "elemento de la cesta")
 	item_basket_schema = ItemBasketSchema()
 	
 	if request.method == "PUT":
@@ -56,10 +57,7 @@ def handle_item_basket(item_basket_id):
 	if request.method == "DELETE":
 		db.session.delete(item_basket)
 		db.session.commit()
-		return (
-			jsonify(msg="El elemento de la cesta ha sido eliminado correctamente."),
-			200,
-		)
+		return response_success("el elemento de la cesta", "eliminado")
 	
 	return item_basket_schema.jsonify(item_basket), 200
 
