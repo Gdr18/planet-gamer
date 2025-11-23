@@ -1,7 +1,8 @@
-from flask import Blueprint, request, current_app
+from flask import Blueprint, request
 
-from src.core.exceptions.custom_exceptions import ResourceCustomError, StripeCustomError
-from src.core.responses.api_responses import response_success, payment_response_success
+from config import STRIPE_WEBHOOK_SECRET
+from ..core.exceptions.custom_exceptions import ResourceCustomError, StripeCustomError
+from ..core.responses.api_responses import response_success, payment_response_success
 from ..models.order_model import OrderModel
 from ..services.db_service import db
 from ..services.stripe_service import create_payment_intent, confirm_payment_intent, get_payment_intent, \
@@ -51,7 +52,7 @@ def stripe_webhook_handler():
 	payload = request.data
 	sig_header = request.headers.get("Stripe-Signature")
 	# TODO: Asignar variable de entorno en producción
-	endpoint_secret = current_app.config["STRIPE_WEBHOOK_SECRET"]
+	endpoint_secret = STRIPE_WEBHOOK_SECRET
 	
 	order = None
 	payment = None

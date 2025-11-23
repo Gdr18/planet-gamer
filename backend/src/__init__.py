@@ -12,6 +12,7 @@ from .routes.auth_route import auth
 from .routes.games_route import games
 from .routes.items_basket_route import items_basket
 from .routes.items_order_route import items_order
+from .routes.main_route import main
 from .routes.orders_route import orders
 from .routes.payment_route import payments
 from .routes.user_roles_route import user_roles
@@ -19,17 +20,12 @@ from .routes.users_route import users
 from .services.auth_service import jwt
 from .services.db_service import db, bcrypt, ma
 
-app = Flask(__name__, static_url_path="")
-
 cors = CORS()
 
 
-@app.route("/", methods=["GET"])
-def welcome():
-	return "Bienvenidx a la API REST de Planet Gamer!", 200
-
-
 def create_app(config):
+	app = Flask(__name__, static_url_path="")
+	
 	app.config.from_object(config)
 	
 	app.register_error_handler(AuthCustomError, error_handler)
@@ -49,6 +45,7 @@ def create_app(config):
 	ma.init_app(app)
 	jwt.init_app(app)
 	
+	app.register_blueprint(main)
 	app.register_blueprint(users)
 	app.register_blueprint(orders)
 	app.register_blueprint(items_order)
@@ -59,7 +56,8 @@ def create_app(config):
 	app.register_blueprint(auth)
 	app.register_blueprint(payments)
 	
-	with app.app_context():
-		db.create_all()
+	if app.config["MODE"] == "development":
+		with app.app_context():
+			db.create_all()
 	
 	return app
