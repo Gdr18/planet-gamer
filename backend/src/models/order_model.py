@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
+from src.extensions import db
 from ..models.item_order_model import ItemOrderModel
-from ..services.db_service import db
 
 
 # TODO: Eliminación de fila automática basándose en el campo 'expires_at' desde Supabase

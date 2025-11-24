@@ -1,4 +1,4 @@
-from src.services.db_service import db
+from src.extensions import db
 
 from ..models.address_model import AddressModel
 from ..models.order_model import OrderModel

@@ -3,10 +3,10 @@ from flask_jwt_extended import get_jwt, decode_token, jwt_required, current_user
 
 from src.core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
 from src.core.responses.api_responses import response_success, msg_success
+from src.extensions import bcrypt, db
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema
 from ..services.auth_service import get_access_token, get_refresh_token
-from ..services.db_service import bcrypt, db
 from ..services.redis_service import (
 	set_refresh_token,
 	set_revoked_token,

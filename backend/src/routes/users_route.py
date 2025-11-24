@@ -2,7 +2,7 @@ from flask import Blueprint, request
 
 from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.responses.api_responses import response_success
-from src.services.db_service import db, bcrypt
+from src.extensions import db, bcrypt
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema
 

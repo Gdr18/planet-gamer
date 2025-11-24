@@ -1,11 +1,11 @@
 from flask import Flask
-from flask_cors import CORS
 from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from stripe import StripeError
 
-from src.core.exceptions.custom_exceptions import StripeCustomError, ResourceCustomError, AuthCustomError
-from src.core.exceptions.handlers import stripe_error_handler, error_handler, db_validation_error_handler, \
+from src.extensions import db, bcrypt, ma, cors
+from .core.exceptions.custom_exceptions import StripeCustomError, ResourceCustomError, AuthCustomError
+from .core.exceptions.handlers import stripe_error_handler, error_handler, db_validation_error_handler, \
 	generic_error_handler, db_error_handler
 from .routes.addresses_route import addresses
 from .routes.auth_route import auth
@@ -18,9 +18,6 @@ from .routes.payment_route import payments
 from .routes.user_roles_route import user_roles
 from .routes.users_route import users
 from .services.auth_service import jwt
-from .services.db_service import db, bcrypt, ma
-
-cors = CORS()
 
 
 def create_app(config):
@@ -56,7 +53,7 @@ def create_app(config):
 	app.register_blueprint(auth)
 	app.register_blueprint(payments)
 	
-	if app.config["MODE"] == "development":
+	if app.config.get("MODE") == "development":
 		with app.app_context():
 			db.create_all()
 	

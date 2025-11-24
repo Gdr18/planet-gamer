@@ -2,9 +2,9 @@ from flask import Blueprint, request
 
 from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.responses.api_responses import response_success
+from src.extensions import db
 from ..models.address_model import AddressModel, unset_previous_default
 from ..schemas.address_schema import AddressSchema
-from ..services.db_service import db
 
 addresses_schema = AddressSchema(many=True)
 

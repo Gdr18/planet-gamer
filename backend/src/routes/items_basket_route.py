@@ -2,7 +2,7 @@ from flask import Blueprint, request
 
 from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.responses.api_responses import response_success
-from src.services.db_service import db
+from src.extensions import db
 from ..models.item_basket_model import ItemBasketModel
 from ..schemas.item_basket_schema import ItemBasketSchema
 

@@ -5,12 +5,16 @@ from dotenv import load_dotenv
 
 load_dotenv(".env.dev")
 
-# TODO: COHERENCIA EN LAS VARIABLES DE ENTORNO
 CONFIG_MODE = os.getenv("CONFIG_MODE")
+
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = int(os.getenv("REDIS_PORT"))
+
+API_KEY_STRIPE = os.getenv("API_KEY_STRIPE")
+WEBHOOK_SECRET_STRIPE = os.getenv("WEBHOOK_SECRET_STRIPE")
 
 
 class Config:
-	MODE = CONFIG_MODE
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	CORS_SUPPORTS_CREDENTIALS = True
 	SECRET_KEY = os.getenv("SECRET_KEY")
@@ -22,6 +26,8 @@ class Config:
 
 class DevelopmentConfig(Config):
 	DEBUG = True
+	PORT = int(os.getenv("PORT", 5000))
+	MODE = CONFIG_MODE
 
 
 ConfigModeEnum = {
@@ -30,8 +36,3 @@ ConfigModeEnum = {
 }
 
 CONFIG = ConfigModeEnum[CONFIG_MODE]
-PORT = int(os.getenv("PORT", 5000))
-REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = int(os.getenv("REDIS_PORT"))
-API_KEY_STRIPE = os.getenv("API_KEY_STRIPE")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")

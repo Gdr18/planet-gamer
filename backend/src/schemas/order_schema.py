@@ -1,6 +1,6 @@
 from marshmallow import pre_load, ValidationError, validate
 
-from src.services.db_service import ma
+from src.extensions import ma
 from ..models.order_model import OrderModel
 from ..schemas.item_order_schema import ItemOrderSchema
 

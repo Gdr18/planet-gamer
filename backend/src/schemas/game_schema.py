@@ -1,6 +1,6 @@
 from marshmallow import validate
 
-from src.services.db_service import ma
+from src.extensions import ma
 from ..models.game_model import GameModel
 from ..schemas.item_order_schema import ItemOrderSchema
 

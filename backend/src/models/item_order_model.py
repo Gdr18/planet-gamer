@@ -1,4 +1,4 @@
-from src.services.db_service import db
+from src.extensions import db
 
 
 class ItemOrderModel(db.Model):

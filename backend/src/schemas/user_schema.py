@@ -2,7 +2,7 @@ import re
 
 from marshmallow import pre_load, ValidationError, validate
 
-from src.services.db_service import ma
+from src.extensions import ma
 from ..models.user_model import UserModel
 from ..schemas.address_schema import AddressSchema
 from ..schemas.order_schema import OrderSchema

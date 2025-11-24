@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.services.db_service import db
+from src.extensions import db
 from ..models.item_order_model import ItemOrderModel
 
 
