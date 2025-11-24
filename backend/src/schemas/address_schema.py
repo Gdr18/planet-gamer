@@ -2,7 +2,6 @@ from marshmallow import ValidationError, pre_load, validate
 
 from src.extensions import ma
 from ..models.address_model import AddressModel
-from ..schemas.order_schema import OrderSchema
 
 
 class AddressSchema(ma.SQLAlchemyAutoSchema):
@@ -15,14 +14,11 @@ class AddressSchema(ma.SQLAlchemyAutoSchema):
 	postal_code = ma.String(required=True, data_key="postalCode",
 	                        validate=validate.Regexp(r"^\d{5}$",
 	                                                 error="El campo 'postalCode' debe contener 5 dígitos."))
-	orders = ma.Nested(OrderSchema, many=True, dump_only=True, exclude=["address_id", "user_id"])
 	
 	class Meta:
 		model = AddressModel
 		dump_only = ["id"]
 		unknown = "exclude"
-		include_relationships = True
-		exclude = ["orders"]
 	
 	@pre_load
 	def validate_user_id(self, data, **kwargs):

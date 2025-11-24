@@ -26,7 +26,6 @@ class OrderSchema(ma.SQLAlchemyAutoSchema):
 		model = OrderModel
 		dump_only = ["id", "created_at", "expires_at"]
 		unknown = "exclude"
-		include_relationships = True
 	
 	@pre_load
 	def validate_data(self, data, **kwargs):

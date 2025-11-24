@@ -2,7 +2,6 @@ from marshmallow import validate
 
 from src.extensions import ma
 from ..models.game_model import GameModel
-from ..schemas.item_order_schema import ItemOrderSchema
 
 platforms = ["Nintendo Switch", "PlayStation 4", "PlayStation 5", "XBOX X/S"]
 
@@ -24,11 +23,8 @@ class GameSchema(ma.SQLAlchemyAutoSchema):
 	                                                         error="El campo 'pegi' debe empezar con '+' seguido de una edad, por ejemplo: +18."))
 	release = ma.String(required=True, validate=validate.Regexp(regex=r"^\d{4}$",
 	                                                            error="El campo 'release' debe ser un año válido de 4 dígitos."))
-	items_order = ma.Nested(ItemOrderSchema, many=True, data_key="itemsOrder", exclude=["game_id"])
 	
 	class Meta:
 		model = GameModel
 		dump_only = ["id", "created_at", "items_order"]
-		include_relationships = True
 		unknown = "exclude"
-		exclude = ["items_order"]
