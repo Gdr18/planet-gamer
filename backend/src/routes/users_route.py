@@ -2,9 +2,10 @@ from flask import Blueprint, request
 
 from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.responses.api_responses import response_success
-from src.extensions import db, bcrypt
+from src.extensions import db
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema
+from ..services.bcrypt_service import hash_password, check_password
 
 users = Blueprint("users", __name__, url_prefix="/users")
 
@@ -28,9 +29,7 @@ def add_user():
 	
 	new_user = user_schema.load(user_data)
 	
-	new_user.password = bcrypt.generate_password_hash(user_data["password"]).decode(
-		"utf-8"
-	)
+	new_user.password = hash_password(user_data["password"])
 	
 	db.session.add(new_user)
 	db.session.commit()
@@ -52,14 +51,13 @@ def handle_user(user_id):
 			"expected_password": user_data.get("password"),
 		}
 		user_schema.context = context
-		user_instance = user_schema.load(user_data)
+		validated_user = user_schema.load(user_data)
 		
-		for key, value in user_instance.items():
+		for key, value in validated_user.items():
 			if key == "password":
-				if not bcrypt.check_password_hash(user_instance.password, value) and (
-					user_instance.password != value
-				):
-					user_instance.password = bcrypt.generate_password_hash(value).decode("utf-8")
+				if user.password != value and not check_password(user.password, value):
+					setattr(user, key, hash_password(value))
+					continue
 			setattr(user, key, value)
 		
 		db.session.commit()

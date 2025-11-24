@@ -39,6 +39,6 @@ def generic_error_handler(error):
 		return jsonify(err="type_error", msg=f"Error de tipo: {str(error)}"), 400
 	elif isinstance(error, ValueError):
 		return jsonify(err="value_error", msg=f"Error de valor: {str(error)}"), 400
-	elif getattr(error, "code") == 404:
+	elif getattr(error, "code", None) == 404:
 		return ResourceCustomError("not_found", "recurso").json_response()
 	return jsonify(err="generic_error", msg=f"Error inesperado: {str(error)}"), 500

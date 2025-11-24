@@ -3,7 +3,7 @@ from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from stripe import StripeError
 
-from src.extensions import db, bcrypt, ma, cors
+from src.extensions import db, ma, cors
 from .core.exceptions.custom_exceptions import StripeCustomError, ResourceCustomError, AuthCustomError
 from .core.exceptions.handlers import stripe_error_handler, error_handler, db_validation_error_handler, \
 	generic_error_handler, db_error_handler
@@ -18,6 +18,7 @@ from .routes.payment_route import payments
 from .routes.user_roles_route import user_roles
 from .routes.users_route import users
 from .services.auth_service import jwt
+from .services.bcrypt_service import bcrypt
 
 
 def create_app(config):

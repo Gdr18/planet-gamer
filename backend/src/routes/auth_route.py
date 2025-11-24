@@ -1,12 +1,13 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt, decode_token, jwt_required, current_user
 
-from src.core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
-from src.core.responses.api_responses import response_success, msg_success
-from src.extensions import bcrypt, db
+from ..core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
+from ..core.responses.api_responses import response_success, msg_success
+from ..extensions import db
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema
 from ..services.auth_service import get_access_token, get_refresh_token
+from ..services.bcrypt_service import hash_password, check_password
 from ..services.redis_service import (
 	set_refresh_token,
 	set_revoked_token,
@@ -26,7 +27,7 @@ def registration():
 	context = {"expected_password": registration_data.get("password")}
 	user_schema = UserSchema(load_instance=True, context=context)
 	new_user = user_schema.load(registration_data)
-	new_user.password = bcrypt.generate_password_hash(new_user.password)
+	new_user.password = hash_password(new_user.password)
 	
 	db.session.add(new_user)
 	db.session.commit()
@@ -42,7 +43,7 @@ def login():
 	if not user:
 		raise ResourceCustomError("not_found", "usuario")
 	
-	if not bcrypt.check_password_hash(user.password, login_data.get("password")):
+	if not check_password(user.password, login_data.get("password")):
 		raise AuthCustomError("password_mismatch")
 	
 	token = get_access_token(user.id, user.role)
