@@ -10,8 +10,3 @@ class ItemBasketModel(db.Model):
 	__table_args__ = (
 		db.UniqueConstraint("game_id", "user_id", name="unique_game_user"),
 	)
-	
-	def __init__(self, qty, game_id, user_id):
-		self.qty = qty
-		self.game_id = game_id
-		self.user_id = user_id

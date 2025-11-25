@@ -11,9 +11,3 @@ class ItemOrderModel(db.Model):
 	__table_args__ = (
 		db.UniqueConstraint("game_id", "order_id", name="unique_game_order"),
 	)
-	
-	def __init__(self, order_id, qty, price, game_id):
-		self.qty = qty
-		self.price = price
-		self.game_id = game_id
-		self.order_id = order_id
