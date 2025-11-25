@@ -2,6 +2,7 @@ from marshmallow import ValidationError, pre_load, validate
 
 from src.extensions import ma
 from ..models.item_basket_model import ItemBasketModel
+from ..schemas.game_schema import GameSchema
 
 
 class ItemBasketSchema(ma.SQLAlchemyAutoSchema):
@@ -10,10 +11,12 @@ class ItemBasketSchema(ma.SQLAlchemyAutoSchema):
 	                     validate=validate.Range(min=1, error="El campo 'game_id' debe ser un entero positivo."))
 	user_id = ma.Integer(required=True, foreign_key="user_model.id", data_key="userId",
 	                     validate=validate.Range(min=1, error="El campo 'user_id' debe ser un entero positivo."))
+	game = ma.Nested(GameSchema)
 	
 	class Meta:
 		model = ItemBasketModel
-		dump_only = ["id"]
+		dump_only = ["id", "game"]
+		load_only = ["game_id"]
 		unknown = "exclude"
 	
 	@pre_load

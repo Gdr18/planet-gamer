@@ -1,14 +1,13 @@
 from datetime import datetime
 
 from src.extensions import db
-from ..models.item_order_model import ItemOrderModel
 
 
 class GameModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	title = db.Column(db.String(50), unique=True, nullable=False)
 	description = db.Column(db.String(1500), unique=True, nullable=False)
-	platform = db.Column(db.String(20), nullable=False)
+	platform = db.Column(db.String(20), nullable=False, index=True)
 	gender = db.Column(db.String(30), nullable=False)
 	pegi = db.Column(db.String(3), nullable=False)
 	release = db.Column(db.String(4), nullable=False)
@@ -16,4 +15,4 @@ class GameModel(db.Model):
 	img_url = db.Column(db.String(150), unique=True, nullable=False)
 	stock = db.Column(db.Integer, nullable=False, default=20)
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
-	items_order = db.relationship(ItemOrderModel, backref="game", lazy="noload")
+	items_order = db.relationship("ItemOrderModel", backref="game", lazy="raise")

@@ -1,5 +1,4 @@
 from src.extensions import db
-from ..models.order_model import OrderModel
 
 
 class AddressModel(db.Model):
@@ -8,9 +7,13 @@ class AddressModel(db.Model):
 	second_line_street = db.Column(db.String(50), nullable=True, default=None)
 	postal_code = db.Column(db.String(5), nullable=False)
 	city = db.Column(db.String(40), nullable=False)
-	user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"), nullable=False)
+	user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"), nullable=False, index=True)
 	default = db.Column(db.Boolean, nullable=True, default=False)
-	orders = db.relationship(OrderModel, backref="address", lazy="noload")
+	orders = db.relationship("OrderModel", backref="address", lazy="raise")
+	
+	__table_args__ = (
+		db.Index("idx_address_default_user", "user_id", "default"),
+	)
 
 
 def unset_previous_default(model_instance: AddressModel) -> None:

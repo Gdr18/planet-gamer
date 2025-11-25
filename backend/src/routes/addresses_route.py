@@ -4,11 +4,11 @@ from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.responses.api_responses import response_success
 from src.extensions import db
 from ..models.address_model import AddressModel, unset_previous_default
-from ..schemas.address_schema import AddressSchema
-
-addresses_schema = AddressSchema(many=True)
+from ..schemas.address_schema import AddressSchema, AddressFullSchema
 
 addresses = Blueprint("addresses", __name__, url_prefix="/addresses")
+
+addresses_schema = AddressSchema(many=True)
 
 
 @addresses.route("/", methods=["POST"])
@@ -68,7 +68,23 @@ def handle_address(address_id):
 	return address_schema.jsonify(address), 200
 
 
+@addresses.route("/<address_id>/with-relations", methods=["GET"])
+def get_orders_by_address_id(address_id):
+	address = (
+		AddressModel.query
+		.options(db.selectinload(AddressModel.orders))
+		.get(address_id)
+	)
+	if not address:
+		raise ResourceCustomError("not_found", "dirección")
+	
+	address_schema = AddressFullSchema()
+	return address_schema.jsonify(address), 200
+
+
 @addresses.route("/users/<user_id>", methods=["GET"])
-def get_addresses_user(user_id):
+def get_addresses_by_user_id(user_id):
 	user_addresses = AddressModel.query.filter_by(user_id=user_id).all()
+	if not user_addresses:
+		raise ResourceCustomError("not_found", "direcciones del usuario")
 	return addresses_schema.jsonify(user_addresses), 200

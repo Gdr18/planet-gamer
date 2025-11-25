@@ -9,12 +9,12 @@ from ..schemas.user_role_schema import UserRoleSchema
 user_roles = Blueprint("user_roles", __name__, url_prefix="/user-roles")
 
 user_role_schema = UserRoleSchema()
-roles_schema = UserRoleSchema(many=True)
 
 
 @user_roles.route("/", methods=["GET"])
 def get_user_roles():
 	all_user_roles = UserRoleModel.query.all()
+	roles_schema = UserRoleSchema(many=True)
 	return roles_schema.jsonify(all_user_roles), 200
 
 

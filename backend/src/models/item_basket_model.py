@@ -6,6 +6,7 @@ class ItemBasketModel(db.Model):
 	qty = db.Column(db.Integer, nullable=False)
 	game_id = db.Column(db.Integer, db.ForeignKey("game_model.id"))
 	user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"))
+	game = db.relationship("GameModel", lazy="joined")
 	
 	__table_args__ = (
 		db.UniqueConstraint("game_id", "user_id", name="unique_game_user"),

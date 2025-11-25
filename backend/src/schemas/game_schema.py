@@ -2,11 +2,12 @@ from marshmallow import validate
 
 from src.extensions import ma
 from ..models.game_model import GameModel
+from ..schemas.item_order_schema import ItemOrderSchema
 
 platforms = ["Nintendo Switch", "PlayStation 4", "PlayStation 5", "XBOX X/S"]
 
 
-# TODO: Campos específicos para gender?
+# TODO: Campos específicos para gender? list?
 
 class GameSchema(ma.SQLAlchemyAutoSchema):
 	title = ma.String(required=True, validate=validate.Length(min=1, max=50))
@@ -28,3 +29,7 @@ class GameSchema(ma.SQLAlchemyAutoSchema):
 		model = GameModel
 		dump_only = ["id", "created_at", "items_order"]
 		unknown = "exclude"
+
+
+class GameFullSchema(GameSchema):
+	items_order = ma.Nested(ItemOrderSchema, many=True, exclude=["game_id"])

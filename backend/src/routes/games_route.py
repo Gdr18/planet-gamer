@@ -4,7 +4,7 @@ from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.responses.api_responses import response_success
 from src.extensions import db
 from ..models.game_model import GameModel
-from ..schemas.game_schema import GameSchema
+from ..schemas.game_schema import GameSchema, GameFullSchema
 
 games = Blueprint("games", __name__, url_prefix="/games")
 
@@ -54,6 +54,16 @@ def handle_game(game_id):
 		
 		return response_success("El videojuego", "eliminado")
 	
+	return game_schema.jsonify(game), 200
+
+
+@games.route("/<game_id>/with-relations", methods=["GET"])
+def get_items_order_by_game(game_id):
+	game = GameModel.query.options(db.joinedload(GameModel.items_order)).get(game_id)
+	if not game:
+		raise ResourceCustomError("not_found", "videojuego")
+	
+	game_schema = GameFullSchema()
 	return game_schema.jsonify(game), 200
 
 

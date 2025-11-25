@@ -4,6 +4,9 @@ from marshmallow import pre_load, ValidationError, validate
 
 from src.extensions import ma
 from ..models.user_model import UserModel
+from ..schemas.address_schema import AddressSchema
+from ..schemas.item_basket_schema import ItemBasketSchema
+from ..schemas.order_schema import OrderSchema
 from ..schemas.user_role_schema import UserRoleSchema
 
 
@@ -23,7 +26,8 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 		allow_none=True
 	)
 	role = ma.Function(lambda obj: obj.role)
-	user_role = ma.Nested(UserRoleSchema, exclude=["email"], uselist=False)
+	user_role = ma.Nested(UserRoleSchema, exclude=["email"], use_list=False)
+	basket = ma.Nested(ItemBasketSchema, many=True, exclude=["user_id"])
 	
 	class Meta:
 		model = UserModel
@@ -46,3 +50,8 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 		):
 			raise ValidationError("El campo 'password' no cumple con el patrón y tampoco es una contraseña hasheada.")
 		return data
+
+
+class UserFullSchema(UserSchema):
+	addresses = ma.Nested(AddressSchema, many=True, exclude=["user_id"])
+	orders = ma.Nested(OrderSchema, many=True, exclude=["user_id"])

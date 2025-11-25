@@ -4,7 +4,7 @@ from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.responses.api_responses import response_success
 from src.extensions import db
 from ..models.user_model import UserModel
-from ..schemas.user_schema import UserSchema
+from ..schemas.user_schema import UserSchema, UserFullSchema
 from ..services.bcrypt_service import hash_password, check_password
 
 users = Blueprint("users", __name__, url_prefix="/users")
@@ -69,3 +69,16 @@ def handle_user(user_id):
 		return response_success("el usuario", "eliminado")
 	
 	return user_schema.jsonify(user)
+
+
+@users.route("/<user_id>/with-relations", methods=["GET"])
+def get_user_relationships(user_id):
+	user = UserModel.query.options(
+		db.selectinload(UserModel.addresses),
+		db.selectinload(UserModel.orders)
+	).get(user_id)
+	if not user:
+		raise ResourceCustomError("not_found", "usuario")
+	
+	user_schema = UserFullSchema()
+	return user_schema.jsonify(user), 200

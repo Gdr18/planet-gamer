@@ -2,6 +2,7 @@ from marshmallow import ValidationError, pre_load, validate
 
 from src.extensions import ma
 from ..models.address_model import AddressModel
+from ..schemas.order_schema import OrderSchema
 
 
 class AddressSchema(ma.SQLAlchemyAutoSchema):
@@ -28,3 +29,7 @@ class AddressSchema(ma.SQLAlchemyAutoSchema):
 		):
 			raise ValidationError("El campo 'userId' no se puede modificar.")
 		return data
+
+
+class AddressFullSchema(AddressSchema):
+	orders = ma.Nested(OrderSchema, many=True, exclude=["address_id"])

@@ -51,9 +51,10 @@ def login():
 	
 	decode_refresh = decode_token(refresh_token)
 	set_refresh_token(decode_refresh)
-	
+	user_schema = UserSchema()
 	return (
 		jsonify(
+			user=user_schema.dump(user),
 			msg=msg_success("el usuario", "autenticado"),
 			access_token=token,
 			refresh_token=refresh_token,

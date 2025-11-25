@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from src.extensions import db
-from ..models.item_order_model import ItemOrderModel
 
 
 # TODO: Eliminación de fila automática basándose en el campo 'expires_at' desde Supabase
@@ -9,14 +8,14 @@ class OrderModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	total = db.Column(db.Numeric(precision=10, scale=2, asdecimal=True), nullable=False)
 	address_id = db.Column(db.Integer, db.ForeignKey("address_model.id"))
-	user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"))
+	user_id = db.Column(db.Integer, db.ForeignKey("user_model.id"), index=True)
 	payment_id = db.Column(db.String(100))
 	status = db.Column(db.String, nullable=False)
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 	expires_at = db.Column(db.DateTime)
 	
 	items = db.relationship(
-		ItemOrderModel, cascade="all, delete", backref="order", lazy="joined"
+		"ItemOrderModel", cascade="all, delete", backref="order", lazy="joined"
 	)
 	
 	def __init__(self, total, address_id, user_id, status="pending", payment_id=None):
