@@ -53,6 +53,9 @@ class AuthCustomError(Exception):
 		elif self.error == "forbidden":
 			self.message = "Acceso prohibido"
 			self.code = 403
+		elif self.error == "forbidden_action":
+			self.message = f"Acción prohibida{f': {details}' if details else ''}"
+			self.code = 403
 	
 	def json_response(self):
 		return jsonify(err=self.error, msg=self.message), self.code
