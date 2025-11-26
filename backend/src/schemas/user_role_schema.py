@@ -1,7 +1,7 @@
 from marshmallow import validate, pre_load, ValidationError
 
-from src.extensions import ma
-from ..models.user_model import ROLE_TYPES
+from ..core.enums import RoleType
+from ..core.extensions import ma
 from ..models.user_role_model import UserRoleModel
 
 
@@ -13,7 +13,7 @@ class UserRoleSchema(ma.SQLAlchemyAutoSchema):
 		validate=validate.Length(min=1, max=100, error="El campo 'email' debe tener entre 1 y 100 caracteres."),
 	)
 	role = ma.Integer(
-		required=True, validate=validate.OneOf(ROLE_TYPES.values())
+		required=True, validate=validate.OneOf(list(RoleType))
 	)
 	
 	class Meta:

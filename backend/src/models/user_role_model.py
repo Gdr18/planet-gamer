@@ -1,4 +1,4 @@
-from src.extensions import db
+from src.core.extensions import db
 
 
 class UserRoleModel(db.Model):

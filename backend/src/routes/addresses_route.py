@@ -1,9 +1,10 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, current_user
 
-from src.core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
-from src.core.responses.api_responses import response_success
-from src.extensions import db
+from ..core.api_responses import response_success
+from ..core.enums import RoleType
+from ..core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
+from ..core.extensions import db
 from ..models.address_model import AddressModel, unset_previous_default
 from ..schemas.address_schema import AddressSchema, AddressFullSchema
 
@@ -20,7 +21,7 @@ def add_address():
 	address_schema = AddressSchema(load_instance=True)
 	new_address = address_schema.load(address_data)
 	
-	if new_address.user_id != current_user.id and current_user.role != 1:
+	if new_address.user_id != current_user.id and current_user.role != RoleType.ADMIN.value:
 		raise AuthCustomError("forbidden_action", "Agregar dirección para otro usuario")
 	try:
 		db.session.add(new_address)
@@ -39,7 +40,7 @@ def add_address():
 @addresses.route("/", methods=["GET"])
 @jwt_required()
 def get_addresses():
-	if current_user.role != 1:
+	if current_user.role != RoleType.ADMIN:
 		raise AuthCustomError("forbidden")
 	all_addresses = AddressModel.query.all()
 	return addresses_schema.jsonify(all_addresses), 200
@@ -51,7 +52,7 @@ def handle_address(address_id):
 	address = AddressModel.query.get(address_id)
 	if not address:
 		raise ResourceCustomError("not_found", "dirección")
-	if current_user.id != address.user_id and current_user.role != 1:
+	if current_user.id != address.user_id and current_user.role != RoleType.ADMIN.value:
 		raise AuthCustomError("forbidden_action", "Acceder a dirección de otro usuario")
 	address_schema = AddressSchema()
 	
@@ -92,7 +93,7 @@ def get_orders_by_address_id(address_id):
 	)
 	if not address:
 		raise ResourceCustomError("not_found", "dirección")
-	if current_user.id != address.user_id and current_user.role != 1:
+	if current_user.id != address.user_id and current_user.role != RoleType.ADMIN.value:
 		raise AuthCustomError("forbidden_action", "Acceder a dirección de otro usuario")
 	
 	address_schema = AddressFullSchema()
@@ -102,7 +103,7 @@ def get_orders_by_address_id(address_id):
 @addresses.route("/users/<user_id>", methods=["GET"])
 @jwt_required()
 def get_addresses_by_user_id(user_id):
-	if current_user.id != int(user_id) and current_user.role != 1:
+	if current_user.id != int(user_id) and current_user.role != RoleType.ADMIN.value:
 		raise AuthCustomError("forbidden_action", "Acceder a direcciones de otro usuario")
 	user_addresses = AddressModel.query.filter_by(user_id=user_id).all()
 	if not user_addresses:

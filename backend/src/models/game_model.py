@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from src.extensions import db
+from src.core.extensions import db
 
 
 class GameModel(db.Model):

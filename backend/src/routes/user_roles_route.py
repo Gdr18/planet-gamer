@@ -1,8 +1,8 @@
 from flask import Blueprint, request
 
+from src.core.api_responses import response_success
 from src.core.exceptions.custom_exceptions import ResourceCustomError
-from src.core.responses.api_responses import response_success
-from src.extensions import db
+from src.core.extensions import db
 from ..models.user_role_model import UserRoleModel
 from ..schemas.user_role_schema import UserRoleSchema
 

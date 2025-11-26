@@ -2,7 +2,7 @@ from flask import jsonify
 from sqlalchemy.exc import IntegrityError
 from stripe import CardError, InvalidRequestError
 
-from src.core.responses.api_responses import DbCustomResponses
+from src.core.api_responses import DbCustomResponses
 from ..exceptions.custom_exceptions import StripeCustomError, ResourceCustomError
 
 

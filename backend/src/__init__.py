@@ -3,7 +3,7 @@ from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from stripe import StripeError
 
-from src.extensions import db, ma, cors
+from src.core.extensions import db, ma, cors
 from .core.exceptions.custom_exceptions import StripeCustomError, ResourceCustomError, AuthCustomError
 from .core.exceptions.handlers import stripe_error_handler, error_handler, db_validation_error_handler, \
 	generic_error_handler, db_error_handler

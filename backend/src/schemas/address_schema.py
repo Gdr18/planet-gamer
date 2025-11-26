@@ -1,6 +1,6 @@
 from marshmallow import ValidationError, pre_load, validate
 
-from src.extensions import ma
+from src.core.extensions import ma
 from ..models.address_model import AddressModel
 from ..schemas.order_schema import OrderSchema
 

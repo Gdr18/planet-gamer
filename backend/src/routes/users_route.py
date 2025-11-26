@@ -1,9 +1,9 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, current_user
 
+from src.core.api_responses import response_success
 from src.core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
-from src.core.responses.api_responses import response_success
-from src.extensions import db
+from src.core.extensions import db
 from ..models.user_model import UserModel
 from ..schemas.user_schema import UserSchema, UserFullSchema
 from ..services.bcrypt_service import hash_password, check_password

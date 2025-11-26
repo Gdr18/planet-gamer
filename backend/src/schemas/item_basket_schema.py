@@ -1,6 +1,6 @@
 from marshmallow import ValidationError, pre_load, validate
 
-from src.extensions import ma
+from src.core.extensions import ma
 from ..models.item_basket_model import ItemBasketModel
 from ..schemas.game_schema import GameSchema
 

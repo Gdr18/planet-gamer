@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from src.extensions import db
+from src.core.extensions import db
 
 
 # TODO: Eliminación de fila automática basándose en el campo 'expires_at' desde Supabase

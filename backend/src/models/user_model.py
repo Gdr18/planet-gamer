@@ -1,7 +1,6 @@
-from src.extensions import db
+from src.core.extensions import db
+from ..core.enums import RoleType
 from ..models.user_role_model import UserRoleModel
-
-ROLE_TYPES = {"admin": 1, "staff": 2, "customer": 3}
 
 
 class UserModel(db.Model):
@@ -26,4 +25,4 @@ class UserModel(db.Model):
 	
 	@property
 	def role(self):
-		return self.user_role.role if self.user_role else ROLE_TYPES["customer"]
+		return self.user_role.role if self.user_role else RoleType.CUSTOMER.value
