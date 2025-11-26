@@ -50,6 +50,9 @@ class AuthCustomError(Exception):
 			self.message = f"No se proporcionó ningún token{f': {details}' if details else ''}"
 		elif self.error == "password_mismatch":
 			self.message = "La contraseña no coincide"
+		elif self.error == "forbidden":
+			self.message = "Acceso prohibido"
+			self.code = 403
 	
 	def json_response(self):
 		return jsonify(err=self.error, msg=self.message), self.code

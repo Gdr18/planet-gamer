@@ -5,7 +5,7 @@ from ..core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomE
 from ..core.responses.api_responses import response_success, msg_success
 from ..extensions import db
 from ..models.user_model import UserModel
-from ..schemas.user_schema import UserSchema
+from ..schemas.user_schema import UserSchema, UserBasketSchema
 from ..services.auth_service import get_access_token, get_refresh_token
 from ..services.bcrypt_service import hash_password, check_password
 from ..services.redis_service import (
@@ -39,7 +39,7 @@ def registration():
 def login():
 	login_data = request.get_json()
 	
-	user = UserModel.query.filter_by(email=login_data.get("email")).first()
+	user = UserModel.query.options(db.selectinload(UserModel.basket)).filter_by(email=login_data.get("email")).first()
 	if not user:
 		raise ResourceCustomError("not_found", "usuario")
 	
@@ -51,10 +51,9 @@ def login():
 	
 	decode_refresh = decode_token(refresh_token)
 	set_refresh_token(decode_refresh)
-	user_schema = UserSchema()
 	return (
 		jsonify(
-			user=user_schema.dump(user),
+			user=UserBasketSchema().dump(user),
 			msg=msg_success("el usuario", "autenticado"),
 			access_token=token,
 			refresh_token=refresh_token,
@@ -70,9 +69,13 @@ def login_with_refresh():
 	if not exists_refresh_token(jti):
 		raise AuthCustomError("expired_token")
 	
+	user = UserModel.query.options(db.selectinload(UserModel.basket)).get(current_user.id)
+	if not user:
+		raise ResourceCustomError("not_found", "usuario")
 	access_token = get_access_token(current_user.id, current_user.role)
 	return (
 		jsonify(
+			user=UserBasketSchema().dump(user),
 			msg=msg_success("el token de acceso", "renovado"),
 			access_token=access_token,
 		),

@@ -27,7 +27,6 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 	)
 	role = ma.Function(lambda obj: obj.role)
 	user_role = ma.Nested(UserRoleSchema, exclude=["email"], use_list=False)
-	basket = ma.Nested(ItemBasketSchema, many=True, exclude=["user_id"])
 	
 	class Meta:
 		model = UserModel
@@ -52,6 +51,10 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 		return data
 
 
-class UserFullSchema(UserSchema):
-	addresses = ma.Nested(AddressSchema, many=True, exclude=["user_id"])
-	orders = ma.Nested(OrderSchema, many=True, exclude=["user_id"])
+class UserBasketSchema(UserSchema):
+	basket = ma.Nested(ItemBasketSchema, many=True, exclude=["user_id"], dump_only=True)
+
+
+class UserFullSchema(UserBasketSchema):
+	addresses = ma.Nested(AddressSchema, many=True, exclude=["user_id"], dump_only=True)
+	orders = ma.Nested(OrderSchema, many=True, exclude=["user_id"], dump_only=True)

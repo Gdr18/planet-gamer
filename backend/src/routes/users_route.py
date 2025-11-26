@@ -1,6 +1,7 @@
 from flask import Blueprint, request
+from flask_jwt_extended import jwt_required, current_user
 
-from src.core.exceptions.custom_exceptions import ResourceCustomError
+from src.core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
 from src.core.responses.api_responses import response_success
 from src.extensions import db
 from ..models.user_model import UserModel
@@ -13,13 +14,19 @@ users_schema = UserSchema(many=True)
 
 
 @users.route("/", methods=["GET"])
+@jwt_required()
 def get_users():
+	if current_user.role != 1:
+		raise AuthCustomError("forbidden")
 	all_users = UserModel.query.all()
 	return users_schema.jsonify(all_users)
 
 
 @users.route("/", methods=["POST"])
+@jwt_required()
 def add_user():
+	if current_user.role != 1:
+		raise AuthCustomError("forbidden")
 	user_data = request.get_json()
 	
 	context = {
@@ -38,7 +45,10 @@ def add_user():
 
 
 @users.route("/<user_id>", methods=["GET", "DELETE", "PUT"])
+@jwt_required()
 def handle_user(user_id):
+	if current_user.role != 1 and current_user.id != int(user_id):
+		raise AuthCustomError("forbidden")
 	user = UserModel.query.get(user_id)
 	if not user:
 		raise ResourceCustomError("not_found", "usuario")
@@ -72,8 +82,12 @@ def handle_user(user_id):
 
 
 @users.route("/<user_id>/with-relations", methods=["GET"])
+@jwt_required()
 def get_user_relationships(user_id):
+	if current_user.role != 1 and current_user.id != int(user_id):
+		raise AuthCustomError("forbidden")
 	user = UserModel.query.options(
+		db.selectinload(UserModel.basket),
 		db.selectinload(UserModel.addresses),
 		db.selectinload(UserModel.orders)
 	).get(user_id)

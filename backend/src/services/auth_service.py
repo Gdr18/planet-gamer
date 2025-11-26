@@ -41,14 +41,14 @@ def callback_query_user(header: dict, payload: dict):
 
 @jwt.revoked_token_loader
 def callback_revoked_token(jwt_header: dict, jwt_payload: dict) -> tuple:
-	raise AuthCustomError("revoked_token")
+	return AuthCustomError("revoked_token").json_response()
 
 
 @jwt.invalid_token_loader
 def callback_invalid_token(msg: str) -> tuple:
-	raise AuthCustomError("invalid_token", msg)
+	return AuthCustomError("invalid_token", msg).json_response()
 
 
 @jwt.unauthorized_loader
 def callback_no_token(msg: str) -> tuple:
-	raise AuthCustomError("not_token", msg)
+	return AuthCustomError("not_token", msg).json_response()

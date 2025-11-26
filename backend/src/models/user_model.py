@@ -21,7 +21,7 @@ class UserModel(db.Model):
 		UserRoleModel, lazy="joined", uselist=False
 	)
 	basket = db.relationship(
-		"ItemBasketModel", cascade="all, delete", backref="user", lazy="joined"
+		"ItemBasketModel", cascade="all, delete", backref="user", lazy="raise"
 	)
 	
 	@property

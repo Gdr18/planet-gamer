@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from flask_jwt_extended import jwt_required
 
 from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.responses.api_responses import response_success
@@ -29,6 +30,7 @@ def add_address():
 
 
 @addresses.route("/", methods=["GET"])
+@jwt_required()
 def get_addresses():
 	all_addresses = AddressModel.query.all()
 	return addresses_schema.jsonify(all_addresses), 200
