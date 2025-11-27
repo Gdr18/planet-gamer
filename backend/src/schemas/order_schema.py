@@ -2,7 +2,7 @@ from marshmallow import pre_load, ValidationError, validate
 
 from src.core.extensions import ma
 from ..models.order_model import OrderModel
-from ..schemas.item_order_schema import ItemOrderSchema
+from ..schemas.order_item_schema import OrderItemSchema
 
 status_order = ["pending", "paid", "failed"]
 
@@ -20,7 +20,7 @@ class OrderSchema(ma.SQLAlchemyAutoSchema):
 	created_at = ma.DateTime(format="%d-%m-%Y %H:%M:%S", data_key="createdAt")
 	expires_at = ma.DateTime(format="%d-%m-%Y %H:%M:%S", data_key="expiresAt")
 	status = ma.String(validate=validate.OneOf(status_order))
-	items = ma.Nested(ItemOrderSchema, many=True, exclude=["order_id"])
+	items = ma.Nested(OrderItemSchema, many=True, exclude=["order_id"])
 	
 	class Meta:
 		model = OrderModel

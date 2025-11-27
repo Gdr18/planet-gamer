@@ -1,8 +1,10 @@
 from flask import Blueprint, request
+from flask_jwt_extended import jwt_required, current_user
 
-from src.core.api_responses import response_success
-from src.core.exceptions.custom_exceptions import ResourceCustomError
-from src.core.extensions import db
+from ..core.api_responses import response_success
+from ..core.enums import RoleType
+from ..core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
+from ..core.extensions import db
 from ..models.user_role_model import UserRoleModel
 from ..schemas.user_role_schema import UserRoleSchema
 
@@ -12,14 +14,20 @@ user_role_schema = UserRoleSchema()
 
 
 @user_roles.route("/", methods=["GET"])
+@jwt_required()
 def get_user_roles():
+	if current_user.role != RoleType.ADMIN.value:
+		raise AuthCustomError("forbidden")
 	all_user_roles = UserRoleModel.query.all()
 	roles_schema = UserRoleSchema(many=True)
 	return roles_schema.jsonify(all_user_roles), 200
 
 
 @user_roles.route("/", methods=["POST"])
+@jwt_required()
 def add_user_role():
+	if current_user.role != RoleType.ADMIN.value:
+		raise AuthCustomError("forbidden")
 	user_role_data = request.get_json()
 	
 	validated_data = user_role_schema.load(user_role_data)
@@ -32,7 +40,10 @@ def add_user_role():
 
 
 @user_roles.route("/<user_role_id>", methods=["GET", "PUT", "DELETE"])
+@jwt_required()
 def handle_user_role(user_role_id):
+	if current_user.role != RoleType.ADMIN.value:
+		raise AuthCustomError("forbidden")
 	user_role = UserRoleModel.query.get(user_role_id)
 	if not user_role:
 		raise ResourceCustomError("not_found", "rol de usuario")

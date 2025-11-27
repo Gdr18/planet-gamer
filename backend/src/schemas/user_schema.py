@@ -5,14 +5,14 @@ from marshmallow import pre_load, ValidationError, validate
 from src.core.extensions import ma
 from ..models.user_model import UserModel
 from ..schemas.address_schema import AddressSchema
-from ..schemas.item_basket_schema import ItemBasketSchema
+from ..schemas.basket_item_schema import BasketItemSchema
 from ..schemas.order_schema import OrderSchema
 from ..schemas.user_role_schema import UserRoleSchema
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
-	email = ma.Email(required=True, validate=validate.Length(min=1, max=100,
-	                                                         error="El campo 'email' debe tener entre 1 y 100 caracteres."))
+	email = ma.Email(required=True, unique=True, validate=validate.Length(min=1, max=100,
+	                                                                      error="El campo 'email' debe tener entre 1 y 100 caracteres."))
 	name = ma.String(required=True, validate=validate.Length(min=1, max=50,
 	                                                         error="El campo 'name' debe tener entre 1 y 50 caracteres."))
 	password = ma.String(required=True)
@@ -52,7 +52,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
 
 class UserBasketSchema(UserSchema):
-	basket = ma.Nested(ItemBasketSchema, many=True, exclude=["user_id"], dump_only=True)
+	basket = ma.Nested(BasketItemSchema, many=True, exclude=["user_id"], dump_only=True)
 
 
 class UserFullSchema(UserBasketSchema):

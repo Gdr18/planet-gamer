@@ -15,7 +15,7 @@ class OrderModel(db.Model):
 	expires_at = db.Column(db.DateTime)
 	
 	items = db.relationship(
-		"ItemOrderModel", cascade="all, delete", backref="order", lazy="joined"
+		"OrderItemModel", cascade="all, delete", backref="order", lazy="joined"
 	)
 	
 	def __init__(self, total, address_id, user_id, status="pending", payment_id=None):

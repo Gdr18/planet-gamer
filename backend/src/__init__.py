@@ -9,8 +9,8 @@ from .core.exceptions.handlers import stripe_error_handler, error_handler, db_va
 	generic_error_handler, db_error_handler
 from .routes.addresses_route import addresses
 from .routes.auth_route import auth
+from .routes.basket_items_route import items_basket
 from .routes.games_route import games
-from .routes.items_basket_route import items_basket
 from .routes.items_order_route import items_order
 from .routes.main_route import main
 from .routes.orders_route import orders

@@ -1,6 +1,6 @@
 from flask import jsonify
 from sqlalchemy.exc import IntegrityError
-from stripe import CardError, InvalidRequestError
+from stripe import CardError, InvalidRequestError, SignatureVerificationError
 
 from src.core.api_responses import DbCustomResponses
 from ..exceptions.custom_exceptions import StripeCustomError, ResourceCustomError
@@ -8,9 +8,11 @@ from ..exceptions.custom_exceptions import StripeCustomError, ResourceCustomErro
 
 def stripe_error_handler(error):
 	if isinstance(error, CardError):
-		return StripeCustomError("paid_rejected").json_response()
+		return StripeCustomError("paid_rejected", str(error)).json_response()
 	elif isinstance(error, InvalidRequestError):
-		return StripeCustomError("invalid_request").json_response()
+		return StripeCustomError("invalid_request", str(error)).json_response()
+	elif isinstance(error, SignatureVerificationError):
+		return StripeCustomError("invalid_request", str(error)).json_response()
 	elif isinstance(error, StripeCustomError):
 		return error.json_response()
 	

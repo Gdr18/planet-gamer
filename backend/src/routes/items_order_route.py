@@ -1,22 +1,27 @@
 from flask import request, Blueprint
+from flask_jwt_extended import jwt_required, current_user
 
-from src.core.api_responses import response_success
-from src.core.exceptions.custom_exceptions import ResourceCustomError
-from src.core.extensions import db
-from ..models.item_order_model import ItemOrderModel
-from ..schemas.item_order_schema import ItemOrderSchema
+from ..core.api_responses import response_success
+from ..core.enums import RoleType
+from ..core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
+from ..core.extensions import db
+from ..models.order_item_model import OrderItemModel
+from ..schemas.order_item_schema import OrderItemSchema
 
-items_order_schema = ItemOrderSchema(many=True)
+items_order_schema = OrderItemSchema(many=True)
 
 items_order = Blueprint("items_order", __name__, url_prefix="/items-order")
 
 
 @items_order.route("/", methods=["POST"])
+@jwt_required()
 def add_item_order():
+	if current_user.role != RoleType.ADMIN.value:
+		raise AuthCustomError("forbidden_action", "agregar item del pedido para otro usuario")
+	
 	item_order_data = request.get_json()
 	
-	item_order_schema = ItemOrderSchema(load_instance=True)
-	
+	item_order_schema = OrderItemSchema(load_instance=True)
 	new_item_order = item_order_schema.load(item_order_data)
 	
 	db.session.add(new_item_order)
@@ -26,17 +31,26 @@ def add_item_order():
 
 
 @items_order.route("/", methods=["GET"])
+@jwt_required()
 def get_item_order():
-	all_items_order = ItemOrderModel.query.all()
+	if current_user.role != RoleType.ADMIN.value:
+		raise AuthCustomError("forbidden")
+	
+	all_items_order = OrderItemModel.query.all()
 	return items_order_schema.jsonify(all_items_order), 200
 
 
 @items_order.route("/<item_order_id>", methods=["GET", "PUT", "DELETE"])
+@jwt_required()
 def handle_item_order(item_order_id):
-	item_order = ItemOrderModel.query.get(item_order_id)
+	if current_user.role != RoleType.ADMIN.value:
+		raise AuthCustomError("forbidden")
+	
+	item_order = OrderItemModel.query.get(item_order_id)
 	if not item_order:
 		raise ResourceCustomError("not_found", "item del pedido")
-	item_order_schema = ItemOrderSchema()
+	
+	item_order_schema = OrderItemSchema()
 	
 	if request.method == "PUT":
 		item_order_data = request.get_json()
@@ -63,8 +77,11 @@ def handle_item_order(item_order_id):
 
 
 @items_order.route("/orders/<order_id>", methods=["GET"])
+@jwt_required()
 def get_all_items_order(order_id):
-	all_items_order = ItemOrderModel.query.filter_by(
+	if current_user.role != RoleType.ADMIN.value:
+		raise AuthCustomError("forbidden")
+	all_items_order = OrderItemModel.query.filter_by(
 		details_order_id=order_id
 	).all()
 	return items_order_schema.jsonify(all_items_order), 200

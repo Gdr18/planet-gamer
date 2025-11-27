@@ -15,4 +15,4 @@ class GameModel(db.Model):
 	img_url = db.Column(db.String(150), unique=True, nullable=False)
 	stock = db.Column(db.Integer, nullable=False, default=20)
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
-	items_order = db.relationship("ItemOrderModel", backref="game", lazy="raise")
+	items_order = db.relationship("OrderItemModel", backref="game", lazy="raise")

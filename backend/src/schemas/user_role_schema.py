@@ -10,10 +10,12 @@ class UserRoleSchema(ma.SQLAlchemyAutoSchema):
 		required=True,
 		foreign_key="user_model.email",
 		primary_key=True,
+		unique=True,
 		validate=validate.Length(min=1, max=100, error="El campo 'email' debe tener entre 1 y 100 caracteres."),
 	)
 	role = ma.Integer(
-		required=True, validate=validate.OneOf(list(RoleType))
+		required=True,
+		validate=validate.OneOf([role.value for role in RoleType], error="El campo 'role' debe ser un rol válido.")
 	)
 	
 	class Meta:

@@ -1,7 +1,7 @@
 from src.core.extensions import db
 
 
-class ItemOrderModel(db.Model):
+class OrderItemModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	qty = db.Column(db.Integer, nullable=False)
 	price = db.Column(db.Numeric(precision=10, scale=2, asdecimal=True), nullable=False)

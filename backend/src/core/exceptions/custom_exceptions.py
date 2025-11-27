@@ -2,17 +2,17 @@ from flask import jsonify
 
 
 class StripeCustomError(Exception):
-	def __init__(self, error: str):
+	def __init__(self, error: str, details: str | None = None):
 		self.error = error
 		self.code = 400
 		
 		if error == "paid_rejected":
-			self.message = "Pago rechazado por Stripe"
+			self.message = f"Pago rechazado por Stripe{f': {details}' if details else ''}"
 			self.code = 402
 		elif error == "requires_payment_method":
 			self.message = "Se requiere un método de pago"
 		elif error == "invalid_request":
-			self.message = "Solicitud inválida a Stripe"
+			self.message = f"Solicitud inválida a Stripe{f': {details}' if details else ''}"
 		else:
 			self.message = "Estado no capturado de Stripe"
 	

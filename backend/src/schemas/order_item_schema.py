@@ -1,10 +1,10 @@
 from marshmallow import pre_load, ValidationError, validate
 
 from src.core.extensions import ma
-from ..models.item_order_model import ItemOrderModel
+from ..models.order_item_model import OrderItemModel
 
 
-class ItemOrderSchema(ma.SQLAlchemyAutoSchema):
+class OrderItemSchema(ma.SQLAlchemyAutoSchema):
 	price = ma.Decimal(as_string=True, places=2, required=True, validate=validate.Range(min=0.01,
 	                                                                                    error="El campo 'price' debe ser un entero positivo mayor que cero."))
 	qty = ma.Integer(required=True, validate=validate.Range(min=1, error="El campo 'qty' debe ser un entero positivo."))
@@ -14,7 +14,7 @@ class ItemOrderSchema(ma.SQLAlchemyAutoSchema):
 	                      validate=validate.Range(min=1, error="El campo 'order_id' debe ser un entero positivo."))
 	
 	class Meta:
-		model = ItemOrderModel
+		model = OrderItemModel
 		dump_only = ["id"]
 		unknown = "exclude"
 	

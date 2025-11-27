@@ -5,12 +5,12 @@ from ..core.api_responses import response_success
 from ..core.enums import RoleType
 from ..core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
 from ..core.extensions import db
-from ..models.item_basket_model import ItemBasketModel
-from ..schemas.item_basket_schema import ItemBasketSchema
+from ..models.basket_item_model import ItemBasketModel
+from ..schemas.basket_item_schema import BasketItemSchema
 
 items_basket = Blueprint("items_basket", __name__, url_prefix="/items-basket")
 
-baskets_schema = ItemBasketSchema(many=True)
+baskets_schema = BasketItemSchema(many=True)
 
 
 @items_basket.route("/", methods=["GET"])
@@ -27,7 +27,7 @@ def get_items_basket():
 def add_item_basket():
 	item_basket_data = request.get_json()
 	
-	item_basket_schema = ItemBasketSchema(load_instance=True)
+	item_basket_schema = BasketItemSchema(load_instance=True)
 	new_item_basket = item_basket_schema.load(item_basket_data)
 	
 	if new_item_basket.user_id != current_user.id and current_user.role != RoleType.ADMIN.value:
@@ -47,7 +47,7 @@ def handle_item_basket(item_basket_id):
 		raise ResourceCustomError("not_found", "elemento de la cesta")
 	if current_user.id != item_basket.user_id and current_user.role != RoleType.ADMIN.value:
 		raise AuthCustomError("forbidden_action", "Acceder a un elemento de la cesta de otro usuario")
-	item_basket_schema = ItemBasketSchema()
+	item_basket_schema = BasketItemSchema()
 	
 	if request.method == "PUT":
 		item_basket_data = request.get_json()

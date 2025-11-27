@@ -2,7 +2,7 @@ from marshmallow import validate
 
 from src.core.extensions import ma
 from ..models.game_model import GameModel
-from ..schemas.item_order_schema import ItemOrderSchema
+from ..schemas.order_item_schema import OrderItemSchema
 
 platforms = ["Nintendo Switch", "PlayStation 4", "PlayStation 5", "XBOX X/S"]
 
@@ -32,4 +32,4 @@ class GameSchema(ma.SQLAlchemyAutoSchema):
 
 
 class GameFullSchema(GameSchema):
-	items_order = ma.Nested(ItemOrderSchema, many=True, exclude=["game_id"])
+	items_order = ma.Nested(OrderItemSchema, many=True, exclude=["game_id"])

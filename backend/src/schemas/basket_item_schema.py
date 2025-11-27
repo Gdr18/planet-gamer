@@ -1,11 +1,11 @@
 from marshmallow import ValidationError, pre_load, validate
 
 from src.core.extensions import ma
-from ..models.item_basket_model import ItemBasketModel
+from ..models.basket_item_model import ItemBasketModel
 from ..schemas.game_schema import GameSchema
 
 
-class ItemBasketSchema(ma.SQLAlchemyAutoSchema):
+class BasketItemSchema(ma.SQLAlchemyAutoSchema):
 	qty = ma.Integer(required=True, validate=validate.Range(min=1, error="El campo 'qty' debe ser un entero positivo."))
 	game_id = ma.Integer(required=True, foreign_key="game_model.id", data_key="gameId",
 	                     validate=validate.Range(min=1, error="El campo 'game_id' debe ser un entero positivo."))
