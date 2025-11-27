@@ -1,8 +1,8 @@
 from redis import Redis
 
-from config import REDIS_HOST, REDIS_PORT
+from config import REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_USER
 
-re = Redis(host=REDIS_HOST, port=int(REDIS_PORT), decode_responses=True)
+re = Redis(host=REDIS_HOST, port=int(REDIS_PORT), username=REDIS_USER, password=REDIS_PASSWORD, decode_responses=True)
 
 
 def set_revoked_token(payload: dict) -> bool:

@@ -1,17 +1,17 @@
 import os
 from datetime import timedelta
 
-from dotenv import load_dotenv
-
-load_dotenv(".env.dev")
+# load_dotenv(".env.dev")
 
 CONFIG_MODE = os.getenv("CONFIG_MODE")
 
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = int(os.getenv("REDIS_PORT"))
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
+REDIS_USER = os.getenv("REDIS_USER", None)
 
 API_KEY_STRIPE = os.getenv("API_KEY_STRIPE")
-WEBHOOK_SECRET_STRIPE = os.getenv("WEBHOOK_SECRET_STRIPE")
+WEBHOOK_SECRET_STRIPE = os.getenv("WEBHOOK_SECRET_STRIPE", None)
 
 
 class Config:
