@@ -95,5 +95,7 @@ def get_platform_games(platform):
 		"ps5": "PlayStation 5",
 		"xbox": "Xbox S/X",
 	}
+	if not platform in platforms.keys():
+		raise ResourceCustomError("not_found", "plataforma")
 	all_platform_games = GameModel.query.filter_by(platform=platforms[platform]).all()
 	return games_schema.jsonify(all_platform_games), 200

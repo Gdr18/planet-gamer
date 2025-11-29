@@ -10,8 +10,6 @@ from ..schemas.user_role_schema import UserRoleSchema
 
 user_roles = Blueprint("user_roles", __name__, url_prefix="/user-roles")
 
-user_role_schema = UserRoleSchema()
-
 
 @user_roles.route("/", methods=["GET"])
 @jwt_required()
@@ -19,8 +17,8 @@ def get_user_roles():
 	if current_user.role != RoleType.ADMIN.value:
 		raise AuthCustomError("forbidden")
 	all_user_roles = UserRoleModel.query.all()
-	roles_schema = UserRoleSchema(many=True)
-	return roles_schema.jsonify(all_user_roles), 200
+	user_roles_schema = UserRoleSchema(many=True)
+	return user_roles_schema.jsonify(all_user_roles), 200
 
 
 @user_roles.route("/", methods=["POST"])
@@ -30,8 +28,9 @@ def add_user_role():
 		raise AuthCustomError("forbidden")
 	user_role_data = request.get_json()
 	
-	validated_data = user_role_schema.load(user_role_data)
-	new_user_role = UserRoleModel(**validated_data)
+	user_role_schema = UserRoleSchema(load_instance=True)
+	
+	new_user_role = user_role_schema.load(user_role_data)
 	
 	db.session.add(new_user_role)
 	db.session.commit()
@@ -47,6 +46,7 @@ def handle_user_role(user_role_id):
 	user_role = UserRoleModel.query.get(user_role_id)
 	if not user_role:
 		raise ResourceCustomError("not_found", "rol de usuario")
+	user_role_schema = UserRoleSchema()
 	
 	if request.method == "PUT":
 		user_role_data = request.get_json()

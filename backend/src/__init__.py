@@ -9,10 +9,10 @@ from .core.exceptions.handlers import stripe_error_handler, error_handler, db_va
 	generic_error_handler, db_error_handler
 from .routes.addresses_route import addresses
 from .routes.auth_route import auth
-from .routes.basket_items_route import items_basket
+from .routes.basket_items_route import basket_items
 from .routes.games_route import games
-from .routes.items_order_route import items_order
 from .routes.main_route import main
+from .routes.order_items_route import items_order
 from .routes.orders_route import orders
 from .routes.payment_route import payments
 from .routes.user_roles_route import user_roles
@@ -48,7 +48,7 @@ def create_app(config):
 	app.register_blueprint(orders)
 	app.register_blueprint(items_order)
 	app.register_blueprint(addresses)
-	app.register_blueprint(items_basket)
+	app.register_blueprint(basket_items)
 	app.register_blueprint(games)
 	app.register_blueprint(user_roles)
 	app.register_blueprint(auth)

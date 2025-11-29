@@ -53,7 +53,6 @@ def get_payment(payment_id):
 	user_id = get_jwt_identity()
 	payment = get_payment_intent(payment_id)
 	if payment.metadata.get("user_id") != user_id:
-		print(payment.metadata.get("user_id"), user_id)
 		raise AuthCustomError("forbidden_action", "acceder a un pago de otro usuario")
 	return payment_response_success(payment.id, payment.client_secret, payment.status)
 

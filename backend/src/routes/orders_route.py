@@ -49,7 +49,8 @@ def get_order(order_id):
 	if current_user.role != RoleType.ADMIN.value and current_user.id != order.user_id:
 		raise AuthCustomError("forbidden_action", "ver este pedido")
 	
-	return OrderSchema().jsonify(order), 200
+	order_schema = OrderSchema()
+	return order_schema.jsonify(order), 200
 
 
 @orders.route("/<order_id>", methods=["PUT", "DELETE"])

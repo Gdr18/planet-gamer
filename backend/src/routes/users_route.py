@@ -10,8 +10,6 @@ from ..services.bcrypt_service import hash_password, check_password
 
 users = Blueprint("users", __name__, url_prefix="/users")
 
-users_schema = UserSchema(many=True)
-
 
 @users.route("/", methods=["GET"])
 @jwt_required()
@@ -19,6 +17,7 @@ def get_users():
 	if current_user.role != 1:
 		raise AuthCustomError("forbidden")
 	all_users = UserModel.query.all()
+	users_schema = UserSchema(many=True)
 	return users_schema.jsonify(all_users)
 
 

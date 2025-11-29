@@ -1,7 +1,7 @@
 from marshmallow import ValidationError, pre_load, validate
 
 from src.core.extensions import ma
-from ..models.basket_item_model import ItemBasketModel
+from ..models.basket_item_model import BasketItemModel
 from ..schemas.game_schema import GameSchema
 
 
@@ -14,7 +14,7 @@ class BasketItemSchema(ma.SQLAlchemyAutoSchema):
 	game = ma.Nested(GameSchema)
 	
 	class Meta:
-		model = ItemBasketModel
+		model = BasketItemModel
 		dump_only = ["id", "game"]
 		load_only = ["game_id"]
 		unknown = "exclude"

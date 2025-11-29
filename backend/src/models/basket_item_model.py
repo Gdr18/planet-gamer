@@ -1,7 +1,7 @@
 from src.core.extensions import db
 
 
-class ItemBasketModel(db.Model):
+class BasketItemModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	qty = db.Column(db.Integer, nullable=False)
 	game_id = db.Column(db.Integer, db.ForeignKey("game_model.id"))
