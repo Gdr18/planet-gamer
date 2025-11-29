@@ -1,7 +1,9 @@
 import os
 from datetime import timedelta
 
-# load_dotenv(".env.dev")
+from dotenv import load_dotenv
+
+load_dotenv(".env.dev")
 
 CONFIG_MODE = os.getenv("CONFIG_MODE")
 
@@ -22,12 +24,11 @@ class Config:
 	JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
 	# TODO: Configurar variable de entorno para producción
 	SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
+	MODE = CONFIG_MODE
 
 
 class DevelopmentConfig(Config):
 	DEBUG = True
-	PORT = int(os.getenv("PORT", 5000))
-	MODE = CONFIG_MODE
 
 
 ConfigModeEnum = {
