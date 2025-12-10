@@ -18,7 +18,7 @@ def get_user_roles():
 		raise AuthCustomError("forbidden")
 	all_user_roles = UserRoleModel.query.all()
 	user_roles_schema = UserRoleSchema(many=True)
-	return user_roles_schema.jsonify(all_user_roles), 200
+	return user_roles_schema.dump(all_user_roles), 200
 
 
 @user_roles.route("/", methods=["POST"])
@@ -35,7 +35,7 @@ def add_user_role():
 	db.session.add(new_user_role)
 	db.session.commit()
 	
-	return user_role_schema.jsonify(new_user_role), 201
+	return user_role_schema.dump(new_user_role), 201
 
 
 @user_roles.route("/<user_role_id>", methods=["GET", "PUT", "DELETE"])
@@ -61,7 +61,7 @@ def handle_user_role(user_role_id):
 		
 		db.session.commit()
 		
-		return user_role_schema.jsonify(user_role)
+		return user_role_schema.dump(user_role)
 	
 	if request.method == "DELETE":
 		db.session.delete(user_role)
@@ -69,4 +69,4 @@ def handle_user_role(user_role_id):
 		
 		return response_success("el rol de usuario", "eliminado")
 	
-	return user_role_schema.jsonify(user_role)
+	return user_role_schema.dump(user_role)

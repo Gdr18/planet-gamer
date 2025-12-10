@@ -31,7 +31,7 @@ def add_address():
 		
 		db.session.commit()
 		
-		return address_schema.jsonify(new_address), 201
+		return address_schema.dump(new_address), 201
 	except Exception as e:
 		db.session.rollback()
 		raise e
@@ -43,7 +43,7 @@ def get_addresses():
 	if current_user.role != RoleType.ADMIN:
 		raise AuthCustomError("forbidden")
 	all_addresses = AddressModel.query.all()
-	return addresses_schema.jsonify(all_addresses), 200
+	return addresses_schema.dump(all_addresses), 200
 
 
 @addresses.route("/<address_id>", methods=["GET", "PUT", "DELETE"])
@@ -72,7 +72,7 @@ def handle_address(address_id):
 			setattr(address, key, value)
 		
 		db.session.commit()
-		return address_schema.jsonify(address), 200
+		return address_schema.dump(address), 200
 	
 	if request.method == "DELETE":
 		db.session.delete(address)
@@ -80,7 +80,7 @@ def handle_address(address_id):
 		
 		return response_success("la dirección", "eliminada")
 	
-	return address_schema.jsonify(address), 200
+	return address_schema.dump(address), 200
 
 
 @addresses.route("/<address_id>/with-relations", methods=["GET"])
@@ -97,7 +97,7 @@ def get_orders_by_address_id(address_id):
 		raise AuthCustomError("forbidden_action", "Acceder a dirección de otro usuario")
 	
 	address_schema = AddressFullSchema()
-	return address_schema.jsonify(address), 200
+	return address_schema.dump(address), 200
 
 
 @addresses.route("/users/<user_id>", methods=["GET"])
@@ -108,4 +108,4 @@ def get_addresses_by_user_id(user_id):
 	user_addresses = AddressModel.query.filter_by(user_id=user_id).all()
 	if not user_addresses:
 		raise ResourceCustomError("not_found", "direcciones del usuario")
-	return addresses_schema.jsonify(user_addresses), 200
+	return addresses_schema.dump(user_addresses), 200

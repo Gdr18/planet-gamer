@@ -19,7 +19,7 @@ def get_items_basket():
 	if current_user.role != RoleType.ADMIN.value:
 		raise AuthCustomError("forbidden")
 	all_basket_items = BasketItemModel.query.all()
-	return basket_items_schema.jsonify(all_basket_items), 200
+	return basket_items_schema.dump(all_basket_items), 200
 
 
 @basket_items.route("/", methods=["POST"])
@@ -36,7 +36,7 @@ def add_item_basket():
 	db.session.add(new_basket_item)
 	db.session.commit()
 	
-	return basket_item_schema.jsonify(new_basket_item), 201
+	return basket_item_schema.dump(new_basket_item), 201
 
 
 @basket_items.route("/<basket_item_id>", methods=["GET", "PUT", "DELETE"])
@@ -70,7 +70,7 @@ def handle_item_basket(basket_item_id):
 		db.session.commit()
 		return response_success("el elemento de la cesta", "eliminado")
 	
-	return basket_item_schema.jsonify(basket_item), 200
+	return basket_item_schema.dump(basket_item), 200
 
 
 @basket_items.route("/users/<user_id>", methods=["GET"])
@@ -79,4 +79,4 @@ def get_basket_user_id(user_id):
 	if current_user.role != RoleType.ADMIN.value and current_user.id != int(user_id):
 		raise AuthCustomError("forbidden_action", "Acceder a la cesta de otro usuario")
 	user_basket = BasketItemModel.query.filter_by(user_id=user_id).all()
-	return basket_items_schema.jsonify(user_basket)
+	return basket_items_schema.dump(user_basket)

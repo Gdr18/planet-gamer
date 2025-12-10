@@ -20,7 +20,7 @@ def get_orders():
 	if current_user.role != RoleType.ADMIN.value:
 		raise AuthCustomError("forbidden")
 	all_orders = OrderModel.query.all()
-	return orders_schema.jsonify(all_orders)
+	return orders_schema.dump(all_orders)
 
 
 @orders.route("/", methods=["POST"])
@@ -37,7 +37,7 @@ def add_order():
 	db.session.add(new_order)
 	db.session.commit()
 	
-	return order_schema.jsonify(new_order), 201
+	return order_schema.dump(new_order), 201
 
 
 @orders.route("/<order_id>", methods=["GET"])
@@ -50,7 +50,7 @@ def get_order(order_id):
 		raise AuthCustomError("forbidden_action", "ver este pedido")
 	
 	order_schema = OrderSchema()
-	return order_schema.jsonify(order), 200
+	return order_schema.dump(order), 200
 
 
 @orders.route("/<order_id>", methods=["PUT", "DELETE"])
@@ -76,7 +76,7 @@ def handle_order(order_id):
 			setattr(order, key, value)
 		
 		db.session.commit()
-		return order_schema.jsonify(order)
+		return order_schema.dump(order)
 	
 	db.session.delete(order)
 	db.session.commit()
