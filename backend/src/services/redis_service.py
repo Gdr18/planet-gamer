@@ -21,3 +21,7 @@ def set_refresh_token(payload: dict) -> bool:
 
 def exists_refresh_token(jti: str) -> bool:
 	return re.exists(f"refresh:{jti}")
+
+
+def stay_alive_redis() -> bool:
+	return re.ping()
