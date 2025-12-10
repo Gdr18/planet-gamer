@@ -54,7 +54,7 @@ def create_app(config):
 	app.register_blueprint(auth)
 	app.register_blueprint(payments)
 	
-	# with app.app_context():
-	# 	db.create_all()
+	with app.app_context():
+		db.create_all()
 	
 	return app
