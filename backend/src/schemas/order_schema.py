@@ -18,13 +18,12 @@ class OrderSchema(ma.SQLAlchemyAutoSchema):
 	payment_id = ma.String(data_key="paymentId", allow_none=True, validate=validate.Length(min=1, max=100,
 	                                                                                       error="El campo 'paymentId' debe tener entre 1 y 100 caracteres."))
 	created_at = ma.DateTime(format="%d-%m-%Y %H:%M:%S", data_key="createdAt")
-	expires_at = ma.DateTime(format="%d-%m-%Y %H:%M:%S", data_key="expiresAt")
 	status = ma.String(validate=validate.OneOf(status_order))
 	items = ma.Nested(OrderItemSchema, many=True, exclude=["order_id"])
 	
 	class Meta:
 		model = OrderModel
-		dump_only = ["id", "created_at", "expires_at"]
+		dump_only = ["id", "created_at"]
 		unknown = "exclude"
 	
 	@pre_load

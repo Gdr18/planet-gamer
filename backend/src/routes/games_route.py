@@ -92,7 +92,7 @@ def get_platform_games(platform):
 		"switch": "Nintendo Switch",
 		"ps4": "PlayStation 4",
 		"ps5": "PlayStation 5",
-		"xbox": "Xbox S/X",
+		"xbox": "Xbox Series",
 	}
 	if not platform in platforms.keys():
 		raise ResourceCustomError("not_found", "plataforma")

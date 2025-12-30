@@ -13,7 +13,6 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
 REDIS_USER = os.getenv("REDIS_USER", None)
 
 API_KEY_STRIPE = os.getenv("API_KEY_STRIPE")
-# TODO: Configurar variable de entorno webhook para producción
 WEBHOOK_SECRET_STRIPE = os.getenv("WEBHOOK_SECRET_STRIPE", None)
 
 

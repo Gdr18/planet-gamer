@@ -75,7 +75,6 @@ def stripe_webhook_handler():
 		
 		if event.type == "payment_intent.succeeded":
 			order.status = "paid"
-			order.expires_at = None
 		elif event.type in ["payment_intent.requires_action", "payment_intent.processing"]:
 			order.status = "pending"
 		else:

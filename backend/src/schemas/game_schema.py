@@ -4,10 +4,8 @@ from src.core.extensions import ma
 from ..models.game_model import GameModel
 from ..schemas.order_item_schema import OrderItemSchema
 
-platforms = ["Nintendo Switch", "PlayStation 4", "PlayStation 5", "XBOX X/S"]
+platforms = ["Nintendo Switch", "PlayStation 4", "PlayStation 5", "Xbox Series"]
 
-
-# TODO: Campos específicos para gender? list?
 
 class GameSchema(ma.SQLAlchemyAutoSchema):
 	title = ma.String(required=True, validate=validate.Length(min=1, max=50))
@@ -22,8 +20,9 @@ class GameSchema(ma.SQLAlchemyAutoSchema):
 	gender = ma.String(required=True, validate=validate.Length(min=1, max=30))
 	pegi = ma.String(required=True, validate=validate.Regexp(regex=r"^\+\d+\b",
 	                                                         error="El campo 'pegi' debe empezar con '+' seguido de una edad, por ejemplo: +18."))
-	release = ma.String(required=True, validate=validate.Regexp(regex=r"^\d{4}$",
-	                                                            error="El campo 'release' debe ser un año válido de 4 dígitos."))
+	release = ma.String(required=True, validate=validate.Regexp(
+		regex=r"^(0?[1-9]|[12][0-9]|3[01]) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de \d{4}$",
+		error="El campo 'release' debe ser una fecha con el siguiente formato: '22 de enero de 2024'."))
 	
 	class Meta:
 		model = GameModel
