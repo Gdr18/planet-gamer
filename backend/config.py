@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from dotenv import load_dotenv
 
-load_dotenv(".env.dev")
+load_dotenv(".env.prod")
 
 CONFIG_MODE = os.getenv("CONFIG_MODE")
 

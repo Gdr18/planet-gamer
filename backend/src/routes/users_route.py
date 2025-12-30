@@ -18,7 +18,7 @@ def get_users():
 		raise AuthCustomError("forbidden")
 	all_users = UserModel.query.all()
 	users_schema = UserSchema(many=True)
-	return users_schema.dump(all_users)
+	return users_schema.jsonify(all_users)
 
 
 @users.route("/", methods=["POST"])
@@ -40,7 +40,7 @@ def add_user():
 	db.session.add(new_user)
 	db.session.commit()
 	
-	return user_schema.dump(new_user)
+	return user_schema.jsonify(new_user)
 
 
 @users.route("/<user_id>", methods=["GET", "DELETE", "PUT"])
@@ -70,14 +70,14 @@ def handle_user(user_id):
 			setattr(user, key, value)
 		
 		db.session.commit()
-		return user_schema.dump(user)
+		return user_schema.jsonify(user)
 	
 	elif request.method == "DELETE":
 		db.session.delete(user)
 		db.session.commit()
 		return response_success("el usuario", "eliminado")
 	
-	return user_schema.dump(user)
+	return user_schema.jsonify(user)
 
 
 @users.route("/<user_id>/with-relations", methods=["GET"])
@@ -94,4 +94,4 @@ def get_user_relationships(user_id):
 		raise ResourceCustomError("not_found", "usuario")
 	
 	user_schema = UserFullSchema()
-	return user_schema.dump(user), 200
+	return user_schema.jsonify(user), 200

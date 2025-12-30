@@ -53,7 +53,7 @@ def login():
 	set_refresh_token(decode_refresh)
 	return (
 		jsonify(
-			user=UserBasketSchema().dump(user),
+			user=UserBasketSchema().jsonify(user),
 			msg=msg_success("el usuario", "autenticado"),
 			access_token=token,
 			refresh_token=refresh_token,
@@ -75,7 +75,7 @@ def login_with_refresh():
 	access_token = get_access_token(current_user.id, current_user.role)
 	return (
 		jsonify(
-			user=UserBasketSchema().dump(user),
+			user=UserBasketSchema().jsonify(user),
 			msg=msg_success("el token de acceso", "renovado"),
 			access_token=access_token,
 		),

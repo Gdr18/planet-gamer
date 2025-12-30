@@ -27,7 +27,7 @@ def add_item_order():
 	db.session.add(new_item_order)
 	db.session.commit()
 	
-	return item_order_schema.dump(new_item_order), 201
+	return item_order_schema.jsonify(new_item_order), 201
 
 
 @items_order.route("/", methods=["GET"])
@@ -37,7 +37,7 @@ def get_item_order():
 		raise AuthCustomError("forbidden")
 	
 	all_items_order = OrderItemModel.query.all()
-	return items_order_schema.dump(all_items_order), 200
+	return items_order_schema.jsonify(all_items_order), 200
 
 
 @items_order.route("/<item_order_id>", methods=["GET", "PUT", "DELETE"])
@@ -73,7 +73,7 @@ def handle_item_order(item_order_id):
 		db.session.commit()
 		return response_success("el item del pedido", "eliminado")
 	
-	return item_order_schema.dump(item_order), 200
+	return item_order_schema.jsonify(item_order), 200
 
 
 @items_order.route("/orders/<order_id>", methods=["GET"])
@@ -84,4 +84,4 @@ def get_all_items_order(order_id):
 	all_items_order = OrderItemModel.query.filter_by(
 		details_order_id=order_id
 	).all()
-	return items_order_schema.dump(all_items_order), 200
+	return items_order_schema.jsonify(all_items_order), 200
