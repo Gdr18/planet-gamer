@@ -40,14 +40,17 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 		
 		regex_password_hash = re.compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$")
 		regex_password = re.compile(
-			r'^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{}|;:\'",.<>?/]).{7,}$',
+			r'^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{}|;:\',.<>?/]).{7,}$',
 			re.UNICODE,
 		)
 		
-		if not re.match(regex_password, expected_password) and not re.match(
-			regex_password_hash, expected_password
+		if not expected_password:
+			raise ValidationError("El campo 'password' es obligatorio.")
+		if len(expected_password) > 70 or (not re.match(regex_password, expected_password) and not re.match(
+			regex_password_hash, expected_password)
 		):
-			raise ValidationError("El campo 'password' no cumple con el patrón y tampoco es una contraseña hasheada.")
+			raise ValidationError(
+				"El campo 'password' no es válido. Debe tener al menos 7 caracteres y como máximo 70, incluyendo una letra mayúscula, una letra minúscula, un número y un carácter especial (!@#$%^&*()_\-+=\[\]{}|;:\',.<>?/).")
 		return data
 
 
