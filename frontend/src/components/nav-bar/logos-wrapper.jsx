@@ -25,7 +25,7 @@ export default function LogosWrapper({ handlePlatforms }) {
 			</Link>
 
 			<Link to={'/p/xbox'} className='logos-wrapper'>
-				<span className='span-catch'>Xbox S/X</span>
+				<span className='span-catch'>Xbox Series</span>
 				<XboxIcon className='logos-icons-navigation' />
 			</Link>
 
