@@ -1,5 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import axios from 'axios'
+import { useLoginContext } from './login-context'
+import { use } from 'react'
 
 const CartContext = React.createContext([[]])
 
@@ -9,25 +11,15 @@ export const CartProvider = ({ children }) => {
 	const [basketItems, setBasketItems] = useState([])
 	const [total, setTotal] = useState(0)
 	const [countProducts, setCountProducts] = useState(0)
-	const [allGames, setAllGames] = useState([])
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
-	useEffect(() => {
-		getGames()
-	}, [])
+	const { loggedUser } = useLoginContext()
 
-	const getGames = () => {
-		axios
-			.get(`${import.meta.env.VITE_BACKEND_URL}/games`, {
-				withCredentials: true
-			})
-			.then(response => {
-				setAllGames(response.data)
-			})
-			.catch(error => {
-				console.log('An error ocurred', error)
-			})
-	}
+	useEffect(() => {
+		if (loggedUser && !basketItems) {
+			rescuingBasket(loggedUser.id)
+		}
+	}, [loggedUser])
 
 	const requestBasket = (game, idLoggedUser, methodHTTP) => {
 		axios({
@@ -156,11 +148,9 @@ export const CartProvider = ({ children }) => {
 				total,
 				countProducts,
 				handleGamesBasket,
-				allGames,
 				cleaningBasket,
 				checkingCheckout,
 				setCheckingCheckout,
-				getGames
 			}}
 		>
 			{children}

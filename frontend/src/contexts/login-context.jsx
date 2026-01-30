@@ -9,41 +9,39 @@ export const LoginProvider = ({ children }) => {
 	const [loggedUser, setLoggedUser] = useState('')
 
 	useEffect(() => {
-		checkLoginStatus()
-	}, [])
+		if (loggedUser) return
+		rescuingUser()
+	}, [loggedUser])
 
-	const rescuingUser = user => {
+	const rescuingUser = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
 		axios
-			.get(`${import.meta.env.VITE_BACKEND_URL}/user/${user}`, {
-				withCredentials: true
+			.get(`${import.meta.env.VITE_BACKEND_URL}/auth/refresh-token`, {
+				withCredentials: true,
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
 			})
 			.then(response => {
-				setLoggedUser(response.data)
+				setLoggedUser(response.data.user)
 			})
 			.catch(error => {
 				console.log('Rescuing error', error)
 			})
 	}
 
-	const checkLoginStatus = () => {
-		axios
-			.get(`${import.meta.env.VITE_BACKEND_URL}/auth`, {
-				withCredentials: true
-			})
-			.then(response => {
-				if (response.data.loggedIn) {
-					rescuingUser(response.data.id)
-				}
-			})
-			.catch(error => {
-				console.log('Checking error', error)
-			})
-	}
-
+	// ! Añadir limpieza del carrito al hacer logout
+	// ! Añadir token en la petición
 	const handleLogout = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
 		axios
-			.delete(`${import.meta.env.VITE_BACKEND_URL}/auth`, {
-				withCredentials: true
+			.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, null, {
+				withCredentials: true,
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
 			})
 			.then(() => {
 				setLoggedUser('')
