@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext } from 'react'
 import axios from 'axios'
 import { useLoginContext } from './login-context'
 import { use } from 'react'
@@ -13,6 +13,7 @@ export const CartProvider = ({ children }) => {
 	const [countProducts, setCountProducts] = useState(0)
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
+<<<<<<< HEAD
 	const { loggedUser } = useLoginContext()
 
 	useEffect(() => {
@@ -21,6 +22,8 @@ export const CartProvider = ({ children }) => {
 		}
 	}, [loggedUser])
 
+=======
+>>>>>>> ce1ad6bcd3b6c2df17be7b8dfb6fcf122ec2d0bf
 	const requestBasket = (game, idLoggedUser, methodHTTP) => {
 		axios({
 			method: methodHTTP,
@@ -150,7 +153,11 @@ export const CartProvider = ({ children }) => {
 				handleGamesBasket,
 				cleaningBasket,
 				checkingCheckout,
+<<<<<<< HEAD
 				setCheckingCheckout,
+=======
+				setCheckingCheckout
+>>>>>>> ce1ad6bcd3b6c2df17be7b8dfb6fcf122ec2d0bf
 			}}
 		>
 			{children}

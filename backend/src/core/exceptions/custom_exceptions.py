@@ -25,10 +25,10 @@ class ResourceCustomError(Exception):
 		self.error = error
 		
 		if self.error == "not_found":
-			self.message = f"{resource.capitalize()} no encontrado/a"
+			self.message = f"{resource.capitalize()} no encontrado"
 			self.code = 404
 		elif self.error == "invalid_data":
-			self.message = f"{resource.capitalize()} inválido/a"
+			self.message = f"{resource.capitalize()} inválido"
 			self.code = 400
 	
 	def json_response(self):
@@ -48,6 +48,8 @@ class AuthCustomError(Exception):
 			self.message = "El token ha sido revocado"
 		elif self.error == "not_token":
 			self.message = f"No se proporcionó ningún token{f': {details}' if details else ''}"
+		elif self.error == "password_required":
+			self.message = "Se requiere contraseña"
 		elif self.error == "password_mismatch":
 			self.message = "La contraseña no coincide"
 		elif self.error == "forbidden":

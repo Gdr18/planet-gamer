@@ -6,14 +6,17 @@ import './style/main.scss'
 
 import { LoginProvider } from './contexts/login-context'
 import { CartProvider } from './contexts/cart-context'
+import { GamesProvider } from './contexts/games-context'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
 		<BrowserRouter>
 			<LoginProvider>
-				<CartProvider>
-					<App />
-				</CartProvider>
+				<GamesProvider>
+					<CartProvider>
+						<App />
+					</CartProvider>
+				</GamesProvider>
 			</LoginProvider>
 		</BrowserRouter>
 	</React.StrictMode>

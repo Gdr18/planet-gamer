@@ -43,6 +43,9 @@ def login():
 	if not user:
 		raise ResourceCustomError("not_found", "usuario")
 	
+	if not login_data.get("password"):
+		raise AuthCustomError("password_required")
+	
 	if not check_password(user.password, login_data.get("password")):
 		raise AuthCustomError("password_mismatch")
 	
