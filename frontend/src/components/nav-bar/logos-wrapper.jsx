@@ -14,22 +14,22 @@ export default function LogosWrapper({ handlePlatforms }) {
 					: 'platforms-wrapper-responsive'
 			}
 		>
-			<Link to={'/p/ps5'} className='logos-wrapper'>
+			<Link to={'/platform/ps5'} className='logos-wrapper'>
 				<span className='span-catch'>PS5</span>
 				<Ps5Icon className='logos-icons-navigation' />
 			</Link>
 
-			<Link to={'/p/ps4'} className='logos-wrapper'>
+			<Link to={'/platform/ps4'} className='logos-wrapper'>
 				<span className='span-catch'>PS4</span>
 				<Ps4Icon className='logos-icons-navigation' />
 			</Link>
 
-			<Link to={'/p/xbox'} className='logos-wrapper'>
+			<Link to={'/platform/xbox'} className='logos-wrapper'>
 				<span className='span-catch'>Xbox Series</span>
 				<XboxIcon className='logos-icons-navigation' />
 			</Link>
 
-			<Link to={'/p/switch'} className='logos-wrapper'>
+			<Link to={'/platform/switch'} className='logos-wrapper'>
 				<span className='span-catch'>Switch</span>
 				<SwitchIcon className='logos-icons-navigation' />
 			</Link>

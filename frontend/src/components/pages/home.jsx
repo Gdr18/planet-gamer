@@ -22,16 +22,16 @@ export default function Home() {
 					<p>Videogames</p>
 				</div>
 				<div className='logos-wrapper'>
-					<Link to={'/p/ps5'}>
+					<Link to={'/platform/ps5'}>
 						<Ps5Icon className='logos-icons-home' />
 					</Link>
-					<Link to={'/p/ps4'}>
+					<Link to={'/platform/ps4'}>
 						<Ps4Icon className='logos-icons-home' />
 					</Link>
-					<Link to={'/p/xbox'}>
+					<Link to={'/platform/xbox'}>
 						<XboxIcon className='logos-icons-home' />
 					</Link>
-					<Link to={'/p/switch'}>
+					<Link to={'/platform/switch'}>
 						<SwitchIcon className='logos-icons-home' />
 					</Link>
 				</div>

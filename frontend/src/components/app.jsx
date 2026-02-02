@@ -17,8 +17,8 @@ export default function App() {
 		<div className='app'>
 			<Routes>
 				<Route exact path='/' element={<Home />} />
-				<Route path='/p/:platform' element={<Products />} />
-				<Route path='/g/:game' element={<Game />} />
+				<Route path='/platform/:platform' element={<Products />} />
+				<Route path='/game/:game' element={<Game />} />
 				<Route path='/contact' element={<Contact />} />
 				{loggedUser ? (
 					<Route path={`/profile/${loggedUser.id}`} element={<Profile />} />

@@ -10,6 +10,7 @@ import Footer from '../footer'
 
 import { useCartContext } from '../../contexts/cart-context'
 import { useLoginContext } from '../../contexts/login-context'
+import { useGamesContext } from '../../contexts/games-context'
 
 export default function Products() {
 	const params = useParams()
@@ -24,8 +25,10 @@ export default function Products() {
 	const [filterIcon, setFilterIcon] = useState(false)
 	const [loading, setLoading] = useState(true)
 
-	const { allGames, handleGamesBasket } = useCartContext()
+	const { handleGamesBasket } = useCartContext()
 	const { loggedUser } = useLoginContext()
+	const { games, getGames } = useGamesContext()
+
 	const platformMap = {
 		ps4: 'PlayStation 4',
 		ps5: 'PlayStation 5',
@@ -34,20 +37,10 @@ export default function Products() {
 	}
 
 	useEffect(() => {
-		renderingFirst()
-	}, [allGames])
-	useEffect(() => {
-		setFilteringGames([])
-		renderingFirst()
+		getGames(platform)
+		setLoading(false)
 	}, [platform])
 
-	const renderingFirst = () => {
-		const gamesList = allGames.filter(
-			game => game.platform === platformMap[platform]
-		)
-		setFilteringGames(gamesList)
-		setLoading(false)
-	}
 
 	const handleCheckbox = ({ target }) => {
 		setGamesPlatform({
@@ -55,7 +48,7 @@ export default function Products() {
 			[target.value]: !gamesPlatform[target.value]
 		})
 		if (target.checked) {
-			const gamesList = allGames.filter(
+			const gamesList = games.filter(
 				game => game.platform === platformMap[target.value]
 			)
 			setFilteringGames([...filteringGames, ...gamesList])
@@ -127,12 +120,12 @@ export default function Products() {
 							</div>
 						</div>
 						<div className='products-wrapper'>
-							{filteringGames.map(game => {
+							{games.map(game => {
 								return (
 									<div key={game.id} className='game-item'>
 										<div className='game-img'>
 											<Link to={`/g/${game.id}`}>
-												<img src={game.img} />
+												<img src={game.imgUrl} />
 											</Link>
 											<button
 												onClick={() => handleGamesBasket(game, loggedUser.id)}
