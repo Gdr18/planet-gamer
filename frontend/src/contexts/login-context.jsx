@@ -9,12 +9,11 @@ export const LoginProvider = ({ children }) => {
 	const [loggedUser, setLoggedUser] = useState('')
 
 	useEffect(() => {
-		if (loggedUser) return
 		rescuingUser()
-	}, [loggedUser])
+	}, [])
 
 	const rescuingUser = () => {
-		const token = localStorage.getItem('access_token')
+		const token = localStorage.getItem('refresh_token')
 		if (!token) return
 		axios
 			.get(`${import.meta.env.VITE_BACKEND_URL}/auth/refresh-token`, {
@@ -32,7 +31,6 @@ export const LoginProvider = ({ children }) => {
 	}
 
 	// ! Añadir limpieza del carrito al hacer logout
-	// ! Añadir token en la petición
 	const handleLogout = () => {
 		const token = localStorage.getItem('access_token')
 		if (!token) return
@@ -45,6 +43,8 @@ export const LoginProvider = ({ children }) => {
 			})
 			.then(() => {
 				setLoggedUser('')
+				localStorage.removeItem('access_token')
+				localStorage.removeItem('refresh_token')
 			})
 			.catch(error => {
 				console.log('Error logging out', error)

@@ -1,7 +1,6 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import axios from 'axios'
 import { useLoginContext } from './login-context'
-import { use } from 'react'
 
 const CartContext = React.createContext([[]])
 
@@ -13,17 +12,16 @@ export const CartProvider = ({ children }) => {
 	const [countProducts, setCountProducts] = useState(0)
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
-<<<<<<< HEAD
 	const { loggedUser } = useLoginContext()
 
 	useEffect(() => {
-		if (loggedUser && !basketItems) {
-			rescuingBasket(loggedUser.id)
+		if (!loggedUser) {
+			cleaningBasket()
+		} else {
+			mixingBasket()
 		}
 	}, [loggedUser])
 
-=======
->>>>>>> ce1ad6bcd3b6c2df17be7b8dfb6fcf122ec2d0bf
 	const requestBasket = (game, idLoggedUser, methodHTTP) => {
 		axios({
 			method: methodHTTP,
@@ -43,7 +41,7 @@ export const CartProvider = ({ children }) => {
 			})
 	}
 
-	const requestBaskets = (dataForm, methodHTTP) => {
+	const addingBaskets = (dataForm, methodHTTP) => {
 		axios({
 			method: methodHTTP,
 			url: `${import.meta.env.VITE_BACKEND_URL}/baskets`,
@@ -113,51 +111,57 @@ export const CartProvider = ({ children }) => {
 		setBasketItems([])
 	}
 
-	const rescuingBasket = idLoggedUser => {
-		const data = basketItems.map(basketItem => {
-			return {
-				basket_user_id: idLoggedUser,
-				basket_game_id: basketItem.id,
-				qty: basketItem.qty
-			}
-		})
-		axios
-			.get(`${import.meta.env.VITE_BACKEND_URL}/basket-games/${idLoggedUser}`, {
-				withCredentials: true
-			})
-			.then(response => {
-				if (response.data.length && !basketItems.length) {
-					setBasketItems(response.data)
-					setCountProducts(response.data.reduce((a, b) => a.qty + b.qty))
-					setTotal(
-						response.data.reduce((a, b) => a.price * a.qty + b.price * b.qty)
+	// !TODO: Desestructurar función dentro de useEffect
+	const mixingBasket = () => {
+		const data = basketItems.map(basketItem => ({
+			basket_user_id: loggedUser.id,
+			basket_game_id: basketItem.id,
+			qty: basketItem.qty
+		}))
+
+		if (loggedUser.basket.length && !basketItems.length) {
+			setBasketItems(loggedUser.basket)
+			setCountProducts(loggedUser.basket.reduce((a, b) => a.qty + b.qty))
+			setTotal(
+				loggedUser.basket.reduce((a, b) => a.price * a.qty + b.price * b.qty)
+			)
+		} else if (!loggedUser.basket.length && basketItems.length) {
+			addingBaskets(data, 'post')
+		} else if (loggedUser.basket.length && basketItems.length) {
+			// TODO: Comprobar si esto funciona
+			let mergedBaskets = [...basketItems, ...loggedUser.basket]
+			mergedBaskets = mergedBaskets.reduce((acc, current) => {
+				const itemInCart = acc.find(item => item.id === current.id)
+				if (!itemInCart) {
+					return acc.concat([current])
+				} else {
+					return acc.map(item =>
+						item.id === itemInCart.id
+							? { ...item, qty: item.qty + current.qty }
+							: item
 					)
-				} else if (!response.data.length && basketItems.length) {
-					requestBaskets(data, 'post')
-				} else if (response.data.length && basketItems.length) {
-					// TODO: Mezclar ambas listas de juegos.
-					requestBaskets({ basket_user_id: idLoggedUser }, 'delete')
-					requestBaskets(data, 'post')
 				}
-			})
+			}, [])
+			setBasketItems(mergedBaskets)
+			setCountProducts(mergedBaskets.reduce((a, b) => a.qty + b.qty))
+			setTotal(
+				mergedBaskets.reduce((a, b) => a.price * a.qty + b.price * b.qty)
+			)
+		}
 	}
 
 	return (
 		<CartContext.Provider
 			value={{
-				rescuingBasket,
-				requestBaskets,
+				mixingBasket,
+				addingBaskets,
 				basketItems,
 				total,
 				countProducts,
 				handleGamesBasket,
 				cleaningBasket,
 				checkingCheckout,
-<<<<<<< HEAD
-				setCheckingCheckout,
-=======
 				setCheckingCheckout
->>>>>>> ce1ad6bcd3b6c2df17be7b8dfb6fcf122ec2d0bf
 			}}
 		>
 			{children}

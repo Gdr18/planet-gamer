@@ -23,7 +23,7 @@
 	background-color: $gris-inputs;
 	padding: 5px;
 	border: 1px solid transparent;
-	border-radius: 2px;
+	border-radius: 4px;
 	transition: 0.3s ease-in-out;
 	-webkit-box-shadow: -2px 0px 32px 2px rgba(87, 86, 87, 1);
 	-moz-box-shadow: -2px 0px 32px 2px rgba(87, 86, 87, 1);
@@ -55,7 +55,7 @@
 	border: 0;
 	padding: 0;
 	transition: 0.5s ease-in-out;
-	border-radius: 3px;
+	border-radius: 4px;
 	-webkit-box-shadow: -2px 0px 32px 2px rgba(87, 86, 87, 1);
 	-moz-box-shadow: -2px 0px 32px 2px rgba(87, 86, 87, 1);
 	box-shadow: -2px 0px 32px 2px rgba(87, 86, 87, 1);
@@ -68,7 +68,7 @@
 
 @mixin button-checkout {
 	border: none;
-	border-radius: 2px;
+	border-radius: 4px;
 	background-color: $morado-inactivo;
 	color: aliceblue;
 	transition: 0.5s ease-in-out;

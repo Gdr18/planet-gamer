@@ -22,10 +22,25 @@
 		input {
 			@include input();
 		}
-		button {
-			width: 60px;
-			height: 30px;
-			@include button();
+		.login-form-actions {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			button {
+				width: 60px;
+				height: 30px;
+				@include button();
+			}
+			a {
+				color: $morado;
+				font-weight: 800;
+				transition: 0.5s ease-in-out;
+				&:hover {
+					cursor: pointer;
+					text-decoration: underline;
+					color: aliceblue;
+				}
+			}
 		}
 	}
 

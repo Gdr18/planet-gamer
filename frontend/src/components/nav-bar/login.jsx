@@ -17,7 +17,6 @@ export default function Login({ handleIconLogin, messageRegister }) {
 	const [register, setRegister] = useState(false)
 
 	const { loggedUser, setLoggedUser, handleLogout } = useLoginContext()
-	const { cleaningBasket } = useCartContext()
 
 	const handleChange = event => {
 		setData({
@@ -80,9 +79,9 @@ export default function Login({ handleIconLogin, messageRegister }) {
 			})
 	}
 
-	const handleClickLogout = () => {
+	// ! Añadir limpieza del carrito a login-context
+ 	const handleClickLogout = () => {
 		handleLogout()
-		cleaningBasket()
 		handleIconLogin()
 	}
 
@@ -108,8 +107,8 @@ export default function Login({ handleIconLogin, messageRegister }) {
 						placeholder='Contraseña'
 						value={data.password}
 						onChange={handleChange}
-						minLength={6}
-						maxLength={200}
+						minLength={7}
+						maxLength={70}
 						required
 					/>
 					{messageRegister ? (
@@ -127,6 +126,7 @@ export default function Login({ handleIconLogin, messageRegister }) {
 
 			{register && !loggedUser && (
 				<form className='login-name' onSubmit={handleSubmitRegister}>
+					<p>Registro</p>
 					<input
 						type='text'
 						name='name'
@@ -153,8 +153,8 @@ export default function Login({ handleIconLogin, messageRegister }) {
 						placeholder='Contraseña'
 						value={data.password}
 						onChange={handleChange}
-						minLength={6}
-						maxLength={200}
+						minLength={7}
+						maxLength={70}
 						required
 					/>
 
@@ -164,12 +164,17 @@ export default function Login({ handleIconLogin, messageRegister }) {
 						placeholder='Confirmar Contraseña'
 						value={data.confirmPassword}
 						onChange={handleChange}
-						minLength={6}
-						maxLength={200}
+						minLength={7}
+						maxLength={70}
 						required
 					/>
 					{errorText ? <div>{errorText}</div> : null}
-					<button type='submit'>Enviar</button>
+					<div className='login-form-actions'>
+						<button type='submit'>Enviar</button>
+						<a href='#' onClick={() => setRegister(false)}>
+							Login
+						</a>
+					</div>
 				</form>
 			)}
 
