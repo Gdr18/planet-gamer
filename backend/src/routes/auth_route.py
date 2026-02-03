@@ -72,7 +72,7 @@ def login_with_refresh():
 	if not exists_refresh_token(jti):
 		raise AuthCustomError("expired_token")
 	
-	user = UserModel.query.options(db.selectinload(UserModel.basket)).get(current_user.id)
+	user = UserModel.query.options(db.selectinload(UserModel.basket)).filter_by(id=current_user.id).first()
 	if not user:
 		raise ResourceCustomError("not_found", "usuario")
 	access_token = get_access_token(current_user.id, current_user.role)

@@ -52,3 +52,8 @@ def callback_invalid_token(msg: str) -> tuple:
 @jwt.unauthorized_loader
 def callback_no_token(msg: str) -> tuple:
 	return AuthCustomError("not_token", msg).json_response()
+
+
+@jwt.expired_token_loader
+def callback_expired_token(jwt_header: dict, jwt_payload: dict) -> tuple:
+	return AuthCustomError("expired_token").json_response()
