@@ -9,7 +9,6 @@ import NavBar from '../nav-bar/nav-bar'
 import Footer from '../footer'
 
 import { useCartContext } from '../../contexts/cart-context'
-import { useLoginContext } from '../../contexts/login-context'
 import { useGamesContext } from '../../contexts/games-context'
 
 export default function Products() {
@@ -26,7 +25,6 @@ export default function Products() {
 	const [loading, setLoading] = useState(true)
 
 	const { handleGamesBasket } = useCartContext()
-	const { loggedUser } = useLoginContext()
 	const { games, getGames } = useGamesContext()
 
 	const platformMap = {
@@ -124,11 +122,11 @@ export default function Products() {
 								return (
 									<div key={game.id} className='game-item'>
 										<div className='game-img'>
-											<Link to={`/g/${game.id}`}>
+											<Link to={`/game/${game.id}`}>
 												<img src={game.imgUrl} />
 											</Link>
 											<button
-												onClick={() => handleGamesBasket(game, loggedUser.id)}
+												onClick={() => handleGamesBasket(game)}
 											>
 												Añadir
 											</button>

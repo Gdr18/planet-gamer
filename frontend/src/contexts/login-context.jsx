@@ -6,11 +6,11 @@ const LoginContext = React.createContext([[]])
 export const useLoginContext = () => useContext(LoginContext)
 
 export const LoginProvider = ({ children }) => {
-	const [loggedUser, setLoggedUser] = useState('')
+	const [loggedUser, setLoggedUser] = useState({})
 
 	useEffect(() => {
-		rescuingUser()
-	}, [])
+		if (!Object.keys(loggedUser).length) rescuingUser()
+	}, [loggedUser])
 
 	const rescuingUser = () => {
 		const token = localStorage.getItem('refresh_token')
@@ -23,6 +23,7 @@ export const LoginProvider = ({ children }) => {
 				}
 			})
 			.then(response => {
+				localStorage.setItem('access_token', response.data.access_token)
 				setLoggedUser(response.data.user)
 			})
 			.catch(error => {
@@ -30,7 +31,6 @@ export const LoginProvider = ({ children }) => {
 			})
 	}
 
-	// ! Añadir limpieza del carrito al hacer logout
 	const handleLogout = () => {
 		const token = localStorage.getItem('access_token')
 		if (!token) return
@@ -42,7 +42,7 @@ export const LoginProvider = ({ children }) => {
 				}
 			})
 			.then(() => {
-				setLoggedUser('')
+				setLoggedUser({})
 				localStorage.removeItem('access_token')
 				localStorage.removeItem('refresh_token')
 			})

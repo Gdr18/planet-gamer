@@ -7,7 +7,6 @@ import NavBar from '../nav-bar/nav-bar'
 import Footer from '../footer'
 
 import { useCartContext } from '../../contexts/cart-context'
-import { useLoginContext } from '../../contexts/login-context'
 
 export default function Game() {
 	const params = useParams()
@@ -16,7 +15,6 @@ export default function Game() {
 	const [loading, setLoading] = useState(true)
 
 	const { handleGamesBasket } = useCartContext()
-	const { loggedUser } = useLoginContext()
 
 	useEffect(() => gettingGame(), [])
 
@@ -58,7 +56,7 @@ export default function Game() {
 								<div>{`PEGI: ${gameComplete.pegi}`}</div>
 							</div>
 							<h3>{`${gameComplete.price}€`}</h3>
-							<button onClick={() => handleGamesBasket(gameComplete, loggedUser.id)}>
+							<button onClick={() => handleGamesBasket(gameComplete)}>
 								Añadir
 							</button>
 						</div>

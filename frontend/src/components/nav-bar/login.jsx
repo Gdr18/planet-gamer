@@ -3,7 +3,6 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 
 import { useLoginContext } from '../../contexts/login-context'
-import { useCartContext } from '../../contexts/cart-context'
 
 export default function Login({ handleIconLogin, messageRegister }) {
 	const [data, setData] = useState({
@@ -79,7 +78,6 @@ export default function Login({ handleIconLogin, messageRegister }) {
 			})
 	}
 
-	// ! Añadir limpieza del carrito a login-context
  	const handleClickLogout = () => {
 		handleLogout()
 		handleIconLogin()
@@ -87,7 +85,7 @@ export default function Login({ handleIconLogin, messageRegister }) {
 
 	return (
 		<div className='login-box-wrapper'>
-			{!register && !loggedUser && (
+			{(!register && !Object.keys(loggedUser).length) && (
 				<form className='login-form' onSubmit={handleSubmitLogin}>
 					<p>Login</p>
 
@@ -124,7 +122,7 @@ export default function Login({ handleIconLogin, messageRegister }) {
 				</form>
 			)}
 
-			{register && !loggedUser && (
+			{register && !Object.keys(loggedUser).length && (
 				<form className='login-name' onSubmit={handleSubmitRegister}>
 					<p>Registro</p>
 					<input
@@ -178,7 +176,7 @@ export default function Login({ handleIconLogin, messageRegister }) {
 				</form>
 			)}
 
-			{loggedUser && (
+			{Object.keys(loggedUser).length && (
 				<div className='login-profile'>
 					<div className='welcome-title'>Bienvenido/a {loggedUser.name}</div>
 					<Link to={`/profile/${loggedUser.id}`} className='profile-title'>

@@ -10,13 +10,13 @@ export default function Basket({
 	setMessageRegister,
 	handleIconBasket
 }) {
-	const { total, basketItems, handleGamesBasket } = useCartContext()
+	const { total, basket, handleGamesBasket } = useCartContext()
 	const { loggedUser } = useLoginContext()
 
 	const navigate = useNavigate()
 
 	const handlePurchaseBotton = () => {
-		if (loggedUser !== '') {
+		if (Object.keys(loggedUser).length) {
 			setMessageRegister(false)
 			navigate(`/checkout/${loggedUser.id}`)
 			handleIconBasket()
@@ -29,40 +29,40 @@ export default function Basket({
 	return (
 		<div>
 			<div className='items-basket-wrapper'>
-				{basketItems.length ? <div className='basket-title'>Cesta</div> : null}
-				{basketItems.map(game => {
+				{basket.length ? <div className='basket-title'>Cesta</div> : null}
+				{basket.map(itemBasket => {
 					return (
-						<div key={game.id} className='item-wrapper'>
+						<div key={itemBasket.id || itemBasket.game?.id} className='item-wrapper'>
 							<div className='item-container'>
-								<img src={game.img} />
+								<img src={itemBasket.game?.imgUrl} />
 								<div className='qty-container'>
 									<VscDiffRemoved
 										className='basket-icon'
 										onClick={() =>
-											handleGamesBasket(game, loggedUser.id, 'remove')
+											handleGamesBasket(itemBasket, 'remove')
 										}
 									/>
-									<span className='title-item'>{game.qty}</span>
+									<span className='title-item'>{itemBasket.qty}</span>
 									<VscDiffAdded
 										className='basket-icon'
-										onClick={() => handleGamesBasket(game, loggedUser.id)}
+										onClick={() => handleGamesBasket(itemBasket)}
 									/>
 								</div>
-								<div className='title-item'>{game.title}</div>
+								<div className='title-item'>{itemBasket.game?.title || itemBasket.title}</div>
 								<div className='title-item'>{`${
-									(Math.round(game.price * game.qty * 100) / 100).toFixed(2)
+									(Math.round((itemBasket.game?.price || itemBasket.price) * itemBasket.qty * 100) / 100).toFixed(2)
 								}€`}</div>
 								<VscClose
 									className='basket-icon'
 									onClick={() =>
-										handleGamesBasket(game, loggedUser.id, 'delete')
+										handleGamesBasket(itemBasket, 'delete')
 									}
 								/>
 							</div>
 						</div>
 					)
 				})}
-				{basketItems.length ? (
+				{basket.length ? (
 					<div className='total-wrapper'>
 						<div>Total: <span>{`${(Math.round(total * 100) / 100).toFixed(2)}€`}</span></div>
 						<button onClick={() => handlePurchaseBotton()}>
@@ -70,7 +70,7 @@ export default function Basket({
 						</button>
 					</div>
 				) : null}
-				{!basketItems.length ? (
+				{!basket.length ? (
 					<div className='empty-basket'>La cesta está vacía</div>
 				) : null}
 			</div>
