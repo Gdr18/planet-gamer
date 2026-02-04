@@ -125,17 +125,18 @@ export const CartProvider = ({ children }) => {
 	const updateItemBasket = (itemBasket, operator) => {
 		let basketGameQty = 0
 		const games = basket.map(item => {
-			if (item.id === itemBasket.id) {
+			if (item.id  === itemBasket.id) {
 				basketGameQty = operator === 'remove' ? item.qty - 1 : item.qty + 1
-				return { ...item, qty: basketGameQty }
+				itemBasket = { ...item, qty: basketGameQty }
+				return itemBasket
 			} else {
 				return item
 			}
 		})
 		setTotal(
 			operator === 'remove'
-				? total - itemBasket.game.price * 1
-				: total + itemBasket.game.price * 1
+				? total - (itemBasket.game.price) * 1
+				: total + (itemBasket.game.price) * 1
 		)
 		setCountProducts(
 			operator === 'remove' ? countProducts - 1 : countProducts + 1
@@ -152,9 +153,9 @@ export const CartProvider = ({ children }) => {
 		) {
 			deleteItemBasket(itemBasket)
 		} else if (
-			(operator === 'add' && itemBasket.qty > 0) ||
+			(operator === 'add' && basket.find(item => item.game.id === itemBasket.game.id) ||
 			operator === 'remove'
-		) {
+		)) {
 			updateItemBasket(itemBasket, operator)
 		} else {
 			addItemBasket(itemBasket)
@@ -170,13 +171,13 @@ export const CartProvider = ({ children }) => {
 	return (
 		<CartContext.Provider
 			value={{
-				handlingBasket: executeBasketAction,
 				basket,
 				total,
 				countProducts,
+				checkingCheckout,
+				executeBasketAction,
 				handleGamesBasket,
 				cleaningBasket,
-				checkingCheckout,
 				setCheckingCheckout
 			}}
 		>

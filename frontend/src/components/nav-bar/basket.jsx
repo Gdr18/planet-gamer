@@ -32,9 +32,9 @@ export default function Basket({
 				{basket.length ? <div className='basket-title'>Cesta</div> : null}
 				{basket.map(itemBasket => {
 					return (
-						<div key={itemBasket.id || itemBasket.game?.id} className='item-wrapper'>
+						<div key={itemBasket.id} className='item-wrapper'>
 							<div className='item-container'>
-								<img src={itemBasket.game?.imgUrl} />
+								<img src={itemBasket.game.imgUrl} />
 								<div className='qty-container'>
 									<VscDiffRemoved
 										className='basket-icon'
@@ -48,9 +48,9 @@ export default function Basket({
 										onClick={() => handleGamesBasket(itemBasket)}
 									/>
 								</div>
-								<div className='title-item'>{itemBasket.game?.title || itemBasket.title}</div>
+								<div className='title-item'>{itemBasket.game.title}</div>
 								<div className='title-item'>{`${
-									(Math.round((itemBasket.game?.price || itemBasket.price) * itemBasket.qty * 100) / 100).toFixed(2)
+									(Math.round(itemBasket.game.price * itemBasket.qty * 100) / 100).toFixed(2)
 								}€`}</div>
 								<VscClose
 									className='basket-icon'
