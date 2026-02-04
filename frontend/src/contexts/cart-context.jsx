@@ -12,21 +12,19 @@ export const CartProvider = ({ children }) => {
 	const [countProducts, setCountProducts] = useState(0)
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
-	const { loggedUser, rescuingUser } = useLoginContext()
+	const { loggedUser, refreshToken } = useLoginContext()
 
 	useEffect(() => {
 		if (!Object.keys(loggedUser).length && basket.length)
 			return cleaningBasket()
 	}, [loggedUser])
 
-	useEffect(() => {
+	
 		const syncBaskets = async () => {
 			loggedUser?.basket.forEach(item => {
 				item.game.price = parseFloat(item.game.price)
 			})
-			if (JSON.stringify(basket) === JSON.stringify(loggedUser.basket)) {
-				console.log('Baskets are the same')
-			} else if (loggedUser?.basket.length && !basket.length) {
+			if (loggedUser?.basket.length && !basket.length) {
 				setBasket([...loggedUser.basket])
 				setCountProducts(
 					loggedUser.basket.reduce((acc, item) => acc + item.qty, 0)
@@ -43,7 +41,6 @@ export const CartProvider = ({ children }) => {
 					gameId: basketItem.game.id,
 					qty: basketItem.qty
 				}))
-				// Corrección: actualizar basket correctamente
 				const newBasket = []
 				for (const item of data) {
 					const itemPosted = await executeBasketAction(item, 'post')
@@ -51,41 +48,55 @@ export const CartProvider = ({ children }) => {
 				}
 				setBasket(newBasket)
 			} else if (loggedUser?.basket?.length && basket.length) {
+				const mergedBasket = []
+
 				for (const itemBasket of basket) {
-					for (const itemBasketUser of loggedUser.basket) {
-						if (itemBasket.game.id === itemBasketUser.game.id) {
-							const data = {
-								id: itemBasketUser.id,
-								gameId: itemBasketUser.game.id,
-								userId: loggedUser.id,
-								qty: itemBasketUser.qty + itemBasket.qty
-							}
-							await executeBasketAction(data, 'put')
-						} else {
-							const data = {
-								userId: loggedUser.id,
-								gameId: itemBasket.game.id,
-								qty: itemBasket.qty
-							}
-							await executeBasketAction(data, 'post')
+					const existingItem = loggedUser.basket.find(
+						item => item.game.id === itemBasket.game.id
+					)
+
+					if (existingItem) {
+						const data = {
+							id: existingItem.id,
+							gameId: existingItem.game.id,
+							userId: loggedUser.id,
+							qty: existingItem.qty + itemBasket.qty
 						}
+						const updatedItem = await executeBasketAction(data, 'put')
+						mergedBasket.push(updatedItem)
+					} else {
+						const data = {
+							userId: loggedUser.id,
+							gameId: itemBasket.game.id,
+							qty: itemBasket.qty
+						}
+						const newItem = await executeBasketAction(data, 'post')
+						mergedBasket.push(newItem)
 					}
 				}
-				setBasket([...loggedUser.basket])
-				setCountProducts(
-					loggedUser.basket.reduce((acc, item) => acc + item.qty, 0)
-				)
+
+				for (const itemDb of loggedUser.basket) {
+					if (!mergedBasket.find(item => item.id === itemDb.id)) {
+						mergedBasket.push(itemDb)
+					}
+				}
+
+				setBasket([...mergedBasket])
+				setCountProducts(mergedBasket.reduce((acc, item) => acc + item.qty, 0))
 				setTotal(
-					loggedUser.basket.reduce(
+					mergedBasket.reduce(
 						(acc, item) => acc + item.game.price * item.qty,
 						0
 					)
 				)
 			}
 		}
-
-		loggedUser?.basket && syncBaskets()
-	}, [loggedUser?.basket])
+		if (
+			loggedUser?.basket &&
+			JSON.stringify(basket) !== JSON.stringify(loggedUser.basket)
+		) {
+			syncBaskets()
+		}
 
 	const executeBasketAction = async (basketItemData, methodHTTP) => {
 		const token = localStorage.getItem('access_token')
@@ -105,8 +116,8 @@ export const CartProvider = ({ children }) => {
 				return response.data
 			})
 			.catch(async error => {
-				if (error.response?.data === 'expired_token') {
-					await rescuingUser()
+				if (error.response?.data?.err === 'expired_token') {
+					await refreshToken()
 					executeBasketAction(basketItemData, methodHTTP)
 				}
 				console.log(error, 'error en la solicitud a basket')
@@ -163,8 +174,13 @@ export const CartProvider = ({ children }) => {
 			operator === 'remove' ? countProducts - 1 : countProducts + 1
 		)
 		setBasket([...games])
-		Object.keys(loggedUser).length &&
-			executeBasketAction({ ...itemBasket, qty: basketGameQty }, 'put')
+		const data = {
+			id: itemBasket.id,
+			gameId: itemBasket.game.id,
+			userId: loggedUser.id,
+			qty: basketGameQty
+		}
+		Object.keys(loggedUser).length && executeBasketAction(data, 'put')
 	}
 
 	const handleGamesBasket = (itemBasket, operator = 'add') => {
