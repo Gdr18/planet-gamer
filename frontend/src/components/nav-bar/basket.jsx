@@ -10,7 +10,7 @@ export default function Basket({
 	setMessageRegister,
 	handleIconBasket
 }) {
-	const { total, basket, handleGamesBasket } = useCartContext()
+	const { total, basket, updateItemBasket, deleteItemBasket } = useCartContext()
 	const { loggedUser } = useLoginContext()
 
 	const navigate = useNavigate()
@@ -39,13 +39,13 @@ export default function Basket({
 									<VscDiffRemoved
 										className='basket-icon'
 										onClick={() =>
-											handleGamesBasket(itemBasket, 'remove')
+											updateItemBasket(itemBasket, 'remove')
 										}
 									/>
 									<span className='title-item'>{itemBasket.qty}</span>
 									<VscDiffAdded
 										className='basket-icon'
-										onClick={() => handleGamesBasket(itemBasket)}
+										onClick={() => updateItemBasket(itemBasket, 'add')}
 									/>
 								</div>
 								<div className='title-item'>{itemBasket.game.title}</div>
@@ -55,7 +55,7 @@ export default function Basket({
 								<VscClose
 									className='basket-icon'
 									onClick={() =>
-										handleGamesBasket(itemBasket, 'delete')
+										deleteItemBasket(itemBasket)
 									}
 								/>
 							</div>

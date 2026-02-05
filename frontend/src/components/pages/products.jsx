@@ -24,7 +24,7 @@ export default function Products() {
 	const [filterIcon, setFilterIcon] = useState(false)
 	const [loading, setLoading] = useState(true)
 
-	const { handleGamesBasket } = useCartContext()
+	const { addItemBasket } = useCartContext()
 	const { games, getGames } = useGamesContext()
 
 	const platformMap = {
@@ -38,7 +38,6 @@ export default function Products() {
 		getGames(platform)
 		setLoading(false)
 	}, [platform])
-
 
 	const handleCheckbox = ({ target }) => {
 		setGamesPlatform({
@@ -63,7 +62,7 @@ export default function Products() {
 	}
 
 	return (
-		<div>
+		<>
 			<NavBar />
 			<div className={loading ? 'spinner-class' : 'products-container'}>
 				{loading ? (
@@ -125,9 +124,7 @@ export default function Products() {
 											<Link to={`/game/${game.id}`}>
 												<img src={game.imgUrl} />
 											</Link>
-											<button
-												onClick={() => handleGamesBasket(game)}
-											>
+											<button onClick={() => addItemBasket(game)}>
 												Añadir
 											</button>
 											<div className='title-price'>
@@ -145,6 +142,6 @@ export default function Products() {
 				)}
 			</div>
 			{!loading ? <Footer /> : null}
-		</div>
+		</>
 	)
 }
