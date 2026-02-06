@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react'
 import axios from 'axios'
-import equal from 'fast-deep-equal/es6'
 
 import { useLoginContext } from './login-context'
 
@@ -17,81 +16,64 @@ export const CartProvider = ({ children }) => {
 	const { loggedUser, refreshToken } = useLoginContext()
 
 	useEffect(() => {
-		if (!Object.keys(loggedUser).length) cleaningBasket()
-	}, [loggedUser])
-
-	useEffect(() => {
-		if (!Object.keys(loggedUser).length) return
-		console.log('Syncing baskets...')
-		syncBaskets()
+		if (Object.keys(loggedUser).length) {
+			syncBaskets()
+		} else {
+			cleaningBasket()
+		}
 	}, [loggedUser.id])
 
 	const syncBaskets = async () => {
-		if (loggedUser.basket.length && equal(loggedUser.basket, basket)) return
-
+		let basketUpdated = []
 		if (loggedUser.basket.length && !basket.length) {
-			setBasket([...loggedUser.basket])
-			setCountProducts(
-				loggedUser.basket.reduce((acc, item) => acc + item.qty, 0)
-			)
-			setTotal(
-				loggedUser.basket.reduce(
-					(acc, item) => acc + item.game.price * item.qty,
-					0
-				)
-			)
+			basketUpdated = [...loggedUser.basket]
+			
 		} else if (!loggedUser.basket.length && basket.length) {
-			const data = basket.map(basketItem => ({
-				userId: loggedUser.id,
-				gameId: basketItem.game.id,
-				qty: basketItem.qty
-			}))
-			const newBasket = []
-			for (const item of data) {
-				const itemPosted = await executeBasketAction(item, 'post')
-				newBasket.push(itemPosted)
-			}
-			setBasket(newBasket)
-		} else if (loggedUser.basket.length && basket.length) {
-			const mergedBasket = []
-
-			for (const itemBasket of basket) {
-				const existingItem = loggedUser.basket.find(
-					item => item.game.id === itemBasket.game.id
-				)
-
-				if (existingItem) {
-					const data = {
-						id: existingItem.id,
-						gameId: existingItem.game.id,
-						userId: loggedUser.id,
-						qty: existingItem.qty + itemBasket.qty
-					}
-					const updatedItem = await executeBasketAction(data, 'put')
-					mergedBasket.push(updatedItem)
-				} else {
-					const data = {
-						userId: loggedUser.id,
-						gameId: itemBasket.game.id,
-						qty: itemBasket.qty
-					}
-					const newItem = await executeBasketAction(data, 'post')
-					mergedBasket.push(newItem)
-				}
-			}
-
-			for (const itemDb of loggedUser.basket) {
-				if (!mergedBasket.find(item => item.id === itemDb.id)) {
-					mergedBasket.push(itemDb)
-				}
-			}
-
-			setBasket([...mergedBasket])
-			setCountProducts(mergedBasket.reduce((acc, item) => acc + item.qty, 0))
-			setTotal(
-				mergedBasket.reduce((acc, item) => acc + item.game.price * item.qty, 0)
+			const posted = await Promise.all(
+				basket.map(item => {
+					const payload = { ...item, userId: loggedUser.id }
+					return executeBasketAction(payload, 'post')
+				})
 			)
+			basketUpdated = [...posted]
+
+		} else if (loggedUser.basket.length && basket.length) {
+			const merged = []
+			const usedLocalIds = new Set()
+
+			const updatedFromDb = await Promise.all(
+				loggedUser.basket.map(async item => {
+					const localItem = basket.find(b => b.game.id === item.game.id)
+					if (localItem) {
+						usedLocalIds.add(localItem.game.id)
+						return executeBasketAction(
+							{ ...item, qty: item.qty + localItem.qty },
+							'put'
+						)
+					}
+					return item
+				})
+			)
+
+			merged.push(...updatedFromDb)
+
+			const localOnly = basket.filter(b => !usedLocalIds.has(b.game.id))
+			const postedLocalOnly = await Promise.all(
+				localOnly.map(item => {
+					const payload = { ...item, userId: loggedUser.id }
+					return executeBasketAction(payload, 'post')
+				})
+			)
+
+			merged.push(...postedLocalOnly)
+			basketUpdated = merged
 		}
+
+		setBasket([...basketUpdated])
+		setCountProducts(basketUpdated.reduce((acc, item) => acc + item.qty, 0))
+		setTotal(
+			basketUpdated.reduce((acc, item) => acc + item.game.price * item.qty, 0)
+		)
 	}
 
 	const executeBasketAction = async (basketItemData, methodHTTP) => {
@@ -127,8 +109,7 @@ export const CartProvider = ({ children }) => {
 		)
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
-		Object.keys(loggedUser).length &&
-			(await executeBasketAction(itemBasket, 'delete'))
+		itemBasket.userId && (await executeBasketAction(itemBasket, 'delete'))
 	}
 
 	const addItemBasket = async newItem => {
@@ -138,21 +119,19 @@ export const CartProvider = ({ children }) => {
 			return
 		}
 		let itemBasket = {
-			game: { ...newItem },
 			id: newItem.id,
+			userId: loggedUser.id || null,
+			gameId: newItem.id,
+			game: { ...newItem },
 			qty: 1
 		}
 		setTotal(total + itemBasket.game.price * 1)
 		setCountProducts(countProducts + 1)
 
-		if (Object.keys(loggedUser).length) {
-			const payload = {
-				userId: loggedUser.id,
-				gameId: newItem.id,
-				qty: 1
-			}
-			itemBasket = await executeBasketAction(payload, 'post')
+		if (itemBasket.userId) {
+			itemBasket = await executeBasketAction(itemBasket, 'post')
 		}
+
 		setBasket([...basket, itemBasket])
 	}
 
@@ -162,11 +141,10 @@ export const CartProvider = ({ children }) => {
 			return
 		}
 
-		let basketGameQty = 0
 		const games = basket.map(item => {
 			if (item.game.id === itemBasket.game.id) {
-				basketGameQty = operator === 'remove' ? item.qty - 1 : item.qty + 1
-				itemBasket = { ...item, qty: basketGameQty }
+				const newQty = operator === 'add' ? item.qty + 1 : item.qty - 1
+				itemBasket = { ...item, qty: newQty }
 				return itemBasket
 			} else {
 				return item
@@ -174,23 +152,15 @@ export const CartProvider = ({ children }) => {
 		})
 
 		setTotal(
-			operator === 'remove'
-				? total - itemBasket.game.price * 1
-				: total + itemBasket.game.price * 1
+			operator === 'add'
+				? total + itemBasket.game.price * 1
+				: total - itemBasket.game.price * 1
 		)
-		setCountProducts(
-			operator === 'remove' ? countProducts - 1 : countProducts + 1
-		)
+		setCountProducts(operator === 'add' ? countProducts + 1 : countProducts - 1)
 		setBasket([...games])
 
-		if (Object.keys(loggedUser).length) {
-			const data = {
-				id: itemBasket.id,
-				gameId: itemBasket.game.id,
-				userId: loggedUser.id,
-				qty: basketGameQty
-			}
-			await executeBasketAction(data, 'put')
+		if (itemBasket.userId) {
+			await executeBasketAction(itemBasket, 'put')
 		}
 	}
 
