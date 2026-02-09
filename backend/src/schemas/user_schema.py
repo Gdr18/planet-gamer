@@ -23,6 +23,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 	phone_number = ma.String(
 		validate=validate.Regexp(regex=r"^(?:\+34\s?)?(6\d{8}|7[1-9]\d{7})$",
 		                         error="El campo 'phone_number' no cumple con el patrón, ejemplos válidos: '666666666' o '+34666666666'"),
+		data_key="phoneNumber",
 		allow_none=True
 	)
 	role = ma.Function(lambda obj: obj.role)
