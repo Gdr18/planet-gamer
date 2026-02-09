@@ -20,15 +20,15 @@ export default function App() {
 				<Route path='/platform/:platform' element={<Products />} />
 				<Route path='/game/:game' element={<Game />} />
 				<Route path='/contact' element={<Contact />} />
-				{loggedUser ? (
+				{Object.keys(loggedUser).length ? (
 					<Route path={`/profile/${loggedUser.id}`} element={<Profile />} />
 				) : null}
-				{loggedUser ? (
+				{Object.keys(loggedUser).length ? (
 					<Route path={`/checkout/${loggedUser.id}`} element={<Checkout />} />
 				) : null}
-				{loggedUser.admin ? (
+				{Object.keys(loggedUser).length && loggedUser.role < 3 ? (
 					<Route
-						path={`/game-manager/${loggedUser.id}`}
+						path={`/game-manager`}
 						element={<GameManager />}
 					/>
 				) : null}
