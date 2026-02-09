@@ -125,17 +125,17 @@ export default function Products() {
 											<Link to={`/game/${game.id}`}>
 												<img src={game.imgUrl} />
 											</Link>
+											<div className='title-price'>
+												<Link to={`/g/${game.id}`}>
+													<strong className='title'>{game.title}</strong>
+												</Link>
+												<div className='price'>{`${game.price}€`}</div>
+											</div>
 											<button
 												onClick={() => handleGamesBasket(game)}
 											>
 												Añadir
 											</button>
-											<div className='title-price'>
-												<Link to={`/g/${game.id}`}>
-													<div className='title'>{game.title}</div>
-												</Link>
-												<div className='price'>{`${game.price}€`}</div>
-											</div>
 										</div>
 									</div>
 								)

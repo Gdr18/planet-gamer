@@ -20,10 +20,9 @@ export default function Game() {
 
 	const gettingGame = () => {
 		axios
-			.get(
-				`${import.meta.env.VITE_BACKEND_URL}/game/${idGame}`,
-				{ withCredentials: true }
-			)
+			.get(`${import.meta.env.VITE_BACKEND_URL}/games/${idGame}`, {
+				withCredentials: true
+			})
 			.then(response => {
 				setGameComplete(response.data)
 				setLoading(false)
@@ -34,7 +33,7 @@ export default function Game() {
 	}
 
 	return (
-		<div>
+		<div className='game-page'>
 			<NavBar />
 			<div className={loading ? 'spinner-class' : 'game-page-container'}>
 				{loading ? (
@@ -48,21 +47,31 @@ export default function Game() {
 				) : (
 					<div className='game-page-wrapper'>
 						<div className='image-wrapper'>
-							<img src={gameComplete.img}></img>
+							<img src={gameComplete.imgUrl} alt={gameComplete.title}></img>
 							<div className='details-wrapper'>
-								<div>{`Platform: ${gameComplete.platform}`}</div>
-								<div>{`Género: ${gameComplete.gender}`}</div>
-								<div>{`Lanzamiento: ${gameComplete.release}`}</div>
-								<div>{`PEGI: ${gameComplete.pegi}`}</div>
+								<div>
+									<strong>Platform:</strong> {gameComplete.platform}
+								</div>
+								<div>
+									<strong>Género:</strong> {gameComplete.gender}
+								</div>
+								<div>
+									<strong>Lanzamiento:</strong> {gameComplete.release}
+								</div>
+								<div>
+									<strong>PEGI:</strong> {gameComplete.pegi}
+								</div>
 							</div>
-							<h3>{`${gameComplete.price}€`}</h3>
-							<button onClick={() => handleGamesBasket(gameComplete)}>
-								Añadir
-							</button>
 						</div>
 						<div className='text-wrapper'>
 							<div className='title-game-page'>{gameComplete.title}</div>
 							<p className='description-wrapper'>{gameComplete.description}</p>
+							<div className='price-button-wrapper'>
+								<h3>{`${gameComplete.price}€`}</h3>
+								<button onClick={() => handleGamesBasket(gameComplete)}>
+									Añadir
+								</button>
+							</div>
 						</div>
 					</div>
 				)}
