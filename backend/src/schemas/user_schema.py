@@ -55,7 +55,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 
 
 class UserBasketSchema(UserSchema):
-	basket = ma.Nested(BasketItemSchema, many=True, exclude=["user_id"], dump_only=True)
+	basket = ma.Nested(BasketItemSchema, many=True, dump_only=True)
 
 
 class UserFullSchema(UserBasketSchema):

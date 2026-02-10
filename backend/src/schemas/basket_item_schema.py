@@ -16,7 +16,6 @@ class BasketItemSchema(ma.SQLAlchemyAutoSchema):
 	class Meta:
 		model = BasketItemModel
 		dump_only = ["id", "game"]
-		load_only = ["game_id"]
 		unknown = "exclude"
 	
 	@pre_load

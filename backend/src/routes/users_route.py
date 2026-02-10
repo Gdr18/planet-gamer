@@ -5,10 +5,18 @@ from src.core.api_responses import response_success
 from src.core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
 from src.core.extensions import db
 from ..models.user_model import UserModel
-from ..schemas.user_schema import UserSchema, UserFullSchema
+from ..schemas.user_schema import UserSchema, UserFullSchema, UserBasketSchema
 from ..services.bcrypt_service import hash_password, check_password
 
 users = Blueprint("users", __name__, url_prefix="/users")
+
+
+@users.route("/me", methods=["GET"])
+@jwt_required()
+def get_my_user():
+	user = UserModel.query.options(db.selectinload(UserModel.basket)).filter_by(id=current_user.id).first()
+	user_schema = UserBasketSchema()
+	return user_schema.jsonify(user)
 
 
 @users.route("/", methods=["GET"])
