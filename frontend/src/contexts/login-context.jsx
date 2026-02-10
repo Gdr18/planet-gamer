@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react'
 import axios from 'axios'
 
+import { refreshToken } from '../services/api-client'
+
 const LoginContext = React.createContext([[]])
 
 export const useLoginContext = () => useContext(LoginContext)
@@ -27,34 +29,27 @@ export const LoginProvider = ({ children }) => {
 			})
 			.catch(async error => {
 				if (error.response?.data.err === 'expired_token') {
-					await refreshToken()
+					await refreshUser()
 					getUser()
 				}
 				console.log('Error getting user', error)
 			})
 	}
 
-	const refreshToken = () => {
+	// TODO: No funcional, llamada en api-client no puede setear user
+	const refreshUser = () => {
 		const token = localStorage.getItem('refresh_token')
 		if (!token) return
-		return axios
-			.get(`${import.meta.env.VITE_BACKEND_URL}/auth/refresh-token`, {
-				withCredentials: true,
-				headers: {
-					Authorization: `Bearer ${token}`
-				}
-			})
+		return refreshToken()
 			.then(response => {
-				localStorage.setItem('access_token', response.data.access_token)
-				setLoggedUser(response.data.user)
+				localStorage.setItem('access_token', response.access_token)
+				setLoggedUser(response.user)
 			})
 			.catch(error => {
 				if (error.response?.data.err === 'expired_token') {
 					setLoggedUser({})
-					localStorage.removeItem('access_token')
-					localStorage.removeItem('refresh_token')
 				}
-				console.log('Rescuing error', error)
+				console.log('Rescuing user error', error)
 			})
 	}
 
@@ -76,7 +71,7 @@ export const LoginProvider = ({ children }) => {
 			.catch(async error => {
 				console.log('Error logging out', error)
 				if (error.response?.data.err === 'expired_token') {
-					await refreshToken()
+					await refreshUser()
 					handleLogout()
 				}
 			})
@@ -89,7 +84,7 @@ export const LoginProvider = ({ children }) => {
 				setLoggedUser,
 				handleLogout,
 				getUser,
-				refreshToken
+				refreshUser
 			}}
 		>
 			{children}

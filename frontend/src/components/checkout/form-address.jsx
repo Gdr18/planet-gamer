@@ -1,6 +1,10 @@
 import { useEffect } from 'react'
-import axios from 'axios'
 import { useForm } from 'react-hook-form'
+
+import {
+	executeAddressAction,
+	executeUserAction
+} from '../../services/api-client'
 
 export default function FormAddress({
 	setSteps,
@@ -12,7 +16,6 @@ export default function FormAddress({
 }) {
 	const {
 		register,
-		handleSubmit,
 		formState: { errors },
 		reset
 	} = useForm({
@@ -27,41 +30,31 @@ export default function FormAddress({
 		}
 	})
 
-	useEffect(() => {
-		axios
-			.get(
-				`${import.meta.env.VITE_BACKEND_URL}/address-user/${loggedUser.id}`,
-				{ withCredentials: true }
-			)
+	useEffect(async () => {
+		if (loggedUser.addresses) return
+
+		executeAddressAction(loggedUser, 'get')
 			.then(response => {
-				if (Object.keys(response.data).length > 0) {
-					reset({
-						street: response.data.street,
-						second_line_street: response.data.second_line_street,
-						postal_code: response.data.postal_code,
-						city: response.data.city
+				const addressData = response.data
+
+				if (addressData.length) {
+					let addressDefault = addressData[0]
+					addressData.forEach(address => {
+						if (address.default) {
+							addressDefault = address
+						}
 					})
+					reset({ ...addressDefault })
+					setAddress(addressDefault)
 				}
 			})
 			.catch(error => {
-				console.log(error, 'algo ha salido mal con el getting de address')
+				console.log(error, 'algo ha salido mal con el getting de dirección')
 			})
 	}, [])
 
-	const puttingUser = dataForm => {
-		axios
-			.put(
-				`${import.meta.env.VITE_BACKEND_URL}/user/${loggedUser.id}`,
-				{
-					email: loggedUser.email,
-					name: dataForm.name,
-					password: '',
-					admin: loggedUser.admin,
-					surnames: dataForm.surnames,
-					phone_number: dataForm.phone_number
-				},
-				{ withCredentials: true }
-			)
+	const updateUser = dataForm => {
+		executeUserAction({ ...loggedUser, ...dataForm }, 'put')
 			.then(response => {
 				setUser(response.data)
 			})
@@ -70,58 +63,40 @@ export default function FormAddress({
 			})
 	}
 
-	const postingAddress = dataForm => {
-		axios
-			.post(
-				`${import.meta.env.VITE_BACKEND_URL}/address/${loggedUser.id}`,
-				{
-					street: dataForm.street,
-					second_line_street: dataForm.second_line_street,
-					postal_code: dataForm.postal_code,
-					city: dataForm.city
-				},
-				{ withCredentials: true }
-			)
-			.then(response => {
-				setAddress(response.data)
-			})
-			.catch(error => {
-				console.log(error, 'algo ha salido mal con el posting de address')
-			})
+	const addAddress = async dataForm => {
+		const formatedData = { ...dataForm, userId: loggedUser.id }
+		const postData = await executeAddressAction(formatedData, 'post')
+
+		if (postData) setAddress(postData)
 	}
 
-	// const handleChangeAddress = (event) => {
-	//     setAddress({
-	//         ...address,
-	//         [event.target.name]: event.target.value
-	//     });
-	// }
 
-	// const handleChangeUser = (event) => {
-	//     setUser({
-	//         ...user,
-	//         [event.target.name]: event.target.value
-	//     });
-	// }
-
-	// const handleSubmit = (event) => {
-	//     event.preventDefault();
-	//     setSteps(2);
-	//     postingAddress();
-	//     puttingUser();
-	// }
+	// TODO: Mejorar esta función
+	const handleSubmit = data => {
+		setSteps(2)
+		const { name, surnames, phoneNumber, ...dataAddress } = data
+		if (
+			dataAddress.street !== address.street ||
+			dataAddress.secondLineStreet !== address.secondLineStreet ||
+			dataAddress.postalCode !== address.postalCode ||
+			dataAddress.city !== address.city
+		) {
+			addAddress(dataAddress)
+		}
+		if (
+			phoneNumber !== loggedUser.phoneNumber ||
+			name !== loggedUser.name ||
+			surnames !== loggedUser.surnames
+		) {
+			const formattedData = { ...loggedUser, name, surnames, phoneNumber }
+			updateUser(formattedData)
+		}
+	}
 
 	return (
 		<div className='address-container'>
 			<div className='title-checkout'>Datos Envío</div>
-			<form
-				className='form-address-wrapper'
-				onSubmit={handleSubmit(data => {
-					setSteps(2)
-					postingAddress(data)
-					puttingUser(data)
-				})}
-			>
+			<form className='form-address-wrapper' onSubmit={handleSubmit}>
 				<div className='one-column'>
 					<input
 						type='text'

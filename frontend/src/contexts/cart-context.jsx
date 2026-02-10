@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react'
-import axios from 'axios'
 
 import { useLoginContext } from './login-context'
+import { executeBasketAction } from '../services/api-client'
+import { syncFromLocal, syncMergeBaskets } from '../services/sync-baskets'
 
 const CartContext = React.createContext([[]])
 
@@ -13,7 +14,7 @@ export const CartProvider = ({ children }) => {
 	const [countProducts, setCountProducts] = useState(0)
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
-	const { loggedUser, refreshToken } = useLoginContext()
+	const { loggedUser } = useLoginContext()
 
 	useEffect(() => {
 		if (Object.keys(loggedUser).length) {
@@ -23,50 +24,14 @@ export const CartProvider = ({ children }) => {
 		}
 	}, [loggedUser.id])
 
-	const syncBaskets = async () => {
+	const syncBaskets = () => {
 		let basketUpdated = []
 		if (loggedUser.basket.length && !basket.length) {
 			basketUpdated = [...loggedUser.basket]
-			
 		} else if (!loggedUser.basket.length && basket.length) {
-			const posted = await Promise.all(
-				basket.map(item => {
-					const payload = { ...item, userId: loggedUser.id }
-					return executeBasketAction(payload, 'post')
-				})
-			)
-			basketUpdated = [...posted]
-
+			basketUpdated = syncFromLocal(basket, loggedUser)
 		} else if (loggedUser.basket.length && basket.length) {
-			const merged = []
-			const usedLocalIds = new Set()
-
-			const updatedFromDb = await Promise.all(
-				loggedUser.basket.map(async item => {
-					const localItem = basket.find(b => b.game.id === item.game.id)
-					if (localItem) {
-						usedLocalIds.add(localItem.game.id)
-						return executeBasketAction(
-							{ ...item, qty: item.qty + localItem.qty },
-							'put'
-						)
-					}
-					return item
-				})
-			)
-
-			merged.push(...updatedFromDb)
-
-			const localOnly = basket.filter(b => !usedLocalIds.has(b.game.id))
-			const postedLocalOnly = await Promise.all(
-				localOnly.map(item => {
-					const payload = { ...item, userId: loggedUser.id }
-					return executeBasketAction(payload, 'post')
-				})
-			)
-
-			merged.push(...postedLocalOnly)
-			basketUpdated = merged
+			basketUpdated = syncMergeBaskets(loggedUser, basket)
 		}
 
 		setBasket([...basketUpdated])
@@ -74,32 +39,6 @@ export const CartProvider = ({ children }) => {
 		setTotal(
 			basketUpdated.reduce((acc, item) => acc + item.game.price * item.qty, 0)
 		)
-	}
-
-	const executeBasketAction = async (basketItemData, methodHTTP) => {
-		const token = localStorage.getItem('access_token')
-		if (!token) return
-
-		return axios({
-			method: methodHTTP,
-			url: `${import.meta.env.VITE_BACKEND_URL}/basket-items/${methodHTTP !== 'post' ? basketItemData.id : ''}`,
-			data: methodHTTP !== 'delete' ? basketItemData : null,
-			withCredentials: true,
-			headers: {
-				Authorization: `Bearer ${token}`
-			}
-		})
-			.then(response => {
-				console.log(response.data, 'Request Basket Items Successfully')
-				return response.data
-			})
-			.catch(async error => {
-				if (error.response?.data?.err === 'expired_token') {
-					await refreshToken()
-					executeBasketAction(basketItemData, methodHTTP)
-				}
-				console.log(error, 'error en la solicitud a basket')
-			})
 	}
 
 	const deleteItemBasket = async itemBasket => {

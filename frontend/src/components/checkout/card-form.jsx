@@ -1,15 +1,14 @@
 import { useState } from 'react'
-import axios from 'axios'
-
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
+import { executeOrderAction, deleteBasketsUser } from '../../services/api-client'
 import { useCartContext } from '../../contexts/cart-context'
 
 export default function CardForm({ setSteps, loggedUser, setOrder }) {
 	const stripe = useStripe()
 	const elements = useElements()
 
-	const { cleaningBasket, setCheckingCheckout, countProducts, total, requestBaskets } =
+	const { cleaningBasket, setCheckingCheckout, countProducts, total } =
 		useCartContext()
 
 	const [errorText, setErrorText] = useState('')
@@ -55,26 +54,20 @@ export default function CardForm({ setSteps, loggedUser, setOrder }) {
 			setErrorText(error.message)
 			setDisabledButton(false)
 		} else {
-			axios
-				.post(
-					`${import.meta.env.VITE_BACKEND_URL}/order`,
-					{
-						total,
-						qty: countProducts,
-						order_user_id: loggedUser.id
-					},
-					{ withCredentials: true }
-				)
-				.then(response => {
-					setCheckingCheckout(true)
-					cleaningBasket()
-					requestBaskets({ basket_user_id: loggedUser.id }, 'delete')
-					setSteps(3)
-					setOrder(response.data)
-				})
-				.catch(error => {
-					console.log(error, 'error en el posteo de la orden')
-				})
+			const data = await executeOrderAction(
+				{
+					total,
+					qty: countProducts,
+					userId: loggedUser.id
+				},
+				'post'
+			)
+			
+			setCheckingCheckout(true)
+			cleaningBasket()
+			deleteBasketsUser(loggedUser.id)
+			setSteps(3)
+			setOrder(data)
 		}
 	}
 
