@@ -73,10 +73,18 @@ def handle_item_basket(basket_item_id):
 	return basket_item_schema.jsonify(basket_item), 200
 
 
-@basket_items.route("/users/<user_id>", methods=["GET"])
+@basket_items.route("/users/<user_id>", methods=["GET", "DELETE"])
 @jwt_required()
-def get_basket_user_id(user_id):
+def handle_basket_user_id(user_id):
 	if current_user.role != RoleType.ADMIN.value and current_user.id != int(user_id):
 		raise AuthCustomError("forbidden_action", "Acceder a la cesta de otro usuario")
+	
 	user_basket = BasketItemModel.query.filter_by(user_id=user_id).all()
+	
+	if request.method == "DELETE":
+		for item in user_basket:
+			db.session.delete(item)
+		db.session.commit()
+		return response_success("la cesta del usuario", "eliminada")
+	
 	return basket_items_schema.jsonify(user_basket)
