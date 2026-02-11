@@ -1,10 +1,7 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
-import {
-	executeAddressAction,
-	executeUserAction
-} from '../../services/api-client'
+import { getAddressesUser, executeUserAction, executeAddressAction } from '../../services/api-client'
 
 export default function FormAddress({
 	setSteps,
@@ -12,7 +9,8 @@ export default function FormAddress({
 	setUser,
 	address,
 	setAddress,
-	loggedUser
+	loggedUser,
+	refreshUser
 }) {
 	const {
 		register,
@@ -22,10 +20,10 @@ export default function FormAddress({
 		defaultValues: {
 			name: user.name,
 			surnames: user.surnames,
-			phone_number: user.phone_number,
+			phoneNumber: user.phone_number,
 			street: address.street,
-			second_line_street: address.second_line_street,
-			postal_code: address.postal_code,
+			secondLineStreet: address.second_line_street,
+			postalCode: address.postal_code,
 			city: address.city
 		}
 	})
@@ -33,9 +31,9 @@ export default function FormAddress({
 	useEffect(async () => {
 		if (loggedUser.addresses) return
 
-		executeAddressAction(loggedUser, 'get')
+		getAddressesUser(loggedUser.id)
 			.then(response => {
-				const addressData = response.data
+				const addressData = response
 
 				if (addressData.length) {
 					let addressDefault = addressData[0]
@@ -48,31 +46,16 @@ export default function FormAddress({
 					setAddress(addressDefault)
 				}
 			})
-			.catch(error => {
-				console.log(error, 'algo ha salido mal con el getting de dirección')
+			.catch(async error => {
+				if (error.response?.data?.err === 'expired_token') {
+					await refreshUser()
+					return getAddressesUser(loggedUser.id)
+				}
+				console.error('Error consiguiendo direcciones del usuario:', error)
 			})
 	}, [])
 
-	const updateUser = dataForm => {
-		executeUserAction({ ...loggedUser, ...dataForm }, 'put')
-			.then(response => {
-				setUser(response.data)
-			})
-			.catch(error => {
-				console.log(error, 'algo ha salido mal con el putting de usuario')
-			})
-	}
-
-	const addAddress = async dataForm => {
-		const formatedData = { ...dataForm, userId: loggedUser.id }
-		const postData = await executeAddressAction(formatedData, 'post')
-
-		if (postData) setAddress(postData)
-	}
-
-
-	// TODO: Mejorar esta función
-	const handleSubmit = data => {
+	const handleSubmit = async data => {
 		setSteps(2)
 		const { name, surnames, phoneNumber, ...dataAddress } = data
 		if (
@@ -81,15 +64,36 @@ export default function FormAddress({
 			dataAddress.postalCode !== address.postalCode ||
 			dataAddress.city !== address.city
 		) {
-			addAddress(dataAddress)
+			const formatedData = { ...data, userId: loggedUser.id }
+			executeAddressAction(formatedData, 'post')
+				.then(response => {
+					setAddress(response)
+				})
+				.catch(async error => {
+					if (error.response?.data?.err === 'expired_token') {
+						await refreshUser()
+						return executeAddressAction(formatedData, 'post')
+					}
+					console.error('Error registrando dirección:', error)
+				})
 		}
 		if (
 			phoneNumber !== loggedUser.phoneNumber ||
 			name !== loggedUser.name ||
 			surnames !== loggedUser.surnames
 		) {
-			const formattedData = { ...loggedUser, name, surnames, phoneNumber }
-			updateUser(formattedData)
+			const formatedData = { ...loggedUser, name, surnames, phoneNumber }
+			executeUserAction(formatedData, 'put')
+				.then(response => {
+					setUser(response)
+				})
+				.catch(async error => {
+					if (error.response?.data?.err === 'expired_token') {
+						await refreshUser()
+						return executeUserAction(formatedData, 'put')
+					}
+					console.error('Error actualizando usuario:', error)
+				})
 		}
 	}
 

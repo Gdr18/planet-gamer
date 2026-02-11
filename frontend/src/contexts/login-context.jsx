@@ -36,7 +36,6 @@ export const LoginProvider = ({ children }) => {
 			})
 	}
 
-	// TODO: No funcional, llamada en api-client no puede setear user
 	const refreshUser = () => {
 		const token = localStorage.getItem('refresh_token')
 		if (!token) return
@@ -48,8 +47,10 @@ export const LoginProvider = ({ children }) => {
 			.catch(error => {
 				if (error.response?.data.err === 'expired_token') {
 					setLoggedUser({})
+					localStorage.removeItem('access_token')
+					localStorage.removeItem('refresh_token')
 				}
-				console.log('Rescuing user error', error)
+				console.log('Refresh user error', error)
 			})
 	}
 

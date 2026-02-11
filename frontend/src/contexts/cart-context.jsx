@@ -24,7 +24,7 @@ export const CartProvider = ({ children }) => {
 		}
 	}, [loggedUser.id])
 
-	const syncBaskets = async() => {
+	const syncBaskets = async () => {
 		let basketUpdated = []
 		if (loggedUser.basket.length && !basket.length) {
 			basketUpdated = [...loggedUser.basket]
@@ -33,7 +33,6 @@ export const CartProvider = ({ children }) => {
 		} else if (loggedUser.basket.length && basket.length) {
 			basketUpdated = await syncMergeBaskets(loggedUser, basket)
 		}
-
 
 		setBasket([...basketUpdated])
 		setCountProducts(basketUpdated.reduce((acc, item) => acc + item.qty, 0))
@@ -49,7 +48,9 @@ export const CartProvider = ({ children }) => {
 		)
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
-		itemBasket.userId && (await executeBasketAction(itemBasket, 'delete'))
+		if (itemBasket.userId) {
+			await executeBasketAction(itemBasket, 'delete')
+		}
 	}
 
 	const addItemBasket = async newItem => {
@@ -100,7 +101,15 @@ export const CartProvider = ({ children }) => {
 		setBasket([...games])
 
 		if (itemBasket.userId) {
-			await executeBasketAction(itemBasket, 'put')
+			await executeBasketAction(itemBasket, 'put').catch(async error => {
+				if (error.response?.data?.err === 'expired_token') {
+					await refreshUser()
+					await executeBasketAction(itemBasket, 'put').catch(error => {
+						console.error('Error en la actualización del item de la cesta después de refrescar el token:', error)
+					})
+				}
+				console.error('Error en la actualización del item de la cesta:', error)
+			})
 		}
 	}
 

@@ -1,9 +1,22 @@
 import axios from 'axios'
 
+import { refreshUser } from '../contexts/login-context'
+
 const axiosInstance = axios.create({
 	baseURL: import.meta.env.VITE_BACKEND_URL,
 	withCredentials: true
 })
+
+async function handleExpiredTokenError(error, errorMsg, retryCallback) {
+	if (error.response?.data?.err === 'expired_token') {
+		await refreshUser()
+		return retryCallback()
+	}
+
+	console.error(errorMsg, error)
+
+	throw error
+}
 
 export const executeBasketAction = async (basketItemData, methodHTTP) => {
 	const token = localStorage.getItem('access_token')
@@ -17,11 +30,10 @@ export const executeBasketAction = async (basketItemData, methodHTTP) => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			if (error.response?.data?.err === 'expired_token') {
-				await refreshToken()
-				return executeBasketAction(basketItemData, methodHTTP)
-			}
-			console.error('Error en la acción de cesta:', error)
+			const errorMsg = `Error en la acción de cesta (${methodHTTP}):`
+			return await handleExpiredTokenError(error, errorMsg, () =>
+				executeBasketAction(basketItemData, methodHTTP)
+			)
 		})
 }
 
@@ -36,11 +48,8 @@ export const deleteBasketsUser = async userId => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			if (error.response?.data?.err === 'expired_token') {
-				await refreshToken()
-				return deleteBasketsUser(userId)
-			}
-			console.error('Error al eliminar las cestas del usuario:', error)
+			const errorMsg = 'Error al eliminar las cestas del usuario:'
+			return await handleExpiredTokenError(error, errorMsg, () => deleteBasketsUser(userId))
 		})
 }
 
@@ -56,17 +65,30 @@ export const executeOrderAction = async (orderData, methodHTTP) => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			if (error.response?.data?.err === 'expired_token') {
-				await refreshToken()
-				return executeOrderAction(orderData, methodHTTP)
-			}
-			console.error('Error en la acción de orden:', error)
+			const errorMsg = `Error en la acción de orden (${methodHTTP}):`
+			return await handleExpiredTokenError(error, errorMsg, () => executeOrderAction(orderData, methodHTTP))
+		})
+}
+
+export const getAddressesUser = async userId => {
+	const token = localStorage.getItem('access_token')
+	if (!token) return
+	return await axiosInstance({
+		method: 'get',
+		url: `/addresses/users/${userId}`,
+		headers: { Authorization: `Bearer ${token}` }
+	})
+		.then(response => response.data)
+		.catch(async error => {
+			const errorMsg = 'Error al obtener las direcciones del usuario:'
+			return await handleExpiredTokenError(error, errorMsg, () => getAddressesUser(userId))
 		})
 }
 
 export const executeAddressAction = async (addressData, methodHTTP) => {
 	const token = localStorage.getItem('access_token')
 	if (!token) return
+
 	return await axiosInstance({
 		method: methodHTTP,
 		url: `/addresses/${methodHTTP !== 'post' ? addressData.id : ''}`,
@@ -75,11 +97,8 @@ export const executeAddressAction = async (addressData, methodHTTP) => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			if (error.response?.data?.err === 'expired_token') {
-				await refreshToken()
-				return executeAddressAction(addressData, methodHTTP)
-			}
-			console.error('Error en la acción de dirección:', error)
+			const errorMsg = `Error en la acción de dirección (${methodHTTP}):`
+			return await handleExpiredTokenError(error, errorMsg, () => executeAddressAction(addressData, methodHTTP))
 		})
 }
 
@@ -95,11 +114,8 @@ export const executeUserAction = async (userData, methodHTTP) => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			if (error.response?.data?.err === 'expired_token') {
-				await refreshToken()
-				return executeUserAction(userData, methodHTTP)
-			}
-			console.error('Error en la acción de usuario:', error)
+			const errorMsg = `Error en la acción de usuario (${methodHTTP}):`
+			return await handleExpiredTokenError(error, errorMsg, () => executeUserAction(userData, methodHTTP))
 		})
 }
 
@@ -116,11 +132,6 @@ export const refreshToken = async () => {
 			return response.data
 		})
 		.catch(error => {
-			if (error.response?.data.err === 'expired_token') {
-				localStorage.removeItem('access_token')
-				localStorage.removeItem('refresh_token')
-			}
-			console.log('Refresh token error', error)
 			throw error
 		})
 }

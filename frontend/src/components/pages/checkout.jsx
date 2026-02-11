@@ -17,7 +17,7 @@ export default function Checkout() {
 	const [steps, setSteps] = useState(1)
 
 	const { total, basketItems, checkingCheckout } = useCartContext()
-	const { loggedUser } = useLoginContext()
+	const { loggedUser, refreshUser } = useLoginContext()
 
 	const [user, setUser] = useState({
 		name: loggedUser.name,
@@ -57,6 +57,7 @@ export default function Checkout() {
 						setAddress={setAddress}
 						loggedUser={loggedUser}
 						setSteps={setSteps}
+						refreshUser={refreshUser}
 					/>
 				) : null}
 
@@ -105,6 +106,7 @@ export default function Checkout() {
 									loggedUser={loggedUser}
 									setOrder={setOrder}
 									order={order}
+									refreshUser={refreshUser}
 								/>
 							</Elements>
 						</div>
