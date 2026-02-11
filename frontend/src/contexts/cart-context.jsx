@@ -24,15 +24,16 @@ export const CartProvider = ({ children }) => {
 		}
 	}, [loggedUser.id])
 
-	const syncBaskets = () => {
+	const syncBaskets = async() => {
 		let basketUpdated = []
 		if (loggedUser.basket.length && !basket.length) {
 			basketUpdated = [...loggedUser.basket]
 		} else if (!loggedUser.basket.length && basket.length) {
-			basketUpdated = syncFromLocal(basket, loggedUser)
+			basketUpdated = await syncFromLocal(basket, loggedUser)
 		} else if (loggedUser.basket.length && basket.length) {
-			basketUpdated = syncMergeBaskets(loggedUser, basket)
+			basketUpdated = await syncMergeBaskets(loggedUser, basket)
 		}
+
 
 		setBasket([...basketUpdated])
 		setCountProducts(basketUpdated.reduce((acc, item) => acc + item.qty, 0))
