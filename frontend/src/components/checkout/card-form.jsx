@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
-import { executeOrderAction, deleteBasketsUser } from '../../services/api-client'
+import { executeOrderAction } from '../../services/api/order-service'
+import { deleteBasketsUser } from '../../services/api/basket-service'
+
 import { useCartContext } from '../../contexts/cart-context'
 
 export default function CardForm({ setSteps, loggedUser, setOrder }) {

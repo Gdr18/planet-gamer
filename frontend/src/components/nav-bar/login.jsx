@@ -15,7 +15,7 @@ export default function Login({ handleIconLogin, messageRegister }) {
 	const [errorText, setErrorText] = useState('')
 	const [register, setRegister] = useState(false)
 
-	const { loggedUser, setLoggedUser, handleLogout } = useLoginContext()
+	const { loggedUser, setLoggedUser, logoutUser } = useLoginContext()
 
 	const handleChange = event => {
 		setData({
@@ -79,7 +79,7 @@ export default function Login({ handleIconLogin, messageRegister }) {
 	}
 
  	const handleClickLogout = () => {
-		handleLogout()
+		logoutUser()
 		handleIconLogin()
 	}
 

@@ -1,7 +1,12 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { getAddressesUser, executeUserAction, executeAddressAction } from '../../services/api-client'
+import {
+	getAddressesUser,
+	executeAddressAction
+} from '../../services/api/address-service'
+
+import { executeUserAction } from '../../services/api/user-service'
 
 export default function FormAddress({
 	setSteps,
@@ -9,8 +14,7 @@ export default function FormAddress({
 	setUser,
 	address,
 	setAddress,
-	loggedUser,
-	refreshUser
+	loggedUser
 }) {
 	const {
 		register,
@@ -31,28 +35,20 @@ export default function FormAddress({
 	useEffect(async () => {
 		if (loggedUser.addresses) return
 
-		getAddressesUser(loggedUser.id)
-			.then(response => {
-				const addressData = response
+		const result = await getAddressesUser(loggedUser.id).then(address => {
+			const addressData = address
 
-				if (addressData.length) {
-					let addressDefault = addressData[0]
-					addressData.forEach(address => {
-						if (address.default) {
-							addressDefault = address
-						}
-					})
-					reset({ ...addressDefault })
-					setAddress(addressDefault)
-				}
-			})
-			.catch(async error => {
-				if (error.response?.data?.err === 'expired_token') {
-					await refreshUser()
-					return getAddressesUser(loggedUser.id)
-				}
-				console.error('Error consiguiendo direcciones del usuario:', error)
-			})
+			if (addressData.length) {
+				let addressDefault = addressData[0]
+				addressData.forEach(address => {
+					if (address.default) {
+						addressDefault = address
+					}
+				})
+				reset({ ...addressDefault })
+				setAddress(addressDefault)
+			}
+		})
 	}, [])
 
 	const handleSubmit = async data => {
@@ -65,16 +61,9 @@ export default function FormAddress({
 			dataAddress.city !== address.city
 		) {
 			const formatedData = { ...data, userId: loggedUser.id }
-			executeAddressAction(formatedData, 'post')
+			const result = executeAddressAction(formatedData, 'post')
 				.then(response => {
 					setAddress(response)
-				})
-				.catch(async error => {
-					if (error.response?.data?.err === 'expired_token') {
-						await refreshUser()
-						return executeAddressAction(formatedData, 'post')
-					}
-					console.error('Error registrando dirección:', error)
 				})
 		}
 		if (
@@ -83,16 +72,9 @@ export default function FormAddress({
 			surnames !== loggedUser.surnames
 		) {
 			const formatedData = { ...loggedUser, name, surnames, phoneNumber }
-			executeUserAction(formatedData, 'put')
+			const result = executeUserAction(formatedData, 'put')
 				.then(response => {
 					setUser(response)
-				})
-				.catch(async error => {
-					if (error.response?.data?.err === 'expired_token') {
-						await refreshUser()
-						return executeUserAction(formatedData, 'put')
-					}
-					console.error('Error actualizando usuario:', error)
 				})
 		}
 	}

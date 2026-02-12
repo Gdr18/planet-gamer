@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
-import axios from 'axios'
 
-import { refreshToken } from '../services/api-client'
+import { getCurrentUser } from '../services/api/user-service'
+import { refreshToken, logout } from '../services/api/auth-service'
 
 const LoginContext = React.createContext([[]])
 
@@ -11,71 +11,30 @@ export const LoginProvider = ({ children }) => {
 	const [loggedUser, setLoggedUser] = useState({})
 
 	useEffect(() => {
-		if (!Object.keys(loggedUser).length) getUser()
+		const token = localStorage.getItem('access_token')
+		if (!token) {
+			setLoggedUser({})
+		} else if (token && !Object.keys(loggedUser).length) {
+			getUser()
+		}
 	}, [])
 
 	const getUser = async () => {
-		const token = localStorage.getItem('access_token')
-		if (!token) return
-
-		return axios
-			.get(`${import.meta.env.VITE_BACKEND_URL}/users/me`, {
-				headers: {
-					Authorization: `Bearer ${token}`
-				}
-			})
-			.then(response => {
-				setLoggedUser(response.data)
-			})
-			.catch(async error => {
-				if (error.response?.data.err === 'expired_token') {
-					await refreshUser()
-					getUser()
-				}
-				console.log('Error getting user', error)
-			})
+		const result = await getCurrentUser().then(user => setLoggedUser(user))
 	}
 
-	const refreshUser = () => {
-		const token = localStorage.getItem('refresh_token')
-		if (!token) return
-		return refreshToken()
-			.then(response => {
-				localStorage.setItem('access_token', response.access_token)
-				setLoggedUser(response.user)
+	const refreshUser = async () => {
+		const result = await refreshToken()
+			.then(user => {
+				setLoggedUser(user)
 			})
-			.catch(error => {
-				if (error.response?.data.err === 'expired_token') {
-					setLoggedUser({})
-					localStorage.removeItem('access_token')
-					localStorage.removeItem('refresh_token')
-				}
-				console.log('Refresh user error', error)
-			})
+			.catch(() => setLoggedUser({}))
 	}
 
-	const handleLogout = () => {
-		const token = localStorage.getItem('access_token')
-		if (!token) return
-		axios
-			.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, null, {
-				withCredentials: true,
-				headers: {
-					Authorization: `Bearer ${token}`
-				}
-			})
-			.then(() => {
-				setLoggedUser({})
-				localStorage.removeItem('access_token')
-				localStorage.removeItem('refresh_token')
-			})
-			.catch(async error => {
-				console.log('Error logging out', error)
-				if (error.response?.data.err === 'expired_token') {
-					await refreshUser()
-					handleLogout()
-				}
-			})
+	const logoutUser = async () => {
+		const result = await logout().then(() => {
+			setLoggedUser({})
+		})
 	}
 
 	return (
@@ -83,7 +42,7 @@ export const LoginProvider = ({ children }) => {
 			value={{
 				loggedUser,
 				setLoggedUser,
-				handleLogout,
+				logoutUser,
 				getUser,
 				refreshUser
 			}}

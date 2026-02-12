@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 
 import { useLoginContext } from './login-context'
-import { executeBasketAction } from '../services/api-client'
+import { executeBasketAction } from '../services/api/basket-service'
 import { syncFromLocal, syncMergeBaskets } from '../services/sync-baskets'
 
 const CartContext = React.createContext([[]])
@@ -49,7 +49,7 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
 		if (itemBasket.userId) {
-			await executeBasketAction(itemBasket, 'delete')
+			const result = await executeBasketAction(itemBasket, 'delete')
 		}
 	}
 
@@ -59,6 +59,7 @@ export const CartProvider = ({ children }) => {
 			updateItemBasket(existItemInBasket, 'add')
 			return
 		}
+
 		let itemBasket = {
 			id: newItem.id,
 			userId: loggedUser.id || null,
@@ -70,7 +71,9 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts + 1)
 
 		if (itemBasket.userId) {
-			itemBasket = await executeBasketAction(itemBasket, 'post')
+			const result = await executeBasketAction(itemBasket, 'post').then(item => {
+				itemBasket = { ...itemBasket, id: item.id }
+			})
 		}
 
 		setBasket([...basket, itemBasket])
@@ -101,15 +104,7 @@ export const CartProvider = ({ children }) => {
 		setBasket([...games])
 
 		if (itemBasket.userId) {
-			await executeBasketAction(itemBasket, 'put').catch(async error => {
-				if (error.response?.data?.err === 'expired_token') {
-					await refreshUser()
-					await executeBasketAction(itemBasket, 'put').catch(error => {
-						console.error('Error en la actualización del item de la cesta después de refrescar el token:', error)
-					})
-				}
-				console.error('Error en la actualización del item de la cesta:', error)
-			})
+			const result = await executeBasketAction(itemBasket, 'put')
 		}
 	}
 
