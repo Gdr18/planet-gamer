@@ -8,7 +8,7 @@ import Checkbox from '../products/checkbox'
 import NavBar from '../nav-bar/nav-bar'
 import Footer from '../footer'
 
-import { useCartContext } from '../../contexts/cart-context'
+import { useCartContext } from '../../contexts/cart/cart-context'
 import { useGamesContext } from '../../contexts/games-context'
 
 export default function Products() {

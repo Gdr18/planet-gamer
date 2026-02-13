@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { VscClose, VscDiffRemoved, VscDiffAdded } from 'react-icons/vsc'
 
-import { useCartContext } from '../../contexts/cart-context'
+import { useCartContext } from '../../contexts/cart/cart-context'
 import { useLoginContext } from '../../contexts/auth-context'
 
 export default function Basket({

@@ -6,7 +6,7 @@ import { RotatingLines } from 'react-loader-spinner'
 import NavBar from '../nav-bar/nav-bar'
 import Footer from '../footer'
 
-import { useCartContext } from '../../contexts/cart-context'
+import { useCartContext } from '../../contexts/cart/cart-context'
 
 export default function Game() {
 	const params = useParams()

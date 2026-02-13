@@ -10,7 +10,7 @@ import CardForm from '../checkout/card-form'
 import PaymentSuccessful from '../checkout/payment-successful'
 import Home from './home'
 
-import { useCartContext } from '../../contexts/cart-context'
+import { useCartContext } from '../../contexts/cart/cart-context'
 import { useLoginContext } from '../../contexts/auth-context'
 
 export default function Checkout() {

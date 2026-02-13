@@ -6,7 +6,7 @@ import './style/main.scss'
 
 import { ErrorModal } from './components/error-modal.jsx'
 import { LoginProvider } from './contexts/auth-context'
-import { CartProvider } from './contexts/cart-context'
+import { CartProvider } from './contexts/cart/cart-context'
 import { GamesProvider } from './contexts/games-context'
 import { ErrorProvider } from './contexts/error-context'
 

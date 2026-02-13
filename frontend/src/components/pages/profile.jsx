@@ -10,7 +10,7 @@ import Footer from '../footer'
 import { TbEdit } from 'react-icons/tb'
 
 import { useLoginContext } from '../../contexts/auth-context'
-import { useCartContext } from '../../contexts/cart-context'
+import { useCartContext } from '../../contexts/cart/cart-context'
 
 export default function Profile() {
 	const { loggedUser, setLoggedUser, handleLogout } = useLoginContext()

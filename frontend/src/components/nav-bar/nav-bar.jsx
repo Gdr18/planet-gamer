@@ -6,7 +6,7 @@ import Login from './login'
 import LogosWrapper from './logos-wrapper'
 import Basket from './basket'
 
-import { useCartContext } from '../../contexts/cart-context'
+import { useCartContext } from '../../contexts/cart/cart-context'
 
 import { CgMenu } from 'react-icons/cg'
 import { FaUserAstronaut } from 'react-icons/fa'
