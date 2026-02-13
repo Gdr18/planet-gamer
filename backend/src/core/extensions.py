@@ -7,7 +7,7 @@ db = SQLAlchemy()
 ma = Marshmallow()
 
 cors = CORS(
-	resources={r"/*": {"origins": ["http://localhost:5173"]}},
+	resources={r"/*": {"origins": ["http://localhost:5173", "https://planet-gamer-frontend.onrender.com"]}},
 	supports_credentials=True,
 	allow_headers=["Content-Type", "Authorization"],
 	methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
