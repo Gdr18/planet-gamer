@@ -9,6 +9,7 @@ class StripeCustomError(Exception):
 		if error == "paid_rejected":
 			self.message = f"Pago rechazado por Stripe{f': {details}' if details else ''}"
 			self.code = 402
+		# TODO: Falta capturar "requires_action" en Stripe. No es un error.
 		elif error == "requires_payment_method":
 			self.message = "Se requiere un método de pago"
 		elif error == "invalid_request":

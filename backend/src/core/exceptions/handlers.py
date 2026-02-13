@@ -29,8 +29,12 @@ def db_validation_error_handler(error):
 
 def db_error_handler(error):
 	if isinstance(error, IntegrityError):
-		return jsonify(err="db_integrity_error",
-		               msg="Error de integridad en la base de datos: posible duplicado o clave foránea inválida."), 400
+		error_formatted = str(error).lower()
+		if "email" in error_formatted or "user_model.email" in error_formatted:
+			print(error_formatted)
+			return jsonify(err="email_duplicated", msg="El email ya está registrado."), 400
+		return jsonify(err="db_integrity_error", msg="Error de integridad en la base de datos: valor duplicado."), 400
+	
 	return jsonify(err="db_generic_error", msg=f"Error inesperado en la base de datos: {str(error)}"), 500
 
 
