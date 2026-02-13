@@ -1,6 +1,6 @@
 import { axiosInstance } from './api-client'
 
-import { handleErrors } from '../../core/errors'
+import { handleErrors } from '../../core/handle-error'
 
 export const getCurrentUser = async () => {
 	const token = localStorage.getItem('access_token')
@@ -12,8 +12,8 @@ export const getCurrentUser = async () => {
 		.then(response => {
 			return response.data
 		})
-		.catch(error => {
-			return handleErrors(error, getCurrentUser)
+		.catch(async error => {
+			throw await handleErrors(error, getCurrentUser)
 		})
 }
 
@@ -27,7 +27,7 @@ export const executeUserAction = async (userData, methodHTTP) => {
 		headers: { Authorization: `Bearer ${token}` }
 	})
 		.then(response => response.data)
-		.catch(error => {
-			return handleErrors(error, () => executeUserAction(userData, methodHTTP))
+		.catch(async error => {
+			throw await handleErrors(error, () => executeUserAction(userData, methodHTTP))
 		})
 }

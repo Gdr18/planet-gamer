@@ -9,7 +9,7 @@ import NoMatch from './pages/no-match'
 import GameManager from './pages/game-manager'
 import Profile from './pages/profile'
 
-import { useLoginContext } from '../contexts/login-context'
+import { useLoginContext } from '../contexts/auth-context'
 
 export default function App() {
 	const { loggedUser } = useLoginContext()
@@ -21,10 +21,10 @@ export default function App() {
 				<Route path='/game/:game' element={<Game />} />
 				<Route path='/contact' element={<Contact />} />
 				{Object.keys(loggedUser).length ? (
-					<Route path={`/profile/${loggedUser.id}`} element={<Profile />} />
+					<Route path={`/profile`} element={<Profile />} />
 				) : null}
 				{Object.keys(loggedUser).length ? (
-					<Route path={`/checkout/${loggedUser.id}`} element={<Checkout />} />
+					<Route path={`/checkout`} element={<Checkout />} />
 				) : null}
 				{Object.keys(loggedUser).length && loggedUser.role < 3 ? (
 					<Route

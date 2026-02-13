@@ -1,6 +1,6 @@
 import { axiosInstance } from './api-client'
 
-import { handleErrors } from '../../core/errors'
+import { handleErrors } from '../../core/handle-error'
 
 export const refreshToken = async () => {
 	const token = localStorage.getItem('refresh_token')
@@ -15,12 +15,8 @@ export const refreshToken = async () => {
 			localStorage.setItem('access_token', response.data.access_token)
 			return response.data.user
 		})
-		.catch(error => {
-			if (error.response?.data.err === 'expired_token') {
-				localStorage.removeItem('access_token')
-				localStorage.removeItem('refresh_token')
-			}
-			return handleErrors(error, refreshToken)
+		.catch(async error => {
+			throw await handleErrors(error, refreshToken)
 		})
 }
 
@@ -39,7 +35,7 @@ export const logout = async () => {
 			localStorage.removeItem('access_token')
 			localStorage.removeItem('refresh_token')
 		})
-		.catch(error => {
-			return handleErrors(error, logout)
+		.catch(async error => {
+			throw await handleErrors(error, logout)
 		})
 }

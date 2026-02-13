@@ -1,8 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react'
 
-import { useLoginContext } from './login-context'
-import { executeBasketAction } from '../services/api/basket-service'
-import { syncFromLocal, syncMergeBaskets } from '../services/sync-baskets'
+import { useLoginContext } from '../auth-context'
+import { executeBasketAction } from '../../services/api/basket-service'
+import { syncFromLocal, syncMergeBaskets } from './sync-baskets'
 
 const CartContext = React.createContext([[]])
 
@@ -71,9 +71,11 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts + 1)
 
 		if (itemBasket.userId) {
-			const result = await executeBasketAction(itemBasket, 'post').then(item => {
-				itemBasket = { ...itemBasket, id: item.id }
-			})
+			const result = await executeBasketAction(itemBasket, 'post').then(
+				item => {
+					itemBasket = { ...itemBasket, id: item.id }
+				}
+			)
 		}
 
 		setBasket([...basket, itemBasket])

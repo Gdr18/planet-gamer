@@ -9,7 +9,7 @@ import Footer from '../footer'
 
 import { TbEdit } from 'react-icons/tb'
 
-import { useLoginContext } from '../../contexts/login-context'
+import { useLoginContext } from '../../contexts/auth-context'
 import { useCartContext } from '../../contexts/cart-context'
 
 export default function Profile() {

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 
-import { useLoginContext } from '../../contexts/login-context'
+import { useLoginContext } from '../../contexts/auth-context'
 
 export default function Login({ handleIconLogin, messageRegister }) {
 	const [data, setData] = useState({

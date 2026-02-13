@@ -1,6 +1,6 @@
 import { axiosInstance } from './api-client'
 
-import { handleErrors } from '../../core/errors'
+import { handleErrors } from '../../core/handle-error'
 
 export const getAddressesUser = async userId => {
 	const token = localStorage.getItem('access_token')
@@ -11,8 +11,8 @@ export const getAddressesUser = async userId => {
 		headers: { Authorization: `Bearer ${token}` }
 	})
 		.then(response => response.data)
-		.catch(error => {
-			return handleErrors(error, () => getAddressesUser(userId))
+		.catch(async error => {
+			throw await handleErrors(error, () => getAddressesUser(userId))
 		})
 }
 
@@ -27,8 +27,8 @@ export const executeAddressAction = async (addressData, methodHTTP) => {
 		headers: { Authorization: `Bearer ${token}` }
 	})
 		.then(response => response.data)
-		.catch(error => {
-			return handleErrors(error, () =>
+		.catch(async error => {
+			throw await handleErrors(error, () =>
 				executeAddressAction(addressData, methodHTTP)
 			)
 		})

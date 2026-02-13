@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react'
 
 import { getCurrentUser } from '../services/api/user-service'
-import { refreshToken, logout } from '../services/api/auth-service'
+import { logout } from '../services/api/auth-service'
+import { useErrorContext } from './error-context'
 
 const LoginContext = React.createContext([[]])
 
@@ -9,6 +10,8 @@ export const useLoginContext = () => useContext(LoginContext)
 
 export const LoginProvider = ({ children }) => {
 	const [loggedUser, setLoggedUser] = useState({})
+
+	const { setError } = useErrorContext()
 
 	useEffect(() => {
 		const token = localStorage.getItem('access_token')
@@ -20,21 +23,11 @@ export const LoginProvider = ({ children }) => {
 	}, [])
 
 	const getUser = async () => {
-		const result = await getCurrentUser().then(user => setLoggedUser(user))
-	}
-
-	const refreshUser = async () => {
-		const result = await refreshToken()
-			.then(user => {
-				setLoggedUser(user)
-			})
-			.catch(() => setLoggedUser({}))
+		await getCurrentUser().then(user => setLoggedUser(user)).catch(error => setError(error))
 	}
 
 	const logoutUser = async () => {
-		const result = await logout().then(() => {
-			setLoggedUser({})
-		})
+		await logout().then(() => setLoggedUser({})).catch(error => setError(error))
 	}
 
 	return (
@@ -43,8 +36,7 @@ export const LoginProvider = ({ children }) => {
 				loggedUser,
 				setLoggedUser,
 				logoutUser,
-				getUser,
-				refreshUser
+				getUser
 			}}
 		>
 			{children}

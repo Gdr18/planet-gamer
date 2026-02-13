@@ -1,4 +1,4 @@
-import { executeBasketAction } from './api/basket-service'
+import { executeBasketAction } from '../../services/api/basket-service'
 
 export const syncFromLocal = async (localBasket, loggedUser) => {
 	const posted = await Promise.all(
