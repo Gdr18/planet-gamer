@@ -32,9 +32,6 @@
 				font-size: 1.7em;
 			}
 			.admin-wrapper {
-				div {
-					color: $morado;
-				}
 				a {
 					div {
 						display: flex;
@@ -46,6 +43,9 @@
 						transition: 0.3s ease-in-out;
 						&:hover {
 							color: $verde-hover;
+						}
+						span {
+							margin-left: 5px;
 						}
 					}
 				}
@@ -60,6 +60,11 @@
 			.form-title-wrapper {
 				display: flex;
 				align-items: center;
+			}
+			.default-address {
+				margin: 0 0 5px 5px; 
+				font-size: 0.8em;
+				color: $morado-completado;
 			}
 			form {
 				display: grid;
@@ -91,10 +96,10 @@
 						font-size: 0.8em;
 						color: $error;
 						transition: 0.3s ease-in-out;
-						text-decoration: underline;
 						&:hover {
 							cursor: pointer;
 							color: $error-hover;
+							text-decoration: underline;
 						}
 					}
 				}

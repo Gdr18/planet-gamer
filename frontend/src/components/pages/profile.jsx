@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 
 import axios from 'axios'
 
@@ -13,7 +13,7 @@ import { useLoginContext } from '../../contexts/login-context'
 import { useCartContext } from '../../contexts/cart-context'
 
 export default function Profile() {
-	const { loggedUser, handleLogout, rescuingUser } = useLoginContext()
+	const { loggedUser, setLoggedUser, handleLogout } = useLoginContext()
 	const { cleaningBasket } = useCartContext()
 
 	const navigate = useNavigate()
@@ -31,8 +31,7 @@ export default function Profile() {
 			surnames: loggedUser.surnames,
 			email: loggedUser.email,
 			password: '',
-			phone_number: loggedUser.phone_number,
-			admin: loggedUser.admin
+			phoneNumber: loggedUser.phoneNumber
 		}
 	})
 
@@ -40,74 +39,97 @@ export default function Profile() {
 		register: registerAddress,
 		handleSubmit: handleSubmitAddress,
 		formState: { errors: errorsAddress },
-		reset
+		reset,
+		control
 	} = useForm({
 		defaultValues: {
-			street: '',
-			second_line_street: '',
-			postal_code: '',
-			city: ''
+			addresses: [
+				{
+					id: '',
+					street: '',
+					secondLineStreet: '',
+					postalCode: '',
+					city: ''
+				}
+			]
 		}
 	})
 
 	const [ordersUser, setOrdersUser] = useState([])
+	const [addressesUser, setAddressesUser] = useState([])
+	console.log(loggedUser, 'data user')
+
+	const { fields: addressFields } = useFieldArray({
+		control,
+		name: 'addresses'
+	})
 
 	useEffect(() => {
+		if (!Object.keys(loggedUser).length) return
+		if (loggedUser.addresses && loggedUser.orders) return
 		axios
 			.get(
-				`${import.meta.env.VITE_BACKEND_URL}/address-user/${loggedUser.id}`,
-				{ withCredentials: true }
-			)
-			.then(response => {
-				if (Object.keys(response.data).length > 0) {
-					reset({
-						street: response.data.street,
-						second_line_street: response.data.second_line_street,
-						postal_code: response.data.postal_code,
-						city: response.data.city
-					})
+				`${import.meta.env.VITE_BACKEND_URL}/users/${loggedUser.id}/with-relations`,
+				{
+					withCredentials: true,
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('access_token')}`
+					}
 				}
-			})
-	}, [])
-
-	useEffect(() => {
-		axios
-			.get(
-				`${import.meta.env.VITE_BACKEND_URL}/orders/${loggedUser.id}`,
-				{ withCredentials: true }
 			)
 			.then(response => {
-				if (response.data.length) {
-					setOrdersUser(response.data)
+				if (Object.keys(response.data).length) {
+					setOrdersUser(response.data.orders)
+					setAddressesUser(response.data.addresses)
+					response.data.addresses.length && reset({ addresses: response.data.addresses })
+					setLoggedUser({...response.data})
 				}
 			})
 	}, [])
 
 	const handleSubmitProfile = handleSubmitUser(data => {
+		const confirmEdit = confirm('Quieres guardar los nuevos datos del perfil?')
+		if (!confirmEdit) return
 		axios
-			.put(
-				`${import.meta.env.VITE_BACKEND_URL}/user/${loggedUser.id}`,
-				data,
-				{ withCredentials: true }
-			)
+			.put(`${import.meta.env.VITE_BACKEND_URL}/users/${loggedUser.id}`, data, {
+				withCredentials: true,
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem('access_token')}`
+				}
+			})
 			.then(response => {
 				setEditUser(!editUser)
-				rescuingUser(response.data.id)
+				setLoggedUser({ ...loggedUser, ...response.data })
 			})
 			.catch(error => {
 				console.log(error, 'algo ha salido mal con el putting del user')
 			})
 	})
 
-	const handleSubmitDirection = handleSubmitAddress(data => {
-		axios
-			.post(
-				`${import.meta.env.VITE_BACKEND_URL}/address/${loggedUser.id}`,
-				data,
-				{ withCredentials: true }
-			)
-			.then(() => {
+	const handleSubmitDirection = handleSubmitAddress((data, methodHTTP) => {
+		const confirmEdit = confirm(
+			'Quieres guardar los nuevos datos de la dirección?'
+		)
+		if (!confirmEdit) return
+
+		axios(
+			`${import.meta.env.VITE_BACKEND_URL}/addresses/${methodHTTP === 'put' && data.id}`,
+			data,
+			{
+				method: methodHTTP,
+				withCredentials: true,
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem('access_token')}`
+				}
+			}
+		)
+			.then(response => {
 				setEditAddress(!editAddress)
+				setAddressesUser([...addressesUser, response.data])
+				setLoggedUser({
+					...loggedUser,
+					addresses: [...loggedUser.addresses, response.data]
+				})
 			})
 			.catch(error => {
 				console.log(error, 'algo ha salido mal con posting address')
@@ -120,14 +142,16 @@ export default function Profile() {
 		)
 
 		if (confirmDelete) {
-			handleLogout()
-			cleaningBasket()
 			axios
-				.delete(
-					`${import.meta.env.VITE_BACKEND_URL}/user/${loggedUser.id}`,
-					{ withCredentials: true }
-				)
+				.delete(`${import.meta.env.VITE_BACKEND_URL}/users/${loggedUser.id}`, {
+					withCredentials: true,
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('access_token')}`
+					}
+				})
 				.then(() => {
+					handleLogout()
+					cleaningBasket()
 					navigate('/')
 				})
 				.catch(error => {
@@ -145,12 +169,12 @@ export default function Profile() {
 				<div className='profile-container'>
 					<div className='profile-title-wrapper'>
 						<div className='profile-title'>Perfil</div>
-						{loggedUser.admin ? (
+						{loggedUser.role < 3 ? (
 							<div className='admin-wrapper'>
-								<div>Admin User</div>
-								<Link to={`/game-manager/${loggedUser.id}`}>
+								<Link to={`/game-manager}`}>
 									<div>
-										Game Manager <TbEdit className='icon-edit' />
+										<TbEdit className='icon-edit' />
+										<span>Game Manager</span>
 									</div>
 								</Link>
 							</div>
@@ -171,15 +195,15 @@ export default function Profile() {
 									{...registerUser('name', {
 										required: {
 											value: true,
-											message: 'Nombre es requerido'
+											message: `El campo 'Nombre' es requerido`
 										},
 										minLength: {
-											value: 2,
-											message: 'Nombre debe tener al menos 2 caracteres'
+											value: 1,
+											message: `El campo 'Nombre' debe tener al menos 1 caracter`
 										},
 										maxLength: {
 											value: 50,
-											message: 'Nombre debe tener como máximo 50 caracteres'
+											message: `El campo 'Nombre' debe tener como máximo 50 caracteres`
 										},
 										disabled: editUser
 									})}
@@ -190,24 +214,20 @@ export default function Profile() {
 								)}
 
 								<input
-									type='number'
-									{...registerUser('phone_number', {
-										minLength: {
-											value: 9,
-											message: 'Teléfono debe tener 9 caracteres'
-										},
-										maxLength: {
-											value: 9,
-											message: 'Teléfono debe tener 9 caracteres'
+									type='text'
+									{...registerUser('phoneNumber', {
+										pattern: {
+											value: /^(?:\+34\s?)?(6\d{8}|7[1-9]\d{7})$/,
+											message: `El campo 'Teléfono' debe tener alguno de los siguientes formatos: '666666666' o '+34666666666'`
 										},
 										disabled: editUser
 									})}
 									placeholder='Teléfono'
 								/>
 
-								{errorsUser.phone_number && (
+								{errorsUser.phoneNumber && (
 									<div className='errorTag'>
-										{errorsUser.phone_number.message}
+										{errorsUser.phoneNumber.message}
 									</div>
 								)}
 							</div>
@@ -216,12 +236,12 @@ export default function Profile() {
 									type='text'
 									{...registerUser('surnames', {
 										minLength: {
-											value: 2,
-											message: 'Apellidos debe tener al menos 2 caracteres'
+											value: 1,
+											message: `El campo 'Apellidos' debe tener al menos 1 caracter`
 										},
 										maxLength: {
-											value: 40,
-											message: 'Apellidos debe tener como máximo 40 caracteres'
+											value: 100,
+											message: `El campo 'Apellidos' debe tener como máximo 100 caracteres`
 										},
 										disabled: editUser
 									})}
@@ -238,15 +258,15 @@ export default function Profile() {
 									{...registerUser('email', {
 										required: {
 											value: true,
-											message: 'Email es requerido'
+											message: `El campo 'Email' es requerido`
 										},
 										maxLength: {
-											value: 50,
-											message: 'Email tiene que tener como máximo 50 caracteres'
+											value: 100,
+											message: `El campo 'Email' debe tener como máximo 100 caracteres`
 										},
 										pattern: {
 											value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-											message: 'Email no válido'
+											message: `El campo 'Email' debe tener un formato como el siguiente: ejemplo@dominio.com`
 										},
 										disabled: editUser
 									})}
@@ -261,13 +281,26 @@ export default function Profile() {
 									type='password'
 									{...registerUser('password', {
 										minLength: {
-											value: 6,
-											message: 'Contraseña debe tener al menos 6 caracteres'
+											value: 7,
+											message: `El campo 'Contraseña' debe tener al menos 7 caracteres`
 										},
 										maxLength: {
-											value: 200,
-											message:
-												'Contraseña debe tener como máximo 200 caracteres'
+											value: 70,
+											message: `El campo 'Contraseña' debe tener como máximo 70 caracteres`
+										},
+										validate: {
+											value: value => {
+												if (value === loggedUser.password) {
+													return true
+												} else {
+													const regex =
+														/^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:',.<>?/]){7,}$/
+													return (
+														regex.test(value) ||
+														`El campo 'Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial`
+													)
+												}
+											}
 										},
 										disabled: editUser
 									})}
@@ -288,125 +321,135 @@ export default function Profile() {
 							</div>
 						</form>
 					</div>
-					<div className='form-wrapper'>
-						<div className='form-title-wrapper'>
-							<div className='universal-title'>Dirección</div>
-							<TbEdit
-								className='edit-icon'
-								onClick={() => setEditAddress(!editAddress)}
-							/>
-						</div>
-						<form onSubmit={handleSubmitDirection}>
-							<div className='one-column'>
-								<input
-									type='text'
-									{...registerAddress('street', {
-										required: {
-											value: true,
-											message: 'Dirección Línea 1 es requerido'
-										},
-										minLength: {
-											value: 2,
-											message:
-												'Dirección Línea 1 debe tener al menos 2 caracteres'
-										},
-										maxLength: {
-											value: 100,
-											message:
-												'Dirección Línea 1 debe tener como máximo 50 caracteres'
-										},
-										disabled: editAddress
-									})}
-									placeholder='Dirección Línea 1'
-								/>
+					{addressFields.map((address, index) => {
+						console.log(address, 'address')
+						return (
+							<div key={address.id} className='form-wrapper'>
+								<div className='form-title-wrapper'>
+									<div className='universal-title'>Dirección</div>
+									<TbEdit
+										className='edit-icon'
+										onClick={() => setEditAddress(!editAddress)}
+									/>
+								</div>
+								{address.default && <div className='default-address'>Predeterminada</div>}
+								<form onSubmit={handleSubmitDirection}>
+									<div className='one-column'>
+										<input
+											type='text'
+											{...registerAddress(`addresses.${index}.street`, {
+												required: {
+													value: true,
+													message: `El campo 'Dirección Línea 1' es requerido`
+												},
+												minLength: {
+													value: 2,
+													message:
+														'Dirección Línea 1 debe tener al menos 2 caracteres'
+												},
+												maxLength: {
+													value: 100,
+													message:
+														'Dirección Línea 1 debe tener como máximo 50 caracteres'
+												},
+												disabled: editAddress
+											})}
+											placeholder='Dirección Línea 1'
+										/>
 
-								{errorsAddress.street && (
-									<div className='errorTag'>{errorsAddress.street.message}</div>
-								)}
-							</div>
-							<div className='one-column'>
-								<input
-									type='text'
-									{...registerAddress('second_line_street', {
-										minLength: {
-											value: 2,
-											message:
-												'Dirección Línea 2 debe tener al menos 2 caracteres'
-										},
-										maxLength: {
-											value: 50,
-											message:
-												'Dirección Línea 2 debe tener como máximo 50 caracteres'
-										},
-										disabled: editAddress
-									})}
-									placeholder='Dirección Línea 2'
-								/>
-
-								{errorsAddress.second_line_street && (
-									<div className='errorTag'>
-										{errorsAddress.second_line_street.message}
+										{errorsAddress.addresses?.[index]?.street && (
+											<div className='errorTag'>
+												{errorsAddress?.addresses[index]?.street?.message}
+											</div>
+										)}
 									</div>
-								)}
-							</div>
-							<div className='two-column'>
-								<input
-									type='number'
-									{...registerAddress('postal_code', {
-										required: {
-											value: true,
-											message: 'Código Postal es requerido'
-										},
-										minLength: {
-											value: 5,
-											message: 'Código Postal debe tener 5 números'
-										},
-										maxLength: {
-											value: 5,
-											message: 'Código Postal debe tener 5 números'
-										},
-										disabled: editAddress
-									})}
-									placeholder='Código Postal'
-								/>
+									<div className='one-column'>
+										<input
+											type='text'
+											{...registerAddress(`addresses.${index}.secondLineStreet`, {
+												minLength: {
+													value: 2,
+													message:
+														'Dirección Línea 2 debe tener al menos 2 caracteres'
+												},
+												maxLength: {
+													value: 50,
+													message:
+														'Dirección Línea 2 debe tener como máximo 50 caracteres'
+												},
+												disabled: editAddress
+											})}
+											placeholder='Dirección Línea 2'
+										/>
 
-								{errorsAddress.postal_code && (
-									<div className='errorTag'>
-										{errorsAddress.postal_code.message}
+										{errorsAddress.addresses?.[index]?.secondLineStreet && (
+											<div className='errorTag'>
+												{errorsAddress.addresses[index].secondLineStreet.message}
+											</div>
+										)}
 									</div>
-								)}
+									<div className='two-column'>
+										<input
+											type='number'
+											{...registerAddress(`addresses.${index}.postalCode`, {
+												required: {
+													value: true,
+													message: 'Código Postal es requerido'
+												},
+												minLength: {
+													value: 5,
+													message: 'Código Postal debe tener 5 números'
+												},
+												maxLength: {
+													value: 5,
+													message: 'Código Postal debe tener 5 números'
+												},
+												disabled: editAddress
+											})}
+											placeholder='Código Postal'
+										/>
 
-								<input
-									type='text'
-									{...registerAddress('city', {
-										required: {
-											value: true,
-											message: 'Ciudad es requerido'
-										},
-										minLength: {
-											value: 2,
-											message: 'Ciudad debe tener al menos 2 caracteres'
-										},
-										maxLength: {
-											value: 40,
-											message: 'Ciudad debe tener como máximo 40 caracteres'
-										},
-										disabled: editAddress
-									})}
-									placeholder='Ciudad'
-								/>
+										{errorsAddress.addresses?.[index]?.postalCode && (
+											<div className='errorTag'>
+												{errorsAddress.addresses[index].postalCode.message}
+											</div>
+										)}
 
-								{errorsAddress.city && (
-									<div className='errorTag'>{errorsAddress.city.message}</div>
-								)}
+										<input
+											type='text'
+											{...registerAddress(`addresses.${index}.city`, {
+												required: {
+													value: true,
+													message: 'Ciudad es requerido'
+												},
+												minLength: {
+													value: 2,
+													message: 'Ciudad debe tener al menos 2 caracteres'
+												},
+												maxLength: {
+													value: 40,
+													message: 'Ciudad debe tener como máximo 40 caracteres'
+												},
+												disabled: editAddress
+											})}
+											placeholder='Ciudad'
+										/>
+
+										{errorsAddress.addresses?.[index]?.city && (
+											<div className='errorTag'>
+												{errorsAddress.addresses[index].city.message}
+											</div>
+										)}
+									</div>
+									<div className='button-wrapper'>
+										<button disabled={editAddress} type='submit'>
+											Guardar
+										</button>
+									</div>
+								</form>
 							</div>
-							<div className='button-wrapper'>
-								<button disabled={editAddress} type='submit'>
-									Guardar
-								</button>
-							</div>
-						</form>
-					</div>
+						)
+					})}
 					{ordersUser.length ? (
 						<div className='form-wrapper'>
 							<div className='universal-title'>Pedidos</div>
@@ -416,10 +459,10 @@ export default function Profile() {
 										<div key={order.id} className='order-item'>
 											<span>{`#${order.id}`}</span>
 											<div className='divs'>
-												Fecha: <span>{order.date}</span>
+												Fecha: <span>{order.createdAt}</span>
 											</div>
 											<div className='divs'>
-												Artículos: <span>{order.qty}</span>
+												Artículos: <span>{order.items.length}</span>
 											</div>
 											<div className='divs'>
 												Importe:{' '}
