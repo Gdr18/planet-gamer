@@ -1,9 +1,9 @@
 import { refreshToken } from '../services/api/auth-service'
 
 export class AppError extends Error {
-	constructor(err, message, errorUi) {
-		super(err, message, errorUi)
-		this.err = err
+	constructor(errorKey, message, errorUi) {
+		super(errorKey, message, errorUi)
+		this.errorKey = errorKey
 		this.message = message
 		this.errorUi = errorUi
 	}
@@ -39,10 +39,11 @@ export const handleErrors = async (error, requestFunction) => {
 			message = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'
 			break
 		case 'not_found':
-			message = error.response?.data?.msg || message
-			if (!message.toLowerCase().includes('user')) {
+			if (!message.toLowerCase().includes('usuario')) {
 				errorUi = 'go_home'
+				message = error.response?.data?.msg
 			}
+			message = 'El correo electrónico no está registrado.'
 			break
 		case 'password_mismatch':
 			message = 'La contraseña ingresada es incorrecta.'
@@ -50,6 +51,9 @@ export const handleErrors = async (error, requestFunction) => {
 		case 'email_duplicated':
 			message =
 				'El correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.'
+			break
+		case 'db_validation_error':
+			message = error.response?.data?.msg
 			break
 		case 'paid_rejected':
 			message =

@@ -57,7 +57,6 @@ export default function Profile() {
 
 	const [ordersUser, setOrdersUser] = useState([])
 	const [addressesUser, setAddressesUser] = useState([])
-	console.log(loggedUser, 'data user')
 
 	const { fields: addressFields } = useFieldArray({
 		control,
@@ -224,7 +223,6 @@ export default function Profile() {
 									})}
 									placeholder='Teléfono'
 								/>
-
 								{errorsUser.phoneNumber && (
 									<div className='errorTag'>
 										{errorsUser.phoneNumber.message}
@@ -247,7 +245,6 @@ export default function Profile() {
 									})}
 									placeholder='Apellidos'
 								/>
-
 								{errorsUser.surnames && (
 									<div className='errorTag'>{errorsUser.surnames.message}</div>
 								)}
@@ -272,7 +269,6 @@ export default function Profile() {
 									})}
 									placeholder='Email'
 								/>
-
 								{errorsUser.email && (
 									<div className='errorTag'>{errorsUser.email.message}</div>
 								)}
@@ -306,7 +302,6 @@ export default function Profile() {
 									})}
 									placeholder='••••••••••'
 								/>
-
 								{errorsUser.password && (
 									<div className='errorTag'>{errorsUser.password.message}</div>
 								)}
@@ -356,7 +351,6 @@ export default function Profile() {
 											})}
 											placeholder='Dirección Línea 1'
 										/>
-
 										{errorsAddress.addresses?.[index]?.street && (
 											<div className='errorTag'>
 												{errorsAddress?.addresses[index]?.street?.message}

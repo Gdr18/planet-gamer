@@ -70,6 +70,12 @@
 			}
 		}
 	}
+
+	.advise,
+	.errorTag {
+		color: $error;
+		font-size: 0.9em;
+	}
 }
 
 @media (max-width: 500px) {

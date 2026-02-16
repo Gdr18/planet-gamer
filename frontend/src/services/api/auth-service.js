@@ -2,21 +2,31 @@ import { axiosInstance } from './api-client'
 
 import { handleErrors } from '../../core/handle-error'
 
-export const refreshToken = async () => {
-	const token = localStorage.getItem('refresh_token')
-	if (!token) return
+export const register = async data => {
+	return await axiosInstance
+		.post('/auth/register', data, {
+			withCredentials: true
+		})
+		.then(response => {
+			return response.data
+		})
+		.catch(async error => {
+			throw await handleErrors(error, () => register(data))
+		})
+}
 
-	return await axiosInstance({
-		method: 'get',
-		url: '/auth/refresh-token',
-		headers: { Authorization: `Bearer ${token}` }
-	})
+export const login = async data => {
+	return await axiosInstance
+		.post('/auth/login', data, {
+			withCredentials: true
+		})
 		.then(response => {
 			localStorage.setItem('access_token', response.data.access_token)
+			localStorage.setItem('refresh_token', response.data.refresh_token)
 			return response.data.user
 		})
 		.catch(async error => {
-			throw await handleErrors(error, refreshToken)
+			throw await handleErrors(error, () => login(data))
 		})
 }
 
@@ -25,7 +35,7 @@ export const logout = async () => {
 	if (!token) return
 
 	return await axiosInstance
-		.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, null, {
+		.post('/auth/logout', null, {
 			withCredentials: true,
 			headers: {
 				Authorization: `Bearer ${token}`
@@ -37,5 +47,23 @@ export const logout = async () => {
 		})
 		.catch(async error => {
 			throw await handleErrors(error, logout)
+		})
+}
+
+export const refreshToken = async () => {
+	const token = localStorage.getItem('refresh_token')
+	if (!token) return
+
+	return await axiosInstance
+		.get('/auth/refresh-token', {
+			withCredentials: true,
+			headers: { Authorization: `Bearer ${token}` }
+		})
+		.then(response => {
+			localStorage.setItem('access_token', response.data.access_token)
+			return response.data.user
+		})
+		.catch(async error => {
+			throw await handleErrors(error, refreshToken)
 		})
 }

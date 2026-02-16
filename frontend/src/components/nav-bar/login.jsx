@@ -1,182 +1,280 @@
 import { useState } from 'react'
-import axios from 'axios'
 import { Link } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
 
 import { useLoginContext } from '../../contexts/auth-context'
+import { useErrorContext } from '../../contexts/error-context'
 
-export default function Login({ handleIconLogin, messageRegister }) {
-	const [data, setData] = useState({
-		email: '',
-		password: '',
-		confirmPassword: '',
-		name: ''
-	})
+import { login, register } from '../../services/api/auth-service'
 
-	const [errorText, setErrorText] = useState('')
-	const [register, setRegister] = useState(false)
+export default function LoginComponent({ handleIconLogin, messageRegister }) {
+	const [advise, setAdvise] = useState('')
+	const [statusRegister, setStatusRegister] = useState(false)
 
 	const { loggedUser, setLoggedUser, logoutUser } = useLoginContext()
+	const { setError } = useErrorContext()
 
-	const handleChange = event => {
-		setData({
-			...data,
-			[event.target.name]: event.target.value
-		})
-	}
+	const {
+		register: registerLogin,
+		handleSubmit: handleSubmitLogin,
+		formState: { errors: errorsLogin }
+	} = useForm({
+		defaultValues: {
+			email: '',
+			password: ''
+		}
+	})
 
-	const handleSubmitLogin = event => {
-		event.preventDefault()
-		axios
-			.post(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, data, {
-				withCredentials: true
+	const {
+		register: registerRegister,
+		handleSubmit: handleSubmitRegister,
+		formState: { errors: errorsRegister }
+	} = useForm({
+		defaultValues: {
+			name: '',
+			email: '',
+			password: '',
+			confirmPassword: ''
+		}
+	})
+
+	const handleSubmitFormLogin = handleSubmitLogin(data => {
+		login(data)
+			.then(user => {
+				setLoggedUser(user)
 			})
-			.then(response => {
-				if (response.data.err) {
-					setErrorText(response.data.msg)
+			.catch(error => {
+				if (
+					error.errorKey === 'not_found' ||
+					error.errorKey === 'password_mismatch'
+				) {
+					setAdvise(error.message)
 					setTimeout(() => {
-						setErrorText('')
-					}, 2000)
-					return
+						setAdvise('')
+					}, 3000)
+				} else {
+					setError(error)
 				}
-				setLoggedUser(response.data.user)
-				localStorage.setItem('access_token', response.data.access_token)
-				localStorage.setItem('refresh_token', response.data.refresh_token)
 			})
-			.catch(() => {
-				setErrorText('Ha ocurrido un error...')
-				setTimeout(() => {
-					setErrorText('')
-				}, 2000)
-			})
-	}
+	})
 
-	const handleSubmitRegister = event => {
-		event.preventDefault()
+	const handleSubmitFormRegister = handleSubmitRegister(data => {
+
 		if (data.password !== data.confirmPassword) {
-			setErrorText('Las contraseñas no coinciden')
+			setAdvise('Las contraseñas no coinciden')
 			setTimeout(() => {
-				setErrorText('')
-			}, 2000)
+				setAdvise('')
+			}, 3000)
 			return
 		}
-		axios
-			.post(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, data, {
-				withCredentials: true
-			})
-			.then(response => {
-				if (response.data.err) {
-					setErrorText(response.data.msg)
-				}
-				setErrorText('Registro completado con éxito.')
-				setTimeout(() => {
-					setRegister(false)
-					setErrorText('')
-				}, 1500)
-			})
-			.catch(() => {
-				setErrorText('Ha ocurrido un error...')
-			})
-	}
 
- 	const handleClickLogout = () => {
+		register(data)
+			.then(response => {
+				setAdvise(response.msg)
+				setTimeout(() => {
+					setStatusRegister(false)
+					setAdvise('')
+				}, 2000)
+			})
+			.catch(error => {
+				if (
+					error.errorKey === 'email_duplicated' ||
+					error.errorKey === 'db_validation_error'
+				) {
+					setAdvise(error.message)
+					setTimeout(() => {
+						setAdvise('')
+					}, 3000)
+				} else {
+					setError(error)
+				}
+			})
+	})
+
+	const handleClickLogout = () => {
 		logoutUser()
 		handleIconLogin()
 	}
 
 	return (
 		<div className='login-box-wrapper'>
-			{(!register && !Object.keys(loggedUser).length) && (
-				<form className='login-form' onSubmit={handleSubmitLogin}>
+			{!statusRegister && !Object.keys(loggedUser).length && (
+				<form className='login-form' onSubmit={handleSubmitFormLogin}>
 					<p>Login</p>
 
 					<input
 						type='email'
-						name='email'
+						{...registerLogin('email', {
+							required: {
+								value: true,
+								message: `El campo 'Email' es requerido`
+							},
+							maxLength: {
+								value: 100,
+								message: `El campo 'Email' debe tener como máximo 100 caracteres`
+							},
+							pattern: {
+								value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+								message: `El campo 'Email' debe tener un formato como el siguiente: ejemplo@dominio.com`
+							}
+						})}
 						placeholder='Email'
-						value={data.email}
-						onChange={handleChange}
-						maxLength={50}
-						required
 					/>
+					{errorsLogin.email && (
+						<div className='errorTag'>{errorsLogin.email.message}</div>
+					)}
 
 					<input
 						type='password'
-						name='password'
+						{...registerLogin('password', {
+							required: {
+								value: true,
+								message: `El campo 'Contraseña' es requerido`
+							},
+							minLength: {
+								value: 7,
+								message: `El campo 'Contraseña' debe tener como mínimo 7 caracteres`
+							},
+							maxLength: {
+								value: 70,
+								message: `El campo 'Contraseña' debe tener como máximo 70 caracteres`
+							},
+							pattern: {
+								value: /^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
+								message: `El campo 'Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (!@#$%^&*()_-+=[]{}|;:'",.<>?/).`
+							}
+						})}
 						placeholder='Contraseña'
-						value={data.password}
-						onChange={handleChange}
-						minLength={7}
-						maxLength={70}
-						required
 					/>
+					{errorsLogin.password && (
+						<div className='errorTag'>{errorsLogin.password.message}</div>
+					)}
+
 					{messageRegister ? (
 						<div>Necesitas registrarte para seguir con la compra.</div>
 					) : null}
-					{errorText !== '' ? <div>{errorText}</div> : null}
+
+					{advise !== '' ? <div className='advise'>{advise}</div> : null}
 					<div className='login-form-actions'>
 						<button type='submit'>Enviar</button>
-						<a href='#' onClick={() => setRegister(true)}>
+						<a href='#' onClick={() => setStatusRegister(true)}>
 							Registro
 						</a>
 					</div>
 				</form>
 			)}
 
-			{register && !Object.keys(loggedUser).length && (
-				<form className='login-name' onSubmit={handleSubmitRegister}>
+			{statusRegister && !Object.keys(loggedUser).length && (
+				<form className='login-name' onSubmit={handleSubmitFormRegister}>
 					<p>Registro</p>
 					<input
 						type='text'
-						name='name'
+						{...registerRegister('name', {
+							required: {
+								value: true,
+								message: `El campo 'Nombre' es requerido`
+							},
+							minLength: {
+								value: 1,
+								message: `El campo 'Nombre' debe tener como mínimo 1 caracter`
+							},
+							maxLength: {
+								value: 50,
+								message: `El campo 'Nombre' debe tener como máximo 50 caracteres`
+							}
+						})}
 						placeholder='Nombre'
-						value={data.name}
-						onChange={handleChange}
-						minLength={2}
-						maxLength={50}
-						required
 					/>
+					{errorsRegister && errorsRegister.name && (
+						<div className='errorTag'>{errorsRegister.name.message}</div>
+					)}
+
 					<input
 						type='email'
-						name='email'
+						{...registerRegister('email', {
+							required: {
+								value: true,
+								message: `El campo 'Email' es requerido`
+							},
+							maxLength: {
+								value: 100,
+								message: `El campo 'Email' debe tener como máximo 100 caracteres`
+							},
+							pattern: {
+								value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+								message: `El campo 'Email' debe tener un formato como el siguiente: ejemplo@dominio.com`
+							}
+						})}
 						placeholder='Email'
-						value={data.email}
-						onChange={handleChange}
-						maxLength={50}
-						required
 					/>
+					{errorsRegister && errorsRegister.email && (
+						<div className='errorTag'>{errorsRegister.email.message}</div>
+					)}
 
 					<input
 						type='password'
-						name='password'
+						{...registerRegister('password', {
+							required: {
+								value: true,
+								message: `El campo 'Contraseña' es requerido`
+							},
+							minLength: {
+								value: 7,
+								message: `El campo 'Contraseña' debe tener como mínimo 7 caracteres`
+							},
+							maxLength: {
+								value: 70,
+								message: `El campo 'Contraseña' debe tener como máximo 70 caracteres`
+							},
+							pattern: {
+								value: /^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
+								message: `El campo 'Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (!@#$%^&*()_-+=[]{}|;:'",.<>?/).`
+							}
+						})}
 						placeholder='Contraseña'
-						value={data.password}
-						onChange={handleChange}
-						minLength={7}
-						maxLength={70}
-						required
 					/>
+					{errorsRegister && errorsRegister.password && (
+						<div className='errorTag'>{errorsRegister.password.message}</div>
+					)}
 
 					<input
 						type='password'
-						name='confirmPassword'
+						{...registerRegister('confirmPassword', {
+							required: {
+								value: true,
+								message: `El campo 'Confirmar Contraseña' es requerido`
+							},
+							minLength: {
+								value: 7,
+								message: `El campo 'Confirmar Contraseña' debe tener como mínimo 7 caracteres`
+							},
+							maxLength: {
+								value: 70,
+								message: `El campo 'Confirmar Contraseña' debe tener como máximo 70 caracteres`
+							},
+							pattern: {
+								value: /^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
+								message: `El campo 'Confirmar Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (!@#$%^&*()_-+=[]{}|;:'",.<>?/).`
+							}
+						})}
 						placeholder='Confirmar Contraseña'
-						value={data.confirmPassword}
-						onChange={handleChange}
-						minLength={7}
-						maxLength={70}
-						required
 					/>
-					{errorText ? <div>{errorText}</div> : null}
+					{errorsRegister && errorsRegister.confirmPassword && (
+						<div className='errorTag'>{errorsRegister.confirmPassword.message}</div>
+					)}
+
+					{advise ? <div className='advise'>{advise}</div> : null}
+
 					<div className='login-form-actions'>
 						<button type='submit'>Enviar</button>
-						<a href='#' onClick={() => setRegister(false)}>
+						<a href='#' onClick={() => setStatusRegister(false)}>
 							Login
 						</a>
 					</div>
 				</form>
 			)}
 
-			{Object.keys(loggedUser).length && (
+			{Object.keys(loggedUser).length > 0&& (
 				<div className='login-profile'>
 					<div className='welcome-title'>Bienvenido/a {loggedUser.name}</div>
 					<Link to={`/profile/${loggedUser.id}`} className='profile-title'>

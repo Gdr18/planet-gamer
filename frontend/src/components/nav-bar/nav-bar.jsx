@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { CSSTransition } from 'react-transition-group'
 
-import Login from './login'
+import LoginComponent from './login'
 import LogosWrapper from './logos-wrapper'
 import Basket from './basket'
 
@@ -72,7 +72,7 @@ export default function NavBar() {
 				>
 					<div ref={nodeRefLogin}>
 						{loginActive ? (
-							<Login
+							<LoginComponent
 								messageRegister={messageRegister}
 								handleIconLogin={handleIconLogin}
 							/>
