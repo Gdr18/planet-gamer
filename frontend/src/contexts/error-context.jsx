@@ -5,7 +5,7 @@ const ErrorContext = createContext([[]])
 export const useErrorContext = () => useContext(ErrorContext)
 
 export const ErrorProvider = ({ children }) => {
-    const [error, setError] = useState(null)
+    const [error, setError] = useState({})
 
     const clearError = () => {
         setError({})

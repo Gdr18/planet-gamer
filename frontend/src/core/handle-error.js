@@ -15,7 +15,7 @@ const handleExpiredTokenError = async retryCallback => {
 			return await retryCallback()
 		})
 		.catch(error => {
-			handleErrors(error, refreshToken)
+			throw error
 		})
 }
 
@@ -23,7 +23,7 @@ export const handleErrors = async (error, requestFunction) => {
 	const errorKey = error.response?.data?.err || 'unknown_error'
 	let errorUi = 'not_modal'
 	let message =
-		'Ha ocurrido un error inesperado. Por favor, inténtalo de más tarde.'
+		'Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.'
 
 	switch (errorKey) {
 		case 'expired_token':
@@ -62,7 +62,9 @@ export const handleErrors = async (error, requestFunction) => {
 			errorUi = 'go_home'
 			break
 		case 'db_generic_error':
-			message = error.response?.data?.msg || message
+			errorUi = 'go_home'
+			break
+		case 'generic_error':
 			errorUi = 'go_home'
 			break
 	}

@@ -1,10 +1,11 @@
+import './style/main.scss'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import App from './components/app.jsx'
-import './style/main.scss'
 
 import { ErrorModal } from './components/error-modal.jsx'
+import App from './components/app.jsx'
+
 import { LoginProvider } from './contexts/auth-context'
 import { CartProvider } from './contexts/cart/cart-context'
 import { GamesProvider } from './contexts/games-context'
@@ -17,8 +18,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 				<LoginProvider>
 					<GamesProvider>
 						<CartProvider>
-							<App />
 							<ErrorModal />
+							<App />
 						</CartProvider>
 					</GamesProvider>
 				</LoginProvider>

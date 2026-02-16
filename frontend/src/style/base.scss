@@ -11,10 +11,10 @@
 body {
 	margin: 0;
 	padding: 0;
+	min-height: 100dvh;
 	font-family: 'Poppins', sans-serif;
 	background-image: url('../assets/beat_schuler_9d2wuvst9_i_unsplash.jpg');
 	background-size: cover;
-	background-attachment: fixed;
 	backdrop-filter: brightness(40%);
 	color: $gris-fuerte;
 }
@@ -44,4 +44,8 @@ input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
+}
+
+.app {
+	position: relative;
 }

@@ -6,8 +6,8 @@ export default function PaymentSuccessful({ order }) {
 	return (
 		<div className='success-wrapper'>
 			<div className='branding'>
-				<div>Planet Gamer</div>
 				<SaturnoIcon fill='#92e678' width={45} height={45} />
+				<div>Planet Gamer</div>
 			</div>
 			<div className='header-success'>
 				<div className='success-icon-team'>

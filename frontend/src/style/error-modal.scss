@@ -1,0 +1,50 @@
+.error-modal {
+	position: fixed;
+	top: 35dvh;
+	left: 30dvw;
+	z-index: 1000;
+	width: 40dvw;
+	height: max-content;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	.error-content {
+		background-color: rgba(0, 0, 0, 0.9);
+		border-radius: 5px;
+		border: 2px solid $verde-marca;
+		padding: 2em;
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+	}
+	.title-logo-container {
+		display: flex;
+		align-items: center;
+		gap: 0.8em;
+		span {
+			font-family: 'Creepster';
+			color: $verde-marca;
+			font-size: 2em;
+		}
+	}
+	.error-information-container {
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+		h2 {
+			margin: 0;
+			color: $error;
+			text-indent: 0.5em;
+		}
+		p {
+			margin: 0;
+			text-align: center;
+            margin-bottom: 0.5em;
+		}
+		button {
+			@include button();
+			margin: auto;
+			padding: 0.5em 1.5em;
+		}
+	}
+}
