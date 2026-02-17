@@ -4,9 +4,9 @@ import { useForm } from 'react-hook-form'
 import {
 	getAddressesUser,
 	executeAddressAction
-} from '../../services/api/address-service'
+} from '../../../services/api/address-service'
 
-import { executeUserAction } from '../../services/api/user-service'
+import { executeUserAction } from '../../../services/api/user-service'
 
 export default function FormAddress({
 	setSteps,
@@ -61,10 +61,11 @@ export default function FormAddress({
 			dataAddress.city !== address.city
 		) {
 			const formatedData = { ...data, userId: loggedUser.id }
-			const result = executeAddressAction(formatedData, 'post')
-				.then(response => {
+			const result = executeAddressAction(formatedData, 'post').then(
+				response => {
 					setAddress(response)
-				})
+				}
+			)
 		}
 		if (
 			phoneNumber !== loggedUser.phoneNumber ||
@@ -72,10 +73,9 @@ export default function FormAddress({
 			surnames !== loggedUser.surnames
 		) {
 			const formatedData = { ...loggedUser, name, surnames, phoneNumber }
-			const result = executeUserAction(formatedData, 'put')
-				.then(response => {
-					setUser(response)
-				})
+			const result = executeUserAction(formatedData, 'put').then(response => {
+				setUser(response)
+			})
 		}
 	}
 

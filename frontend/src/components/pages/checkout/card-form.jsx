@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
-import { executeOrderAction } from '../../services/api/order-service'
-import { deleteBasketsUser } from '../../services/api/basket-service'
+import { executeOrderAction } from '../../../services/api/order-service'
+import { deleteBasketsUser } from '../../../services/api/basket-service'
 
-import { useCartContext } from '../../contexts/cart/cart-context'
+import { useCartContext } from '../../../contexts/cart/cart-context'
 
 export default function CardForm({ setSteps, loggedUser, setOrder }) {
 	const stripe = useStripe()
@@ -64,7 +64,7 @@ export default function CardForm({ setSteps, loggedUser, setOrder }) {
 				},
 				'post'
 			)
-			
+
 			setCheckingCheckout(true)
 			cleaningBasket()
 			deleteBasketsUser(loggedUser.id)

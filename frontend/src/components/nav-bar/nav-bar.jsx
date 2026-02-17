@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { CSSTransition } from 'react-transition-group'
 
-import LoginComponent from './login'
+import LoginComponent from './auth'
 import LogosWrapper from './logos-wrapper'
 import Basket from './basket'
 

@@ -1,4 +1,4 @@
-import SaturnoIcon from '../icons/saturno-icon'
+import SaturnoIcon from '../../icons/saturno-icon'
 
 import { HiOutlineRocketLaunch } from 'react-icons/hi2'
 

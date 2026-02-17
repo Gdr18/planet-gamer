@@ -7,7 +7,7 @@ import { useErrorContext } from '../../contexts/error-context'
 
 import { login, register } from '../../services/api/auth-service'
 
-export default function LoginComponent({ handleIconLogin, messageRegister }) {
+export default function AuthComponent({ handleIconLogin, messageRegister }) {
 	const [advise, setAdvise] = useState('')
 	const [statusRegister, setStatusRegister] = useState(false)
 
@@ -274,10 +274,10 @@ export default function LoginComponent({ handleIconLogin, messageRegister }) {
 				</form>
 			)}
 
-			{Object.keys(loggedUser).length > 0&& (
+			{Object.keys(loggedUser).length > 0 && (
 				<div className='login-profile'>
 					<div className='welcome-title'>Bienvenido/a {loggedUser.name}</div>
-					<Link to={`/profile/${loggedUser.id}`} className='profile-title'>
+					<Link to='/profile' className='profile-title'>
 						Perfil
 					</Link>
 					<div className='logout-title' onClick={handleClickLogout}>

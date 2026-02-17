@@ -20,6 +20,7 @@ export const getCurrentUser = async () => {
 export const executeUserAction = async (userData, methodHTTP) => {
 	const token = localStorage.getItem('access_token')
 	if (!token) return
+	
 	return await axiosInstance({
 		method: methodHTTP,
 		url: `/users/${methodHTTP !== 'post' ? userData.id : ''}`,
@@ -30,4 +31,23 @@ export const executeUserAction = async (userData, methodHTTP) => {
 		.catch(async error => {
 			throw await handleErrors(error, () => executeUserAction(userData, methodHTTP))
 		})
+}
+
+export const getUserWithRelatedData = async userId => {
+	const token = localStorage.getItem('access_token')
+	if (!token) return
+
+	return await axiosInstance
+		.get(`/users/${userId}/with-relations`,
+				{
+					withCredentials: true,
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('access_token')}`
+					}
+				}
+			)
+			.then(response => response.data)
+			.catch(async error => {
+				throw await handleErrors(error, () => getUserWithRelatedData(userId))
+			})
 }

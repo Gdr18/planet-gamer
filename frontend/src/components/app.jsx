@@ -1,12 +1,12 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 
 import Home from './pages/home'
 import Contact from './pages/contact'
-import Products from './pages/products'
+import Products from './pages/products/products'
 import Game from './pages/game'
-import Checkout from './pages/checkout'
+import Checkout from './pages/checkout/checkout'
 import NoMatch from './pages/no-match'
-import GameManager from './pages/game-manager'
+import GameManager from './pages/games-manager/games-manager'
 import Profile from './pages/profile'
 
 import { useLoginContext } from '../contexts/auth-context'
@@ -20,19 +20,37 @@ export default function App() {
 				<Route path='/platform/:platform' element={<Products />} />
 				<Route path='/game/:game' element={<Game />} />
 				<Route path='/contact' element={<Contact />} />
-				{Object.keys(loggedUser).length ? (
-					<Route path={`/profile`} element={<Profile />} />
-				) : null}
-				{Object.keys(loggedUser).length ? (
-					<Route path={`/checkout`} element={<Checkout />} />
-				) : null}
-				{Object.keys(loggedUser).length && loggedUser.role < 3 ? (
-					<Route
-						path={`/game-manager`}
-						element={<GameManager />}
-					/>
-				) : null}
-				<Route element={<NoMatch />} />
+				<Route
+					path='/profile'
+					element={
+						Object.keys(loggedUser).length ? (
+							<Profile />
+						) : (
+							<Navigate to='/' replace />
+						)
+					}
+				/>
+				<Route
+					path='/checkout'
+					element={
+						Object.keys(loggedUser).length ? (
+							<Checkout />
+						) : (
+							<Navigate to='/' replace />
+						)
+					}
+				/>
+				<Route
+					path='/game-manager'
+					element={
+						Object.keys(loggedUser).length && loggedUser.role < 3 ? (
+							<GameManager />
+						) : (
+							<Navigate to='/' replace />
+						)
+					}
+				/>
+				<Route path='*' element={<NoMatch />} />
 			</Routes>
 		</div>
 	)

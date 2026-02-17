@@ -2,10 +2,10 @@ import { useState } from 'react'
 import axios from 'axios'
 
 import GameSidebarList from '../games-manager/game-sidebar-list'
-import NavBar from '../nav-bar/nav-bar'
-import Footer from '../footer'
+import NavBar from '../../nav-bar/nav-bar'
+import Footer from '../../footer'
 
-import { useCartContext } from '../../contexts/cart/cart-context'
+import { useCartContext } from '../../../contexts/cart/cart-context'
 
 export default function GameManager() {
 	const { getGames } = useCartContext()

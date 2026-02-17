@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 import { TbTrashXFilled, TbEdit } from 'react-icons/tb'
 
-import { useCartContext } from '../../contexts/cart/cart-context'
+import { useCartContext } from '../../../contexts/cart/cart-context'
 
 const GameSidebarList = ({ handleDeleteClick, handleEditClick }) => {
 	const { allGames } = useCartContext()

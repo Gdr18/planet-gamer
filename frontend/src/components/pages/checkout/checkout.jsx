@@ -3,15 +3,15 @@ import { useState } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 
-import NavBar from '../nav-bar/nav-bar'
-import Footer from '../footer'
-import FormAddress from '../checkout/form-address'
-import CardForm from '../checkout/card-form'
-import PaymentSuccessful from '../checkout/payment-successful'
-import Home from './home'
+import NavBar from '../../nav-bar/nav-bar'
+import Footer from '../../footer'
+import FormAddress from './form-address'
+import CardForm from './card-form'
+import PaymentSuccessful from './payment-successful'
+import Home from '../home'
 
-import { useCartContext } from '../../contexts/cart/cart-context'
-import { useLoginContext } from '../../contexts/auth-context'
+import { useCartContext } from '../../../contexts/cart/cart-context'
+import { useLoginContext } from '../../../contexts/auth-context'
 
 export default function Checkout() {
 	const [steps, setSteps] = useState(1)

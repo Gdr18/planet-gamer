@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 
-import axios from 'axios'
+import {
+	executeUserAction,
+	getUserWithRelatedData
+} from '../../services/api/user-service'
+import { executeAddressAction } from '../../services/api/address-service'
 
 import NavBar from '../nav-bar/nav-bar'
 import Footer from '../footer'
@@ -11,15 +15,19 @@ import { TbEdit } from 'react-icons/tb'
 
 import { useLoginContext } from '../../contexts/auth-context'
 import { useCartContext } from '../../contexts/cart/cart-context'
+import { useErrorContext } from '../../contexts/error-context'
 
 export default function Profile() {
-	const { loggedUser, setLoggedUser, handleLogout } = useLoginContext()
+	const { loggedUser, setLoggedUser, logoutUser } = useLoginContext()
 	const { cleaningBasket } = useCartContext()
+	const { setError } = useErrorContext()
 
 	const navigate = useNavigate()
 
 	const [editUser, setEditUser] = useState(true)
-	const [editAddress, setEditAddress] = useState(true)
+	const [editAddress, setEditAddress] = useState([])
+	const [successMessageAddress, setSuccessMessageAddress] = useState('')
+	const [successMessageProfile, setSuccessMessageProfile] = useState('')
 
 	const {
 		register: registerUser,
@@ -27,6 +35,7 @@ export default function Profile() {
 		formState: { errors: errorsUser }
 	} = useForm({
 		defaultValues: {
+			id: loggedUser.id,
 			name: loggedUser.name,
 			surnames: loggedUser.surnames,
 			email: loggedUser.email,
@@ -49,14 +58,12 @@ export default function Profile() {
 					street: '',
 					secondLineStreet: '',
 					postalCode: '',
-					city: ''
+					city: '',
+					default: false
 				}
 			]
 		}
 	})
-
-	const [ordersUser, setOrdersUser] = useState([])
-	const [addressesUser, setAddressesUser] = useState([])
 
 	const { fields: addressFields } = useFieldArray({
 		control,
@@ -64,97 +71,102 @@ export default function Profile() {
 	})
 
 	useEffect(() => {
-		if (!Object.keys(loggedUser).length) return
-		if (loggedUser.addresses && loggedUser.orders) return
-		axios
-			.get(
-				`${import.meta.env.VITE_BACKEND_URL}/users/${loggedUser.id}/with-relations`,
-				{
-					withCredentials: true,
-					headers: {
-						Authorization: `Bearer ${localStorage.getItem('access_token')}`
+		if (!loggedUser.addresses && !loggedUser.orders) {
+			getUserWithRelatedData(loggedUser.id)
+				.then(user => {
+					if (Object.keys(user).length) {
+						setLoggedUser({ ...user })
 					}
-				}
-			)
-			.then(response => {
-				if (Object.keys(response.data).length) {
-					setOrdersUser(response.data.orders)
-					setAddressesUser(response.data.addresses)
-					response.data.addresses.length && reset({ addresses: response.data.addresses })
-					setLoggedUser({...response.data})
-				}
-			})
-	}, [])
+				})
+				.catch(error => {
+					setError(error)
+				})
+		}
+	}, [loggedUser.id])
 
-	const handleSubmitProfile = handleSubmitUser(data => {
+	useEffect(() => {
+		if (loggedUser.addresses?.length) {
+			reset({ addresses: loggedUser.addresses })
+			setEditAddress(new Array(loggedUser.addresses.length).fill(true))
+		} else {
+			setEditAddress([true])
+		}
+	}, [loggedUser.addresses])
+
+	useEffect(() => {
+		if (Object.keys(loggedUser).length) return
+		navigate('/')
+	}, [loggedUser.id])
+
+	const handleSubmitProfile = handleSubmitUser(async data => {
 		const confirmEdit = confirm('Quieres guardar los nuevos datos del perfil?')
 		if (!confirmEdit) return
-		axios
-			.put(`${import.meta.env.VITE_BACKEND_URL}/users/${loggedUser.id}`, data, {
-				withCredentials: true,
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem('access_token')}`
-				}
-			})
-			.then(response => {
+
+		await executeUserAction({ ...data, password: loggedUser.password }, 'put')
+			.then(user => {
 				setEditUser(!editUser)
-				setLoggedUser({ ...loggedUser, ...response.data })
+				setLoggedUser({ ...loggedUser, ...user })
+				setSuccessMessageProfile(
+					'Los datos del perfil han sido actualizados correctamente.'
+				)
+				setTimeout(() => {
+					setSuccessMessageProfile('')
+				}, 3000)
 			})
 			.catch(error => {
-				console.log(error, 'algo ha salido mal con el putting del user')
+				setError(error)
 			})
 	})
 
-	const handleSubmitDirection = handleSubmitAddress((data, methodHTTP) => {
-		const confirmEdit = confirm(
-			'Quieres guardar los nuevos datos de la dirección?'
-		)
-		if (!confirmEdit) return
+	const handleSubmitDirection = index =>
+		handleSubmitAddress(async data => {
+			const confirmEdit = confirm(
+				'Quieres guardar los nuevos datos de la dirección?'
+			)
+			if (!confirmEdit) return
 
-		axios(
-			`${import.meta.env.VITE_BACKEND_URL}/addresses/${methodHTTP === 'put' && data.id}`,
-			data,
-			{
-				method: methodHTTP,
-				withCredentials: true,
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem('access_token')}`
-				}
-			}
-		)
-			.then(response => {
-				setEditAddress(!editAddress)
-				setAddressesUser([...addressesUser, response.data])
-				setLoggedUser({
-					...loggedUser,
-					addresses: [...loggedUser.addresses, response.data]
+			const currentAddress = { ...data.addresses[index], userId: loggedUser.id }
+			const methodHTTP = currentAddress.id ? 'put' : 'post'
+
+			await executeAddressAction(currentAddress, methodHTTP)
+				.then(address => {
+					setEditAddress(prev => {
+						const next = [...prev]
+						next[index] = !next[index]
+						return next
+					})
+					setLoggedUser(prev => ({
+						...prev,
+						addresses: prev.addresses
+							? prev.addresses.map((addr, i) => (i === index ? address : addr))
+							: [address]
+					}))
+					setSuccessMessageAddress(
+						'Los datos de la dirección han sido actualizados correctamente.'
+					)
+					setTimeout(() => {
+						setSuccessMessageAddress('')
+					}, 3000)
 				})
-			})
-			.catch(error => {
-				console.log(error, 'algo ha salido mal con posting address')
-			})
-	})
+				.catch(error => {
+					setError(error)
+				})
+		})
 
-	const deletingUser = () => {
+	const deletingUser = async () => {
 		const confirmDelete = confirm(
 			'Estás segurx de que quieres salir de nuestra órbita para siempre? 😔'
 		)
 
 		if (confirmDelete) {
-			axios
-				.delete(`${import.meta.env.VITE_BACKEND_URL}/users/${loggedUser.id}`, {
-					withCredentials: true,
-					headers: {
-						Authorization: `Bearer ${localStorage.getItem('access_token')}`
-					}
-				})
+			await executeUserAction(loggedUser, 'delete')
 				.then(() => {
-					handleLogout()
+					logoutUser()
 					cleaningBasket()
 					navigate('/')
 				})
 				.catch(error => {
-					console.log(error, 'Algo ha salido mal borrando al usuario')
+					setError(error)
 				})
 		} else {
 			alert('Gracias por continuar con nosotrxs!!🤗')
@@ -163,21 +175,22 @@ export default function Profile() {
 
 	return (
 		<div>
+			{/* {console.log(loggedUser)} */}
 			<NavBar />
 			<div className='profile-wrapper'>
 				<div className='profile-container'>
 					<div className='profile-title-wrapper'>
 						<div className='profile-title'>Perfil</div>
-						{loggedUser.role < 3 ? (
+						{loggedUser.role < 3 && (
 							<div className='admin-wrapper'>
-								<Link to={`/game-manager}`}>
+								<Link to={'/game-manager'}>
 									<div>
 										<TbEdit className='icon-edit' />
 										<span>Game Manager</span>
 									</div>
 								</Link>
 							</div>
-						) : null}
+						)}
 					</div>
 					<div className='form-wrapper'>
 						<div className='form-title-wrapper'>
@@ -286,11 +299,11 @@ export default function Profile() {
 										},
 										validate: {
 											value: value => {
-												if (value === loggedUser.password) {
+												if (value === loggedUser.password || value === '') {
 													return true
 												} else {
 													const regex =
-														/^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:',.<>?/]){7,}$/
+														/^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:',.<>?/]).{7,}$/
 													return (
 														regex.test(value) ||
 														`El campo 'Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial`
@@ -302,8 +315,13 @@ export default function Profile() {
 									})}
 									placeholder='••••••••••'
 								/>
+
 								{errorsUser.password && (
 									<div className='errorTag'>{errorsUser.password.message}</div>
+								)}
+
+								{successMessageProfile && (
+									<div className='success-message'>{successMessageProfile}</div>
 								)}
 							</div>
 							<div className='button-wrapper'>
@@ -317,18 +335,33 @@ export default function Profile() {
 						</form>
 					</div>
 					{addressFields.map((address, index) => {
-						console.log(address, 'address')
 						return (
 							<div key={address.id} className='form-wrapper'>
 								<div className='form-title-wrapper'>
 									<div className='universal-title'>Dirección</div>
 									<TbEdit
 										className='edit-icon'
-										onClick={() => setEditAddress(!editAddress)}
+										onClick={() =>
+											setEditAddress(prev => {
+												const next = [...prev]
+												next[index] = !next[index]
+												return next
+											})
+										}
 									/>
 								</div>
-								{address.default && <div className='default-address'>Predeterminada</div>}
-								<form onSubmit={handleSubmitDirection}>
+								<form onSubmit={handleSubmitDirection(index)}>
+									<div className='checkbox-default'>
+										<label htmlFor={`default-${index}`}>Predeterminada</label>
+										<input
+											type='checkbox'
+											id={`default-${index}`}
+											{...registerAddress(`addresses.${index}.default`, {
+												value: address.default,
+												disabled: editAddress[index]
+											})}
+										/>
+									</div>
 									<div className='one-column'>
 										<input
 											type='text'
@@ -345,9 +378,9 @@ export default function Profile() {
 												maxLength: {
 													value: 100,
 													message:
-														'Dirección Línea 1 debe tener como máximo 50 caracteres'
+														'Dirección Línea 1 debe tener como máximo 100 caracteres'
 												},
-												disabled: editAddress
+												disabled: editAddress[index]
 											})}
 											placeholder='Dirección Línea 1'
 										/>
@@ -360,25 +393,31 @@ export default function Profile() {
 									<div className='one-column'>
 										<input
 											type='text'
-											{...registerAddress(`addresses.${index}.secondLineStreet`, {
-												minLength: {
-													value: 2,
-													message:
-														'Dirección Línea 2 debe tener al menos 2 caracteres'
-												},
-												maxLength: {
-													value: 50,
-													message:
-														'Dirección Línea 2 debe tener como máximo 50 caracteres'
-												},
-												disabled: editAddress
-											})}
+											{...registerAddress(
+												`addresses.${index}.secondLineStreet`,
+												{
+													minLength: {
+														value: 2,
+														message:
+															'Dirección Línea 2 debe tener al menos 2 caracteres'
+													},
+													maxLength: {
+														value: 50,
+														message:
+															'Dirección Línea 2 debe tener como máximo 100 caracteres'
+													},
+													disabled: editAddress[index]
+												}
+											)}
 											placeholder='Dirección Línea 2'
 										/>
 
 										{errorsAddress.addresses?.[index]?.secondLineStreet && (
 											<div className='errorTag'>
-												{errorsAddress.addresses[index].secondLineStreet.message}
+												{
+													errorsAddress.addresses[index].secondLineStreet
+														.message
+												}
 											</div>
 										)}
 									</div>
@@ -398,7 +437,7 @@ export default function Profile() {
 													value: 5,
 													message: 'Código Postal debe tener 5 números'
 												},
-												disabled: editAddress
+												disabled: editAddress[index]
 											})}
 											placeholder='Código Postal'
 										/>
@@ -424,7 +463,7 @@ export default function Profile() {
 													value: 40,
 													message: 'Ciudad debe tener como máximo 40 caracteres'
 												},
-												disabled: editAddress
+												disabled: editAddress[index]
 											})}
 											placeholder='Ciudad'
 										/>
@@ -434,9 +473,15 @@ export default function Profile() {
 												{errorsAddress.addresses[index].city.message}
 											</div>
 										)}
+
+										{successMessageAddress && (
+											<div className='success-message'>
+												{successMessageAddress}
+											</div>
+										)}
 									</div>
 									<div className='button-wrapper'>
-										<button disabled={editAddress} type='submit'>
+										<button disabled={editAddress[index]} type='submit'>
 											Guardar
 										</button>
 									</div>
@@ -444,11 +489,12 @@ export default function Profile() {
 							</div>
 						)
 					})}
-					{ordersUser.length ? (
+
+					{loggedUser.orders?.length > 0 && (
 						<div className='form-wrapper'>
 							<div className='universal-title'>Pedidos</div>
 							<div className='orders-wrapper'>
-								{ordersUser.map(order => {
+								{loggedUser.orders.map(order => {
 									return (
 										<div key={order.id} className='order-item'>
 											<span>{`#${order.id}`}</span>
@@ -467,7 +513,7 @@ export default function Profile() {
 								})}
 							</div>
 						</div>
-					) : null}
+					)}
 				</div>
 			</div>
 			<Footer />

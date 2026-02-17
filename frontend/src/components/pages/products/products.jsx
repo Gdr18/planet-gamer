@@ -5,11 +5,11 @@ import { RotatingLines } from 'react-loader-spinner'
 import { BsFilterLeft } from 'react-icons/bs'
 
 import Checkbox from '../products/checkbox'
-import NavBar from '../nav-bar/nav-bar'
-import Footer from '../footer'
+import NavBar from '../../nav-bar/nav-bar'
+import Footer from '../../footer'
 
-import { useCartContext } from '../../contexts/cart/cart-context'
-import { useGamesContext } from '../../contexts/games-context'
+import { useCartContext } from '../../../contexts/cart/cart-context'
+import { useGamesContext } from '../../../contexts/games-context'
 
 export default function Products() {
 	const params = useParams()

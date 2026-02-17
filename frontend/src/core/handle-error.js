@@ -20,6 +20,7 @@ const handleExpiredTokenError = async retryCallback => {
 }
 
 export const handleErrors = async (error, requestFunction) => {
+	console.log(error)
 	const errorKey = error.response?.data?.err || 'unknown_error'
 	let errorUi = 'not_modal'
 	let message =
