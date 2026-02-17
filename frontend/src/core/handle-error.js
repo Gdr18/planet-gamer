@@ -48,12 +48,9 @@ export const handleErrors = async (error, requestFunction) => {
 		case 'password_mismatch':
 			message = 'La contraseña ingresada es incorrecta.'
 			break
-		case 'email_duplicated':
+		case 'db_email_duplicated':
 			message =
 				'El correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.'
-			break
-		case 'db_validation_error':
-			message = error.response?.data?.msg
 			break
 		case 'paid_rejected':
 			message =
@@ -65,10 +62,7 @@ export const handleErrors = async (error, requestFunction) => {
 			message = 'No tienes permiso para realizar esta acción.'
 			errorUi = 'go_home'
 			break
-		case 'db_generic_error':
-			errorUi = 'go_home'
-			break
-		case 'generic_error':
+		default:
 			errorUi = 'go_home'
 			break
 	}
