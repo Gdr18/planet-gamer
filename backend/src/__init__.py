@@ -1,12 +1,13 @@
 from flask import Flask
 from marshmallow import ValidationError
+from redis import RedisError
 from sqlalchemy.exc import SQLAlchemyError
 from stripe import StripeError
 
 from src.core.extensions import db, ma, cors
 from .core.exceptions.custom_exceptions import StripeCustomError, ResourceCustomError, AuthCustomError
 from .core.exceptions.handlers import stripe_error_handler, error_handler, db_validation_error_handler, \
-	generic_error_handler, db_error_handler
+	generic_error_handler, db_error_handler, redis_error_handler
 from .routes.addresses_route import addresses
 from .routes.auth_route import auth
 from .routes.basket_items_route import basket_items
@@ -33,6 +34,7 @@ def create_app(config):
 	
 	app.register_error_handler(ValidationError, db_validation_error_handler)
 	app.register_error_handler(SQLAlchemyError, db_error_handler)
+	app.register_error_handler(RedisError, redis_error_handler)
 	
 	app.register_error_handler(ResourceCustomError, error_handler)
 	app.register_error_handler(Exception, generic_error_handler)

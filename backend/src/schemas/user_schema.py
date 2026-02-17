@@ -41,7 +41,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
 		
 		regex_password_hash = re.compile(r"^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$")
 		regex_password = re.compile(
-			r'^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{}|;:\',.<>?/]).{7,}$',
+			r'^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{}|;:\',.<>?/]).{7,70}$',
 			re.UNICODE,
 		)
 		

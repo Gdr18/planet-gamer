@@ -31,7 +31,7 @@ def add_game():
 	game_schema = GameSchema(load_instance=True)
 	
 	new_game = game_schema.load(game_data)
-	print(new_game)
+	
 	db.session.add(new_game)
 	db.session.commit()
 	

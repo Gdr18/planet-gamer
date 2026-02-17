@@ -1,4 +1,5 @@
 from flask import jsonify
+from redis import ConnectionError, TimeoutError
 from sqlalchemy.exc import IntegrityError
 from stripe import CardError, InvalidRequestError, SignatureVerificationError
 
@@ -31,11 +32,19 @@ def db_error_handler(error):
 	if isinstance(error, IntegrityError):
 		error_formatted = str(error).lower()
 		if "email" in error_formatted or "user_model.email" in error_formatted:
-			print(error_formatted)
-			return jsonify(err="email_duplicated", msg="El email ya está registrado."), 400
+			return jsonify(err="db_email_duplicated", msg="El email ya está registrado."), 400
 		return jsonify(err="db_integrity_error", msg="Error de integridad en la base de datos: valor duplicado."), 400
 	
 	return jsonify(err="db_generic_error", msg=f"Error inesperado en la base de datos: {str(error)}"), 500
+
+
+def redis_error_handler(error):
+	if isinstance(error, ConnectionError):
+		return jsonify(err="redis_connection_error", msg="Error de conexión a Redis."), 500
+	elif isinstance(error, TimeoutError):
+		return jsonify(err="redis_timeout_error", msg="Tiempo de espera agotado al conectar con Redis."), 500
+	
+	return jsonify(err="redis_generic_error", msg=f"Error inesperado de Redis: {str(error)}"), 500
 
 
 def generic_error_handler(error):
