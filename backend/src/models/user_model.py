@@ -17,7 +17,12 @@ class UserModel(db.Model):
 		"OrderModel", backref="user", lazy="raise"
 	)
 	user_role = db.relationship(
-		UserRoleModel, lazy="joined", uselist=False
+		UserRoleModel,
+		lazy="joined",
+		uselist=False,
+		primaryjoin="UserModel.email == foreign(UserRoleModel.email)",
+		foreign_keys="UserRoleModel.email",
+		viewonly=True,
 	)
 	basket = db.relationship(
 		"BasketItemModel", cascade="all, delete", backref="user", lazy="raise"

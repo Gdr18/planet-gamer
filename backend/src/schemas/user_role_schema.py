@@ -8,10 +8,10 @@ from ..models.user_role_model import UserRoleModel
 class UserRoleSchema(ma.SQLAlchemyAutoSchema):
 	email = ma.Email(
 		required=True,
-		foreign_key="user_model.email",
 		primary_key=True,
 		unique=True,
 		validate=validate.Length(min=1, max=100, error="El campo 'email' debe tener entre 1 y 100 caracteres."),
+		index=True
 	)
 	role = ma.Integer(
 		required=True,

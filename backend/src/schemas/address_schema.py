@@ -6,6 +6,7 @@ from ..schemas.order_schema import OrderSchema
 
 
 class AddressSchema(ma.SQLAlchemyAutoSchema):
+	default = ma.Boolean(allow_none=True)
 	second_line_street = ma.String(data_key="secondLineStreet", validate=validate.Length(min=1, max=50),
 	                               allow_none=True)
 	user_id = ma.Integer(foreign_key="user_model.id", required=True, data_key="userId",
