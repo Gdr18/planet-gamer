@@ -76,6 +76,10 @@
 		color: $error;
 		font-size: 0.9em;
 	}
+
+	.success {
+		color: $success;
+	}
 }
 
 @media (max-width: 500px) {

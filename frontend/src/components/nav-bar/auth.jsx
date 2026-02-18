@@ -263,7 +263,7 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 						<div className='errorTag'>{errorsRegister.confirmPassword.message}</div>
 					)}
 
-					{advise ? <div className='advise'>{advise}</div> : null}
+					{advise ? <div className={`advise ${advise.includes('correcta') ? 'success' : ''}`}>{advise}</div> : null}
 
 					<div className='login-form-actions'>
 						<button type='submit'>Enviar</button>
