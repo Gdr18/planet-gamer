@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { VscClose, VscDiffRemoved, VscDiffAdded } from 'react-icons/vsc'
 
 import { useCartContext } from '../../contexts/cart/cart-context'
-import { useLoginContext } from '../../contexts/auth-context'
+import { useAuthContext } from '../../contexts/auth-context'
 
 export default function Basket({
 	handleIconLogin,
@@ -11,7 +11,7 @@ export default function Basket({
 	handleIconBasket
 }) {
 	const { total, basket, updateItemBasket, deleteItemBasket } = useCartContext()
-	const { loggedUser } = useLoginContext()
+	const { loggedUser } = useAuthContext()
 
 	const navigate = useNavigate()
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 
 import {
@@ -13,16 +13,22 @@ import Footer from '../footer'
 
 import { TbEdit } from 'react-icons/tb'
 
-import { useLoginContext } from '../../contexts/auth-context'
+import { useAuthContext } from '../../contexts/auth-context'
 import { useCartContext } from '../../contexts/cart/cart-context'
 import { useErrorContext } from '../../contexts/error-context'
 
 export default function Profile() {
-	const { loggedUser, setLoggedUser, logoutUser } = useLoginContext()
+	const {
+		loggedUser,
+		setLoggedUser,
+		setCurrentBasket,
+		setCurrentAddresses,
+		setCurrentOrders,
+		currentAddresses,
+		currentOrders
+	} = useAuthContext()
 	const { cleaningBasket } = useCartContext()
 	const { setError } = useErrorContext()
-
-	const navigate = useNavigate()
 
 	const [editUser, setEditUser] = useState(true)
 	const [editAddress, setEditAddress] = useState([])
@@ -71,32 +77,39 @@ export default function Profile() {
 	})
 
 	useEffect(() => {
-		if (!loggedUser.addresses && !loggedUser.orders) {
-			getUserWithRelatedData(loggedUser.id)
-				.then(user => {
-					if (Object.keys(user).length) {
-						setLoggedUser({ ...user })
-					}
-				})
-				.catch(error => {
-					setError(error)
-				})
+		if (!currentAddresses.length && !currentOrders.length) {
+			const fetchUser = async () => {
+				await getUserWithRelatedData(loggedUser.id)
+					.then(user => {
+						if (Object.keys(user).length) {
+							const {
+								basket: userBasket,
+								addresses: userAddresses,
+								orders: userOrders,
+								...userData
+							} = user
+							setCurrentBasket(userBasket)
+							setCurrentOrders(userOrders)
+							setLoggedUser({ ...userData })
+							setCurrentAddresses(userAddresses)
+						}
+					})
+					.catch(error => {
+						setError(error)
+					})
+			}
+			fetchUser()
 		}
-	}, [loggedUser.id])
+	}, [currentAddresses, currentOrders])
 
 	useEffect(() => {
-		if (loggedUser.addresses?.length) {
-			reset({ addresses: loggedUser.addresses })
-			setEditAddress(new Array(loggedUser.addresses.length).fill(true))
-		} else {
+		if (!currentAddresses.length) {
 			setEditAddress([true])
+		} else {
+			reset({ addresses: currentAddresses })
+			setEditAddress(new Array(currentAddresses.length).fill(true))
 		}
-	}, [loggedUser.addresses])
-
-	useEffect(() => {
-		if (Object.keys(loggedUser).length) return
-		navigate('/')
-	}, [loggedUser.id])
+	}, [currentAddresses])
 
 	const handleSubmitProfile = handleSubmitUser(async data => {
 		const confirmEdit = confirm('Quieres guardar los nuevos datos del perfil?')
@@ -105,7 +118,7 @@ export default function Profile() {
 		await executeUserAction({ ...data, password: loggedUser.password }, 'put')
 			.then(user => {
 				setEditUser(!editUser)
-				setLoggedUser({ ...loggedUser, ...user })
+				setLoggedUser({...user})
 				setSuccessMessageProfile(
 					'Los datos del perfil han sido actualizados correctamente.'
 				)
@@ -135,12 +148,11 @@ export default function Profile() {
 						next[index] = !next[index]
 						return next
 					})
-					setLoggedUser(prev => ({
-						...prev,
-						addresses: prev.addresses
-							? prev.addresses.map((addr, i) => (i === index ? address : addr))
-							: [address]
-					}))
+					setCurrentAddresses(prev => ([
+						...prev.slice(0, index),
+						address,
+						...prev.slice(index + 1)
+					]))
 					setSuccessMessageAddress(
 						'Los datos de la dirección han sido actualizados correctamente.'
 					)
@@ -161,9 +173,10 @@ export default function Profile() {
 		if (confirmDelete) {
 			await executeUserAction(loggedUser, 'delete')
 				.then(() => {
-					logoutUser()
+					setLoggedUser({})
+					localStorage.removeItem('access_token')
+					localStorage.removeItem('refresh_token')
 					cleaningBasket()
-					navigate('/')
 				})
 				.catch(error => {
 					setError(error)

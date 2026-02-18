@@ -13,7 +13,7 @@ export const ErrorModal = () => {
 
 	useEffect(() => {
 		if (!Object.keys(error).length) return
-		if (error.errorUi === 'not_modal') return
+		if (error.errorUi === 'go_home' || error.errorUi === 'not_token') return
 
 		timeout = setTimeout(() => {
 			handleCase()

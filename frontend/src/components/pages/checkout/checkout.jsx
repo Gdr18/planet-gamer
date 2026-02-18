@@ -11,13 +11,13 @@ import PaymentSuccessful from './payment-successful'
 import Home from '../home'
 
 import { useCartContext } from '../../../contexts/cart/cart-context'
-import { useLoginContext } from '../../../contexts/auth-context'
+import { useAuthContext } from '../../../contexts/auth-context'
 
 export default function Checkout() {
 	const [steps, setSteps] = useState(1)
 
 	const { total, basketItems, checkingCheckout } = useCartContext()
-	const { loggedUser } = useLoginContext()
+	const { loggedUser } = useAuthContext()
 
 	const [user, setUser] = useState({
 		name: loggedUser.name,

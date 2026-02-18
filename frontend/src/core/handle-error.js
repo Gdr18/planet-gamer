@@ -21,7 +21,7 @@ const handleExpiredTokenError = async retryCallback => {
 
 export const handleErrors = async (error, requestFunction) => {
 	console.log(error)
-	const errorKey = error.response?.data?.err || 'unknown_error'
+	const { err: errorKey, msg: apiMsg } = error.response?.data
 	let errorUi = 'not_modal'
 	let message =
 		'Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.'
@@ -49,9 +49,13 @@ export const handleErrors = async (error, requestFunction) => {
 		case 'password_mismatch':
 			message = 'La contraseña ingresada es incorrecta.'
 			break
-		case 'db_email_duplicated':
-			message =
-				'El correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.'
+		case 'db_integrity_error':
+			if (apiMsg && apiMsg.includes('user_model.email')) {
+				message = 'El correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.'
+				errorUi = 'email_duplicated'
+			} else {
+				errorUi = 'go_home'
+			}
 			break
 		case 'paid_rejected':
 			message =
@@ -68,5 +72,5 @@ export const handleErrors = async (error, requestFunction) => {
 			break
 	}
 
-	return new AppError(errorKey, message, errorUi)
+	return new AppError(errorKey || 'unknown_error', message, errorUi)
 }

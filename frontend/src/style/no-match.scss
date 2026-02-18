@@ -1,16 +1,15 @@
-.no-match-container {
-	width: 100vw;
-	min-height: 85.8vh;
+.no-match {
+	height: 100dvh;
 	display: flex;
-	justify-content: center;
+	flex-direction: column;
+	justify-content: space-between;
 	.no-match-wrapper {
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
 		align-items: center;
 		h3 {
 			color: $gris-mas-claro;
-			margin-bottom: 50px;
+			margin-bottom: 2em;
 			text-align: center;
 		}
 		.icon-rocket {

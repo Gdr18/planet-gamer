@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 
 import Home from './pages/home'
 import Contact from './pages/contact'
@@ -9,10 +9,10 @@ import NoMatch from './pages/no-match'
 import GameManager from './pages/games-manager/games-manager'
 import Profile from './pages/profile'
 
-import { useLoginContext } from '../contexts/auth-context'
+import { useAuthContext } from '../contexts/auth-context'
 
 export default function App() {
-	const { loggedUser } = useLoginContext()
+	const { loggedUser } = useAuthContext()
 	return (
 		<div className='app'>
 			<Routes>
@@ -20,36 +20,11 @@ export default function App() {
 				<Route path='/platform/:platform' element={<Products />} />
 				<Route path='/game/:game' element={<Game />} />
 				<Route path='/contact' element={<Contact />} />
-				<Route
-					path='/profile'
-					element={
-						Object.keys(loggedUser).length ? (
-							<Profile />
-						) : (
-							<Navigate to='/' replace />
-						)
-					}
-				/>
-				<Route
-					path='/checkout'
-					element={
-						Object.keys(loggedUser).length ? (
-							<Checkout />
-						) : (
-							<Navigate to='/' replace />
-						)
-					}
-				/>
-				<Route
-					path='/game-manager'
-					element={
-						Object.keys(loggedUser).length && loggedUser.role < 3 ? (
-							<GameManager />
-						) : (
-							<Navigate to='/' replace />
-						)
-					}
-				/>
+				{loggedUser.id && <Route path='/profile' element={<Profile />} />}
+				{loggedUser.id && <Route path='/checkout' element={<Checkout />} />}
+				{loggedUser.role < 3 && (
+					<Route path='/game-manager' element={<GameManager />} />
+				)}
 				<Route path='*' element={<NoMatch />} />
 			</Routes>
 		</div>

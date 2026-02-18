@@ -4,12 +4,15 @@ import { getCurrentUser } from '../services/api/user-service'
 import { logout } from '../services/api/auth-service'
 import { useErrorContext } from './error-context'
 
-const LoginContext = React.createContext([[]])
+const AuthContext = React.createContext([[]])
 
-export const useLoginContext = () => useContext(LoginContext)
+export const useAuthContext = () => useContext(AuthContext)
 
-export const LoginProvider = ({ children }) => {
+export const AuthProvider = ({ children }) => {
 	const [loggedUser, setLoggedUser] = useState({})
+	const [currentBasket, setCurrentBasket] = useState([])
+	const [currentAddresses, setCurrentAddresses] = useState([])
+	const [currentOrders, setCurrentOrders] = useState([])
 
 	const { setError } = useErrorContext()
 
@@ -17,29 +20,48 @@ export const LoginProvider = ({ children }) => {
 		const token = localStorage.getItem('access_token')
 		if (!token) {
 			setLoggedUser({})
-		} else if (token && !Object.keys(loggedUser).length) {
+		}
+		if (token && !Object.keys(loggedUser).length) {
+			const getUser = async () => {
+				await getCurrentUser()
+					.then(user => {
+						const { basket, ...userData } = user
+						setLoggedUser(userData)
+						setCurrentBasket(basket)
+					})
+					.catch(error => setError(error))
+			}
 			getUser()
 		}
-	}, [])
+	}, [loggedUser.id])
 
-	const getUser = async () => {
-		await getCurrentUser().then(user => setLoggedUser(user)).catch(error => setError(error))
-	}
 
 	const logoutUser = async () => {
-		await logout().then(() => setLoggedUser({})).catch(error => setError(error))
+		await logout()
+			.then(() => {
+				setLoggedUser({})
+				setCurrentBasket([])
+				setCurrentAddresses([])
+				setCurrentOrders([])
+			})
+			.catch(error => setError(error))
 	}
 
 	return (
-		<LoginContext.Provider
+		<AuthContext.Provider
 			value={{
 				loggedUser,
+				currentBasket,
+				currentAddresses,
+				currentOrders,
 				setLoggedUser,
 				logoutUser,
-				getUser
+				setCurrentBasket,
+				setCurrentAddresses,
+				setCurrentOrders
 			}}
 		>
 			{children}
-		</LoginContext.Provider>
+		</AuthContext.Provider>
 	)
 }

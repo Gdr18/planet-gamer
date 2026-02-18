@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 
-import { useLoginContext } from '../../contexts/auth-context'
+import { useAuthContext } from '../../contexts/auth-context'
 import { useErrorContext } from '../../contexts/error-context'
 
 import { login, register } from '../../services/api/auth-service'
@@ -11,7 +11,7 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 	const [advise, setAdvise] = useState('')
 	const [statusRegister, setStatusRegister] = useState(false)
 
-	const { loggedUser, setLoggedUser, logoutUser } = useLoginContext()
+	const { loggedUser, setLoggedUser, logoutUser, setCurrentBasket } = useAuthContext()
 	const { setError } = useErrorContext()
 
 	const {
@@ -41,7 +41,9 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 	const handleSubmitFormLogin = handleSubmitLogin(data => {
 		login(data)
 			.then(user => {
-				setLoggedUser(user)
+				const { basket, ...userData } = user
+				setLoggedUser(userData)
+				setCurrentBasket(basket)
 			})
 			.catch(error => {
 				if (
@@ -77,10 +79,7 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 				}, 2000)
 			})
 			.catch(error => {
-				if (
-					error.errorKey === 'email_duplicated' ||
-					error.errorKey === 'db_validation_error'
-				) {
+				if (error.errorUi === 'email_duplicated') {
 					setAdvise(error.message)
 					setTimeout(() => {
 						setAdvise('')

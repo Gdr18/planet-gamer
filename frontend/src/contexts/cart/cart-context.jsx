@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 
-import { useLoginContext } from '../auth-context'
+import { useAuthContext } from '../auth-context'
 import { executeBasketAction } from '../../services/api/basket-service'
 import { syncFromLocal, syncMergeBaskets } from './sync-baskets'
 
@@ -14,15 +14,15 @@ export const CartProvider = ({ children }) => {
 	const [countProducts, setCountProducts] = useState(0)
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
-	const { loggedUser } = useLoginContext()
+	const { loggedUser, currentBasket, setCurrentBasket} = useAuthContext()
 
 	useEffect(() => {
-		if (Object.keys(loggedUser).length) {
+		if (currentBasket.length) {
 			syncBaskets()
 		} else {
 			cleaningBasket()
 		}
-	}, [loggedUser.id])
+	}, [currentBasket])
 
 	const syncBaskets = async () => {
 		let basketUpdated = []
@@ -49,7 +49,7 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
 		if (itemBasket.userId) {
-			const result = await executeBasketAction(itemBasket, 'delete')
+			await executeBasketAction(itemBasket, 'delete')
 		}
 	}
 
@@ -71,7 +71,7 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts + 1)
 
 		if (itemBasket.userId) {
-			const result = await executeBasketAction(itemBasket, 'post').then(
+			await executeBasketAction(itemBasket, 'post').then(
 				item => {
 					itemBasket = { ...itemBasket, id: item.id }
 				}
@@ -106,7 +106,7 @@ export const CartProvider = ({ children }) => {
 		setBasket([...games])
 
 		if (itemBasket.userId) {
-			const result = await executeBasketAction(itemBasket, 'put')
+			await executeBasketAction(itemBasket, 'put')
 		}
 	}
 
