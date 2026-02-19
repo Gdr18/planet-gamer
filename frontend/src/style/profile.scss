@@ -1,11 +1,21 @@
 .universal-title {
 	color: $gris-fuerte;
-	padding: 20px;
 	font-weight: 600;
 }
 
-.edit-icon {
-	@include icon2();
+.edit-container {
+	display: flex;
+	align-items: center;
+	color: $morado;
+	transition: 0.3s ease-in-out;
+	.edit-title {
+		font-size: 0.9em;
+		margin-left: 5px;
+	}
+	&:hover {
+		color: $morado-inactivo;
+		cursor: pointer;
+	}
 }
 
 .profile-wrapper {
@@ -32,21 +42,20 @@
 				font-size: 1.7em;
 			}
 			.admin-wrapper {
+				display: flex;
+				gap: 1.5em;
+				font-size: 1.2em;
 				a {
-					div {
-						display: flex;
-						align-items: center;
-						margin-top: 10px;
-						font-family: 'Creepster', sans-serif;
-						color: $verde-marca;
-						font-size: 1.5em;
-						transition: 0.3s ease-in-out;
-						&:hover {
-							color: $verde-hover;
-						}
-						span {
-							margin-left: 5px;
-						}
+					font-family: 'Creepster', sans-serif;
+					color: $verde-marca;
+					transition: 0.3s ease-in-out;
+					&:hover {
+						color: $verde-hover;
+						cursor: pointer;
+						text-decoration: underline;
+					}
+					span {
+						margin-left: 5px;
 					}
 				}
 			}
@@ -59,7 +68,8 @@
 			margin-top: 20px;
 			.form-title-wrapper {
 				display: flex;
-				align-items: center;
+				justify-content: space-around;
+				margin-bottom: 20px;
 			}
 			.default-address {
 				margin: 0 0 5px 5px;
@@ -75,11 +85,21 @@
 					width: fit-content;
 					gap: 5px;
 					font-size: 0.8em;
-					font-weight: 700;
-					color: $morado-completado;
+					color: $morado-activo;
 				}
 				.two-column {
 					@include two-column();
+					.change-password {
+						text-align: right;
+						font-size: 0.8em;
+						color: $morado-activo;
+						transition: 0.3s ease-in-out;
+						&:hover {
+							color: $morado-inactivo;
+							cursor: pointer;
+							text-decoration: underline;
+						}
+					}
 				}
 				.one-column {
 					@include one-column();

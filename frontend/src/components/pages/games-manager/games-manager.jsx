@@ -7,7 +7,7 @@ import Footer from '../../footer'
 
 import { useCartContext } from '../../../contexts/cart/cart-context'
 
-export default function GameManager() {
+export default function GamesManager() {
 	const { getGames } = useCartContext()
 
 	const [gamesForm, setGamesForm] = useState({

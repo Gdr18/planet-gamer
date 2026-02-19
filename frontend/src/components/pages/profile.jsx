@@ -34,11 +34,13 @@ export default function Profile() {
 	const [editAddress, setEditAddress] = useState([])
 	const [successMessageAddress, setSuccessMessageAddress] = useState('')
 	const [successMessageProfile, setSuccessMessageProfile] = useState('')
+	const [changePassword, setChangePassword] = useState(true)
 
 	const {
 		register: registerUser,
 		handleSubmit: handleSubmitUser,
-		formState: { errors: errorsUser }
+		formState: { errors: errorsUser },
+		getValues
 	} = useForm({
 		defaultValues: {
 			id: loggedUser.id,
@@ -46,6 +48,7 @@ export default function Profile() {
 			surnames: loggedUser.surnames,
 			email: loggedUser.email,
 			password: '',
+			confirmPassword: '',
 			phoneNumber: loggedUser.phoneNumber
 		}
 	})
@@ -100,7 +103,7 @@ export default function Profile() {
 			}
 			fetchUser()
 		}
-	}, [currentAddresses, currentOrders])
+	}, [])
 
 	useEffect(() => {
 		if (!currentAddresses.length) {
@@ -115,10 +118,14 @@ export default function Profile() {
 		const confirmEdit = confirm('Quieres guardar los nuevos datos del perfil?')
 		if (!confirmEdit) return
 
-		await executeUserAction({ ...data, password: loggedUser.password }, 'put')
+		const passwordToSend = data.password.length
+			? data.password
+			: loggedUser.password
+
+		await executeUserAction({ ...data, password: passwordToSend }, 'put')
 			.then(user => {
 				setEditUser(!editUser)
-				setLoggedUser({...user})
+				setLoggedUser({ ...user })
 				setSuccessMessageProfile(
 					'Los datos del perfil han sido actualizados correctamente.'
 				)
@@ -148,11 +155,11 @@ export default function Profile() {
 						next[index] = !next[index]
 						return next
 					})
-					setCurrentAddresses(prev => ([
+					setCurrentAddresses(prev => [
 						...prev.slice(0, index),
 						address,
 						...prev.slice(index + 1)
-					]))
+					])
 					setSuccessMessageAddress(
 						'Los datos de la dirección han sido actualizados correctamente.'
 					)
@@ -188,7 +195,6 @@ export default function Profile() {
 
 	return (
 		<div>
-			{/* {console.log(loggedUser)} */}
 			<NavBar />
 			<div className='profile-wrapper'>
 				<div className='profile-container'>
@@ -196,22 +202,23 @@ export default function Profile() {
 						<div className='profile-title'>Perfil</div>
 						{loggedUser.role < 3 && (
 							<div className='admin-wrapper'>
-								<Link to={'/game-manager'}>
-									<div>
-										<TbEdit className='icon-edit' />
-										<span>Game Manager</span>
-									</div>
-								</Link>
+								<Link to={'/games-manager'}>Games Manager</Link>
+								{loggedUser.role === 1 && (
+									<Link to={'/roles-manager'}>Roles Manager</Link>
+								)}
 							</div>
 						)}
 					</div>
 					<div className='form-wrapper'>
 						<div className='form-title-wrapper'>
 							<div className='universal-title'>Datos Personales</div>
-							<TbEdit
-								className='edit-icon'
+							<div
+								className='edit-container'
 								onClick={() => setEditUser(!editUser)}
-							/>
+							>
+								<TbEdit className='edit-icon' />
+								<span className='edit-title'>Editar</span>
+							</div>
 						</div>
 						<form onSubmit={handleSubmitProfile}>
 							<div className='two-column'>
@@ -299,8 +306,16 @@ export default function Profile() {
 									<div className='errorTag'>{errorsUser.email.message}</div>
 								)}
 
+								<span
+									className='change-password'
+									onClick={() => setChangePassword(!changePassword)}
+								>
+									Cambiar contraseña
+								</span>
+
 								<input
 									type='password'
+									hidden={changePassword}
 									{...registerUser('password', {
 										minLength: {
 											value: 7,
@@ -326,7 +341,31 @@ export default function Profile() {
 										},
 										disabled: editUser
 									})}
-									placeholder='••••••••••'
+									placeholder='Nueva Contraseña'
+								/>
+
+								<input
+									type='password'
+									hidden={changePassword}
+									{...registerUser('confirmPassword', {
+										minLength: {
+											value: 7,
+											message: `El campo 'Contraseña' debe tener al menos 7 caracteres`
+										},
+										maxLength: {
+											value: 70,
+											message: `El campo 'Confirmar Contraseña' debe tener como máximo 70 caracteres`
+										},
+										validate: {
+											value: value => {
+												if (value !== getValues('password')) {
+													return `El campo 'Confirmar Contraseña' debe coincidir con el campo 'Contraseña'`
+												}
+											}
+										},
+										disabled: editUser
+									})}
+									placeholder='Confirmar Nueva Contraseña'
 								/>
 
 								{errorsUser.password && (
@@ -352,8 +391,8 @@ export default function Profile() {
 							<div key={address.id} className='form-wrapper'>
 								<div className='form-title-wrapper'>
 									<div className='universal-title'>Dirección</div>
-									<TbEdit
-										className='edit-icon'
+									<div
+										className='edit-container'
 										onClick={() =>
 											setEditAddress(prev => {
 												const next = [...prev]
@@ -361,7 +400,10 @@ export default function Profile() {
 												return next
 											})
 										}
-									/>
+									>
+										<TbEdit className='edit-icon' />
+										<span className='edit-title'>Editar</span>
+									</div>
 								</div>
 								<form onSubmit={handleSubmitDirection(index)}>
 									<div className='checkbox-default'>
@@ -395,7 +437,7 @@ export default function Profile() {
 												},
 												disabled: editAddress[index]
 											})}
-											placeholder='Dirección Línea 1'
+											placeholder='Calle, número, etc.'
 										/>
 										{errorsAddress.addresses?.[index]?.street && (
 											<div className='errorTag'>
@@ -417,12 +459,12 @@ export default function Profile() {
 													maxLength: {
 														value: 50,
 														message:
-															'Dirección Línea 2 debe tener como máximo 100 caracteres'
+															'Dirección Línea 2 debe tener como máximo 50 caracteres'
 													},
 													disabled: editAddress[index]
 												}
 											)}
-											placeholder='Dirección Línea 2'
+											placeholder='Bloque, piso, puerta, etc. (opcional)'
 										/>
 
 										{errorsAddress.addresses?.[index]?.secondLineStreet && (

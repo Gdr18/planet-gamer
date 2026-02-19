@@ -6,7 +6,8 @@ import Products from './pages/products/products'
 import Game from './pages/game'
 import Checkout from './pages/checkout/checkout'
 import NoMatch from './pages/no-match'
-import GameManager from './pages/games-manager/games-manager'
+import GamesManager from './pages/games-manager/games-manager'
+import RolesManager from './pages/roles-manager'
 import Profile from './pages/profile'
 
 import { useAuthContext } from '../contexts/auth-context'
@@ -23,7 +24,10 @@ export default function App() {
 				{loggedUser.id && <Route path='/profile' element={<Profile />} />}
 				{loggedUser.id && <Route path='/checkout' element={<Checkout />} />}
 				{loggedUser.role < 3 && (
-					<Route path='/game-manager' element={<GameManager />} />
+					<Route path='/games-manager' element={<GamesManager />} />
+				)}
+				{loggedUser.role === 1 && (
+					<Route path='/roles-manager' element={<RolesManager />} />
 				)}
 				<Route path='*' element={<NoMatch />} />
 			</Routes>
