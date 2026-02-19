@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react'
 
 import { useAuthContext } from '../auth-context'
+import { useErrorContext } from '../error-context'
+
 import { executeBasketAction } from '../../services/api/basket-service'
 import { syncFromLocal, syncMergeBaskets } from './sync-baskets'
 
@@ -14,24 +16,25 @@ export const CartProvider = ({ children }) => {
 	const [countProducts, setCountProducts] = useState(0)
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
-	const { loggedUser, currentBasket, setCurrentBasket} = useAuthContext()
+	const { loggedUser, currentBasket } = useAuthContext()
+	const { setError } = useErrorContext()
 
 	useEffect(() => {
-		if (currentBasket.length) {
-			syncBaskets()
+		if (Object.keys(loggedUser).length) {
+			syncBaskets().catch(err => setError(err))
 		} else {
 			cleaningBasket()
 		}
-	}, [currentBasket])
-
+	}, [loggedUser.id])
+	
 	const syncBaskets = async () => {
 		let basketUpdated = []
-		if (loggedUser.basket.length && !basket.length) {
-			basketUpdated = [...loggedUser.basket]
-		} else if (!loggedUser.basket.length && basket.length) {
-			basketUpdated = await syncFromLocal(basket, loggedUser)
-		} else if (loggedUser.basket.length && basket.length) {
-			basketUpdated = await syncMergeBaskets(loggedUser, basket)
+		if (currentBasket.length && !basket.length) {
+			basketUpdated = [...currentBasket]
+		} else if (!currentBasket.length && basket.length) {
+			basketUpdated = await syncFromLocal(basket, loggedUser.id)
+		} else if (currentBasket.length && basket.length) {
+			basketUpdated = await syncMergeBaskets(currentBasket, basket, loggedUser.id)
 		}
 
 		setBasket([...basketUpdated])
@@ -49,7 +52,7 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
 		if (itemBasket.userId) {
-			await executeBasketAction(itemBasket, 'delete')
+			await executeBasketAction(itemBasket, 'delete').catch(err => setError(err))
 		}
 	}
 
@@ -75,7 +78,7 @@ export const CartProvider = ({ children }) => {
 				item => {
 					itemBasket = { ...itemBasket, id: item.id }
 				}
-			)
+			).catch(error => setError(error))
 		}
 
 		setBasket([...basket, itemBasket])
@@ -106,7 +109,7 @@ export const CartProvider = ({ children }) => {
 		setBasket([...games])
 
 		if (itemBasket.userId) {
-			await executeBasketAction(itemBasket, 'put')
+			await executeBasketAction(itemBasket, 'put').catch(err => setError(err))
 		}
 	}
 

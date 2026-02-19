@@ -1,43 +1,41 @@
 import { executeBasketAction } from '../../services/api/basket-service'
 
-export const syncFromLocal = async (localBasket, loggedUser) => {
+export const syncFromLocal = async (localBasket, customerId) => {
 	const posted = await Promise.all(
 		localBasket.map(item => {
-			const payload = { ...item, userId: loggedUser.id }
+			const payload = { ...item, userId: customerId }
 			return executeBasketAction(payload, 'post')
 		})
 	)
 	return [...posted]
 }
 
-export const syncMergeBaskets = async (loggedUser, localBasket) => {
-	const merged = []
-	const usedLocalIds = new Set()
+export const syncMergeBaskets = async (serverBasket, localBasket, customerId) => {
+	let merged = []
+	const updatedServerIds = []
 
 	const updatedFromDb = await Promise.all(
-		loggedUser.basket.map(async item => {
-			const localItem = localBasket.find(b => b.game.id === item.game.id)
-			if (localItem) {
-				usedLocalIds.add(localItem.game.id)
+		serverBasket.map(async serverItem => {
+			const existLocalItem = localBasket.find(localItem => localItem.game.id === serverItem.game.id)
+			if (existLocalItem) {
+				updatedServerIds.push(existLocalItem.game.id)
 				return executeBasketAction(
-					{ ...item, qty: item.qty + localItem.qty },
+					{ ...serverItem, qty: serverItem.qty + existLocalItem.qty },
 					'put'
 				)
 			}
-			return item
+			return serverItem
 		})
 	)
 
-	merged.push(...updatedFromDb)
-
-	const localOnly = localBasket.filter(b => !usedLocalIds.has(b.game.id))
-	const postedLocalOnly = await Promise.all(
-		localOnly.map(item => {
-			const payload = { ...item, userId: loggedUser.id }
+	const itemsNotInServer = localBasket.filter(localItem => !updatedServerIds.includes(localItem.game.id))
+	const localItemsPosted = await Promise.all(
+		itemsNotInServer.map(item => {
+			const payload = { ...item, userId: customerId }
 			return executeBasketAction(payload, 'post')
 		})
 	)
 
-	merged.push(...postedLocalOnly)
+	merged = [...updatedFromDb, ...localItemsPosted]
 	return merged
 }
