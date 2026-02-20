@@ -18,9 +18,9 @@ class GameSchema(ma.SQLAlchemyAutoSchema):
 	platform = ma.String(required=True, validate=validate.OneOf(platforms))
 	img_url = ma.String(required=True, data_key="imgUrl", validate=validate.Regexp(regex=r"^https?:\/\/\S+",
 	                                                                               error="El campo 'imgUrl' debe ser una URL válida."))
-	description = ma.String(required=True, validate=validate.Length(min=1, max=2000))
+	description = ma.String(required=True, validate=validate.Length(min=10, max=2000))
 	gender = ma.String(required=True, validate=validate.Length(min=1, max=30))
-	pegi = ma.String(required=True, validate=validate.Regexp(regex=r"^\+\d+\b",
+	pegi = ma.String(required=True, validate=validate.Regexp(regex=r"^(3|7|12|16|18)",
 	                                                         error="El campo 'pegi' debe empezar con '+' seguido de una edad, por ejemplo: +18."))
 	release = ma.Integer(required=True, validate=validate.Range(
 		min=1975, max=datetime.now().year,
