@@ -2,16 +2,13 @@ import { Link } from 'react-router-dom'
 
 import { TbTrashXFilled, TbEdit } from 'react-icons/tb'
 
-import { useCartContext } from '../../../contexts/cart/cart-context'
-
-const GameSidebarList = ({ handleDeleteClick, handleEditClick }) => {
-	const { allGames } = useCartContext()
-	const gamesList = allGames.map(game => {
+const GameSidebarList = ({ handleDeleteClick, handleEditClick, games }) => {
+	const gamesList = games.map(game => {
 		return (
 			<div key={game.id} className='manager-item'>
 				<div className='manager-img'>
 					<Link to={`/g/${game.id}`}>
-						<img src={game.img} />
+						<img src={game.imgUrl} />
 					</Link>
 				</div>
 

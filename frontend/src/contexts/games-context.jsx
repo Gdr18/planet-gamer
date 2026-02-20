@@ -1,5 +1,7 @@
 import { createContext, useContext, useState } from 'react'
-import axios from 'axios'
+
+import { getGamesByPlatform } from '../services/api/game-service'
+import { useErrorContext } from './error-context'
 
 const GamesContext = createContext([[]])
 
@@ -8,16 +10,16 @@ export const useGamesContext = () => useContext(GamesContext)
 export const GamesProvider = ({ children }) => {
 	const [games, setGames] = useState([])
 
-	const getGames = platform => {
-		axios
-			.get(`${import.meta.env.VITE_BACKEND_URL}/games/platforms/${platform}`, {
-				withCredentials: true
-			})
-			.then(response => {
-				setGames(response.data)
+	const { setError } = useErrorContext()
+
+	const getGames = async platform => {
+		return await getGamesByPlatform(platform)
+			.then(fetchedGames => {
+				setGames([...games, ...fetchedGames])
+				return fetchedGames
 			})
 			.catch(error => {
-				console.log('An error ocurred', error)
+				setError(error)
 			})
 	}
 
