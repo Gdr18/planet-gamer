@@ -14,7 +14,7 @@ export const executeBasketAction = async (basketItemData, methodHTTP) => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			throw await handleErrors(error, () =>
+			return await handleErrors(error, () =>
 				executeBasketAction(basketItemData, methodHTTP)
 			)
 		})
@@ -31,6 +31,6 @@ export const deleteBasketsUser = async userId => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			throw await handleErrors(error, () => deleteBasketsUser(userId))
+			return await handleErrors(error, () => deleteBasketsUser(userId))
 		})
 }

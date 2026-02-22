@@ -7,13 +7,13 @@ const GameSidebarList = ({ handleDeleteClick, handleEditClick, games }) => {
 		return (
 			<div key={game.id} className='manager-item'>
 				<div className='manager-img'>
-					<Link to={`/g/${game.id}`}>
+					<Link to={`/game/${game.id}`}>
 						<img src={game.imgUrl} />
 					</Link>
 				</div>
 
 				<div className='title-manager-wrapper'>
-					<Link to={`/g/${game.id}`}>
+					<Link to={`/game/${game.id}`}>
 						<div className='title-manager'>{game.title}</div>
 					</Link>
 

@@ -49,3 +49,13 @@ input[type='number']::-webkit-outer-spin-button {
 .app {
 	position: relative;
 }
+
+.advise,
+.errorTag {
+	color: $error;
+	font-size: 0.9em;
+}
+
+.success {
+	color: $success;
+}

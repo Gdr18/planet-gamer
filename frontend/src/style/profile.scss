@@ -104,10 +104,6 @@
 				.one-column {
 					@include one-column();
 				}
-				.errorTag {
-					color: $error;
-					font-size: 0.8em;
-				}
 				.success-message {
 					color: $success;
 					font-size: 0.8em;

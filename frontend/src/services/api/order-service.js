@@ -14,7 +14,7 @@ export const executeOrderAction = async (orderData, methodHTTP) => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			throw await handleErrors(error, () =>
+			return await handleErrors(error, () =>
 				executeOrderAction(orderData, methodHTTP)
 			)
 		})

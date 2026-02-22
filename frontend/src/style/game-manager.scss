@@ -66,6 +66,14 @@
 				}
 			}
 		}
+		.right-column {
+			@include background-black-grey();
+			.select-element {
+				@include input();
+				width: fit-content;
+				margin: 2em 0 0 2em;
+			}
+		}
 	}
 }
 

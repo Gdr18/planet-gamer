@@ -12,7 +12,7 @@ export const getAddressesUser = async userId => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			throw await handleErrors(error, () => getAddressesUser(userId))
+			return await handleErrors(error, () => getAddressesUser(userId))
 		})
 }
 
@@ -28,7 +28,7 @@ export const executeAddressAction = async (addressData, methodHTTP) => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			throw await handleErrors(error, () =>
+			return await handleErrors(error, () =>
 				executeAddressAction(addressData, methodHTTP)
 			)
 		})

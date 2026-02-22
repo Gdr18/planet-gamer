@@ -15,7 +15,7 @@ const handleExpiredTokenError = async retryCallback => {
 			return await retryCallback()
 		})
 		.catch(error => {
-			throw error
+			return handleErrors(error, refreshToken)
 		})
 }
 
@@ -31,8 +31,7 @@ export const handleErrors = async (error, requestFunction) => {
 		case 'invalid_token':
 		case 'revoked_token':
 			if (requestFunction !== refreshToken) {
-				await handleExpiredTokenError(() => requestFunction())
-				break
+				return await handleExpiredTokenError(requestFunction)
 			}
 			localStorage.removeItem('access_token')
 			localStorage.removeItem('refresh_token')

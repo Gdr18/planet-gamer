@@ -6,7 +6,7 @@ export const getGamesByPlatform = async platform => {
 		.get(`/games/platforms/${platform}`)
 		.then(response => response.data)
 		.catch(error => {
-			throw handleErrors(error)
+			return handleErrors(error, () => getGamesByPlatform(platform))
 		})
 }
 
@@ -17,11 +17,11 @@ export const executeGameAction = async (method, data) => {
 		data,
 		withCredentials: true,
 		headers: {
-			Authorization: `Bearer ${localStorage.getItem('token')}`
+			Authorization: `Bearer ${localStorage.getItem('access_token')}`
 		}
 	})
 		.then(response => response.data)
 		.catch(error => {
-			throw handleErrors(error)
+			return handleErrors(error, () => executeGameAction(method, data))
 		})
 }

@@ -11,7 +11,7 @@ export const register = async data => {
 			return response.data
 		})
 		.catch(async error => {
-			throw await handleErrors(error, () => register(data))
+			return await handleErrors(error, () => register(data))
 		})
 }
 
@@ -26,7 +26,7 @@ export const login = async data => {
 			return response.data.user
 		})
 		.catch(async error => {
-			throw await handleErrors(error, () => login(data))
+			return await handleErrors(error, () => login(data))
 		})
 }
 
@@ -46,7 +46,7 @@ export const logout = async () => {
 			localStorage.removeItem('refresh_token')
 		})
 		.catch(async error => {
-			throw await handleErrors(error, logout)
+			return await handleErrors(error, logout)
 		})
 }
 
@@ -64,6 +64,6 @@ export const refreshToken = async () => {
 			return response.data.user
 		})
 		.catch(async error => {
-			throw await handleErrors(error, refreshToken)
+			return await handleErrors(error, refreshToken)
 		})
 }

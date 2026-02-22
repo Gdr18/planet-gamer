@@ -13,7 +13,7 @@ export const getCurrentUser = async () => {
 			return response.data
 		})
 		.catch(async error => {
-			throw await handleErrors(error, getCurrentUser)
+			return await handleErrors(error, getCurrentUser)
 		})
 }
 
@@ -29,7 +29,7 @@ export const executeUserAction = async (userData, methodHTTP) => {
 	})
 		.then(response => response.data)
 		.catch(async error => {
-			throw await handleErrors(error, () => executeUserAction(userData, methodHTTP))
+			return await handleErrors(error, () => executeUserAction(userData, methodHTTP))
 		})
 }
 
@@ -48,6 +48,6 @@ export const getUserWithRelatedData = async userId => {
 			)
 			.then(response => response.data)
 			.catch(async error => {
-				throw await handleErrors(error, () => getUserWithRelatedData(userId))
+				return await handleErrors(error, () => getUserWithRelatedData(userId))
 			})
 }

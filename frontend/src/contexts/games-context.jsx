@@ -27,7 +27,8 @@ export const GamesProvider = ({ children }) => {
 		<GamesContext.Provider
 			value={{
 				games,
-				getGames
+				getGames,
+				setGames
 			}}
 		>
 			{children}
