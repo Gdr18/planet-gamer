@@ -20,8 +20,8 @@ class GameSchema(ma.SQLAlchemyAutoSchema):
 	                                                                               error="El campo 'imgUrl' debe ser una URL válida."))
 	description = ma.String(required=True, validate=validate.Length(min=10, max=2000))
 	gender = ma.String(required=True, validate=validate.Length(min=1, max=30))
-	pegi = ma.String(required=True, validate=validate.Regexp(regex=r"^(3|7|12|16|18)",
-	                                                         error="El campo 'pegi' debe empezar con '+' seguido de una edad, por ejemplo: +18."))
+	pegi = ma.String(required=True, validate=validate.Regexp(regex=r"^(\+3|\+7|\+12|\+16|\+18)$",
+	                                                         error="El campo 'pegi' debe ser uno de los siguientes valores: +3, +7, +12, +16, +18"))
 	release = ma.Integer(required=True, validate=validate.Range(
 		min=1975, max=datetime.now().year,
 		error="El campo 'release' debe ser un entero que represente un año desde 1975 al año actual, ejemplo: 2024."))
