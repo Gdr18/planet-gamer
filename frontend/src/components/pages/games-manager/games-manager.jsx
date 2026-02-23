@@ -181,7 +181,7 @@ export default function GamesManager() {
 
 							<div className='three-column'>
 								<input
-									type='text'
+									type='number'
 									placeholder='PEGI'
 									{...register('pegi', {
 										required: {

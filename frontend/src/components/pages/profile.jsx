@@ -138,7 +138,7 @@ export default function Profile() {
 			})
 	})
 
-	const handleSubmitDirection = index =>
+	const handleSubmitLocalization = index =>
 		handleSubmitAddress(async data => {
 			const confirmEdit = confirm(
 				'Quieres guardar los nuevos datos de la dirección?'
@@ -405,7 +405,7 @@ export default function Profile() {
 										<span className='edit-title'>Editar</span>
 									</div>
 								</div>
-								<form onSubmit={handleSubmitDirection(index)}>
+								<form onSubmit={handleSubmitLocalization(index)}>
 									<div className='checkbox-default'>
 										<label htmlFor={`default-${index}`}>Predeterminada</label>
 										<input
@@ -545,11 +545,11 @@ export default function Profile() {
 						)
 					})}
 
-					{loggedUser.orders?.length > 0 && (
+					{currentOrders.length > 0 && (
 						<div className='form-wrapper'>
 							<div className='universal-title'>Pedidos</div>
 							<div className='orders-wrapper'>
-								{loggedUser.orders.map(order => {
+								{currentOrders.map(order => {
 									return (
 										<div key={order.id} className='order-item'>
 											<span>{`#${order.id}`}</span>

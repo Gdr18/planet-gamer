@@ -2,20 +2,20 @@ import { axiosInstance } from './api-client'
 
 import { handleErrors } from '../../core/handle-error'
 
-export const executeOrderAction = async (orderData, methodHTTP) => {
+export const postOrder = async (orderData) => {
 	const token = localStorage.getItem('access_token')
 	if (!token) return
 
 	return await axiosInstance({
-		method: methodHTTP,
-		url: `/orders/${methodHTTP !== 'post' ? orderData.id : ''}`,
-		data: methodHTTP !== 'delete' ? orderData : null,
+		method: 'post',
+		url: `/orders`,
+		data: orderData,
 		headers: { Authorization: `Bearer ${token}` }
 	})
 		.then(response => response.data)
 		.catch(async error => {
 			return await handleErrors(error, () =>
-				executeOrderAction(orderData, methodHTTP)
+				postOrder(orderData)
 			)
 		})
 }

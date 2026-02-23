@@ -1,17 +1,9 @@
 import { useState } from 'react'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
-import { executeOrderAction } from '../../../services/api/order-service'
-import { deleteBasketsUser } from '../../../services/api/basket-service'
-
-import { useCartContext } from '../../../contexts/cart/cart-context'
-
-export default function CardForm({ setSteps, loggedUser, setOrder }) {
+export default function CardForm({ handleSubmitPayment, previousStep }) {
 	const stripe = useStripe()
 	const elements = useElements()
-
-	const { cleaningBasket, setCheckingCheckout, countProducts, total } =
-		useCartContext()
 
 	const [errorText, setErrorText] = useState('')
 	const [disabledButton, setDisabledButton] = useState(false)
@@ -40,13 +32,9 @@ export default function CardForm({ setSteps, loggedUser, setOrder }) {
 	const handleSubmitCard = async event => {
 		event.preventDefault()
 
-		setOrder({
-			total,
-			qty: countProducts
-		})
-
 		setDisabledButton(true)
-		// Arreglar Stripes
+
+		// TODO: Arreglar Stripes
 		const { error, paymentMethod } = await stripe.createPaymentMethod({
 			type: 'card',
 			card: elements.getElement(CardElement)
@@ -56,20 +44,7 @@ export default function CardForm({ setSteps, loggedUser, setOrder }) {
 			setErrorText(error.message)
 			setDisabledButton(false)
 		} else {
-			const data = await executeOrderAction(
-				{
-					total,
-					qty: countProducts,
-					userId: loggedUser.id
-				},
-				'post'
-			)
-
-			setCheckingCheckout(true)
-			cleaningBasket()
-			deleteBasketsUser(loggedUser.id)
-			setSteps(3)
-			setOrder(data)
+			handleSubmitPayment(paymentMethod.id)
 		}
 	}
 
@@ -82,8 +57,8 @@ export default function CardForm({ setSteps, loggedUser, setOrder }) {
 			<div className='buttons-wrapper'>
 				<button
 					onClick={event => {
-						setSteps(1)
 						event.preventDefault()
+						previousStep()
 					}}
 				>
 					Atrás

@@ -16,9 +16,9 @@ export default function Basket({
 	const navigate = useNavigate()
 
 	const handlePurchaseBotton = () => {
-		if (Object.keys(loggedUser).length) {
+		if (loggedUser.id) {
 			setMessageRegister(false)
-			navigate(`/checkout/${loggedUser.id}`)
+			navigate('/checkout')
 			handleIconBasket()
 		} else {
 			setMessageRegister(true)
@@ -65,7 +65,7 @@ export default function Basket({
 				{basket.length ? (
 					<div className='total-wrapper'>
 						<div>Total: <span>{`${(Math.round(total * 100) / 100).toFixed(2)}€`}</span></div>
-						<button onClick={() => handlePurchaseBotton()}>
+						<button disabled={basket.length === 0} onClick={() => handlePurchaseBotton()}>
 							Tramitar pedido
 						</button>
 					</div>

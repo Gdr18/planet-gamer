@@ -1,48 +1,111 @@
-import { useState } from 'react'
-
-import { Elements } from '@stripe/react-stripe-js'
-import { loadStripe } from '@stripe/stripe-js'
+import { useState, useEffect } from 'react'
 
 import NavBar from '../../nav-bar/nav-bar'
 import Footer from '../../footer'
-import FormAddress from './form-address'
-import CardForm from './card-form'
+import FormCheckoutData from './form-checkout-data'
 import PaymentSuccessful from './payment-successful'
-import Home from '../home'
+import ConfirmCheckout from './confirm-checkout/confirm-checkout'
 
 import { useCartContext } from '../../../contexts/cart/cart-context'
 import { useAuthContext } from '../../../contexts/auth-context'
+import { useErrorContext } from '../../../contexts/error-context'
+
+import {
+	getAddressesUser,
+	executeAddressAction
+} from '../../../services/api/address-service'
+import { executeUserAction } from '../../../services/api/user-service'
 
 export default function Checkout() {
+	const { total, basket, cleaningBasket } = useCartContext()
+	const { loggedUser, setLoggedUser, currentAddresses, setCurrentAddresses } =
+		useAuthContext()
+	const { setError } = useErrorContext()
+
 	const [steps, setSteps] = useState(1)
-
-	const { total, basketItems, checkingCheckout } = useCartContext()
-	const { loggedUser } = useAuthContext()
-
-	const [user, setUser] = useState({
+	const [order, setOrder] = useState({})
+	const [userData, setUserData] = useState({
 		name: loggedUser.name,
 		surnames: loggedUser.surnames,
-		phone_number: loggedUser.phone_number,
-		email: loggedUser.email,
-		password: '',
-		admin: loggedUser.admin
-	})
-
-	const [address, setAddress] = useState({
+		phoneNumber: loggedUser.phoneNumber,
+		addressId: '',
+		isDefaultAddress: false,
 		street: '',
-		second_line_street: '',
-		postal_code: '',
+		secondLineStreet: '',
+		postalCode: '',
 		city: ''
 	})
 
-	const [order, setOrder] = useState({})
+	useEffect(() => {
+		const fetchAddresses = async () =>
+			await getAddressesUser(loggedUser.id)
+				.then(addresses => {
+					setCurrentAddresses(addresses)
+				})
+				.catch(error => {
+					setError(error)
+				})
 
-	const [stripePromise, setStripePromise] = useState(() =>
-		loadStripe(import.meta.env.VITE_STRIPES)
-	)
+		if (!currentAddresses.length) {
+			fetchAddresses()
+		}
 
-	if (!checkingCheckout & !basketItems.length) {
-		return <Home />
+		const defaultAddress =
+			currentAddresses.find(address => address.default) || currentAddresses[0]
+		const { id: addressId, default: isDefaultAddress, ...restAddress } = defaultAddress || {}
+		defaultAddress && setUserData({ ...userData, ...restAddress, addressId, isDefaultAddress })
+	}, [])
+
+	const previousStep = () => {
+		if (steps === 1) return
+		setSteps(steps - 1)
+	}
+
+	const nextStep = () => {
+		if (steps === 3) return
+		setSteps(steps + 1)
+	}
+
+	const handleSubmitCheckoutData = async data => {
+		const { name, surnames, phoneNumber, ...dataAddress } = data
+
+		if (
+			dataAddress.street !== userData.street ||
+			dataAddress.secondLineStreet !== userData.secondLineStreet ||
+			dataAddress.postalCode !== userData.postalCode ||
+			dataAddress.city !== userData.city
+		) {
+			const formatedData = {
+				...dataAddress,
+				userId: loggedUser.id
+			}
+			await executeAddressAction(formatedData, 'post')
+				.then(newAddress => {
+					setCurrentAddresses([...currentAddresses, newAddress])
+					setUserData({ ...data, addressId: newAddress.id })
+				})
+				.catch(error => setError(error))
+		} else (
+			setUserData({ ...userData, ...data })
+		)
+
+		if (phoneNumber !== userData.phoneNumber) {
+			const formatedData = { ...loggedUser, phoneNumber }
+			await executeUserAction(formatedData, 'put')
+				.then(user => {
+					setLoggedUser(user)
+				})
+				.catch(error => setError(error))
+		}
+
+		nextStep()
+	}
+
+	const handleSubmitPayment = async paymentMethodId => {
+		// TODO: Hacer petición /orders/with-items
+		
+		cleaningBasket()
+		nextStep()
 	}
 
 	return (
@@ -50,65 +113,20 @@ export default function Checkout() {
 			<NavBar />
 			<div className='wrapper'>
 				{steps === 1 ? (
-					<FormAddress
-						user={user}
-						setUser={setUser}
-						address={address}
-						setAddress={setAddress}
-						loggedUser={loggedUser}
-						setSteps={setSteps}
+					<FormCheckoutData
+						defaultFormValues={userData}
+						handleSubmitFormCheckout={handleSubmitCheckoutData}
 					/>
 				) : null}
 
 				{steps === 2 ? (
-					<div className='payment-container'>
-						<div className='payment-wrapper'>
-							<div className='order-details-wrapper'>
-								<div className='title-checkout'>Detalles Pedido</div>
-								{basketItems.map(game => {
-									return (
-										<div key={game.id} className='item'>
-											<img src={game.img} />
-											<div className='title-price-wrapper'>
-												<div>{game.title}</div>
-												<p>{`${game.qty} x ${game.price}`}</p>
-											</div>
-										</div>
-									)
-								})}
-								<div className='total-wrapper'>
-									<div>{`Total: ${Math.floor(total * 100) / 100}€`}</div>
-								</div>
-							</div>
-
-							<div className='address-details-wrapper'>
-								<div className='title-checkout'>Detalles Envío</div>
-								<p>{`${user.name} ${user.surnames}`}</p>
-								<p>{user.phone_number}</p>
-								<p>{address.street}</p>
-								<p>{address.second_line_street}</p>
-								<p>{address.postal_code}</p>
-								<p>{address.city}</p>
-							</div>
-
-							<div className='payment-logo-wrapper'>
-								<div className='title-checkout'>Pago</div>
-								<img
-									src='https://uniemprendia.es/wp-content/uploads/2018/10/Visa-MasterCard-1024x393.png'
-									alt=''
-								/>
-							</div>
-
-							<Elements stripe={stripePromise}>
-								<CardForm
-									setSteps={setSteps}
-									loggedUser={loggedUser}
-									setOrder={setOrder}
-									order={order}
-								/>
-							</Elements>
-						</div>
-					</div>
+					<ConfirmCheckout
+						userData={userData}
+						basket={basket}
+						total={total}
+						previousStep={previousStep}
+						handleSubmitPayment={handleSubmitPayment}
+					/>
 				) : null}
 				{steps === 3 ? <PaymentSuccessful order={order} /> : null}
 			</div>
