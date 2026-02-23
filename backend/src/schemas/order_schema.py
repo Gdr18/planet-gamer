@@ -8,6 +8,12 @@ status_order = ["pending", "paid", "failed"]
 
 
 class OrderSchema(ma.SQLAlchemyAutoSchema):
+	addressee = ma.String(required=True, validate=validate.Length(min=1, max=150))
+	phone_number = ma.String(
+		validate=validate.Regexp(regex=r"^(?:\+34\s?)?(6\d{8}|7[1-9]\d{7})$",
+		                         error="El campo 'phone_number' no cumple con el patrón, ejemplos válidos: '666666666' o '+34666666666'"),
+		data_key="phoneNumber"
+	)
 	total = ma.Decimal(as_string=True, places=2, required=True, validate=validate.Range(min=0.1,
 	                                                                                    error="El campo 'total' debe ser un entero positivo mayor que 0."))
 	address_id = ma.Integer(required=True, foreign_key="address_model.id", data_key="addressId",
@@ -29,6 +35,6 @@ class OrderSchema(ma.SQLAlchemyAutoSchema):
 	@pre_load
 	def validate_data(self, data, **kwargs):
 		expected_user_id = self.context.get("expected_user_id")
-		if expected_user_id and data.get(expected_user_id) and (str(data.get("user_id")) != str(expected_user_id)):
+		if expected_user_id and data.get("user_id") and (str(data.get("user_id")) != str(expected_user_id)):
 			raise ValidationError("El campo 'user_id' no se puede modificar.")
 		return data

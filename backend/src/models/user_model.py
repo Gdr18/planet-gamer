@@ -9,7 +9,7 @@ class UserModel(db.Model):
 	name = db.Column(db.String(50), nullable=False)
 	password = db.Column(db.String(70), nullable=False)
 	surnames = db.Column(db.String(100), default=None)
-	phone_number = db.Column(db.String(12), default=None)
+	phone_number = db.Column(db.String(14), default=None)
 	addresses = db.relationship(
 		"AddressModel", cascade="all, delete", backref="user", lazy="raise"
 	)
