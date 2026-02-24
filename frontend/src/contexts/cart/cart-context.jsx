@@ -16,7 +16,7 @@ export const CartProvider = ({ children }) => {
 	const [countProducts, setCountProducts] = useState(0)
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
-	const { loggedUser, currentBasket } = useAuthContext()
+	const { loggedUser, currentBasket, setCurrentBasket } = useAuthContext()
 	const { setError } = useErrorContext()
 
 	useEffect(() => {
@@ -42,6 +42,7 @@ export const CartProvider = ({ children }) => {
 		setTotal(
 			basketUpdated.reduce((acc, item) => acc + item.game.price * item.qty, 0)
 		)
+		setCurrentBasket([])
 	}
 
 	const deleteItemBasket = async itemBasket => {

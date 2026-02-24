@@ -13,11 +13,11 @@ export default function FormCheckoutData({ defaultFormValues, handleSubmitFormCh
 		<div className='address-container'>
 			<div className='title-checkout'>Datos Envío</div>
 			<form className='form-address-wrapper' onSubmit={handleSubmit(handleSubmitFormCheckout)}>
-				<div>
-					<label htmlFor="default">Dirección por defecto</label>
+				<div className='checkbox-default'>
 					<input type="checkbox" id="default"{...register('isDefaultAddress', {
 						value: defaultFormValues.isDefaultAddress,
 					})} />
+					<label htmlFor="default">Dirección por defecto</label>
 				</div>
 				<div className='one-column'>
 					<input

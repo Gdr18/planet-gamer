@@ -1,10 +1,11 @@
 .address-container {
 	width: 700px;
-	height: 370px;
+	height: fit-content;
 	@include white-shadow();
 	padding: 20px;
 	background-color: $gris-mas-claro;
 	border-radius: 3px;
+	align-self: center;
 	.title-checkout {
 		color: $gris-fuerte;
 		margin-top: 0;
@@ -15,6 +16,19 @@
 		width: 100%;
 		input {
 			@include input();
+		}
+		.checkbox-default {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			margin-right: 1em;
+			#default {
+				width: fit-content;
+			}
+			label {
+				font-size: 0.8em;
+				color: $gris-fuerte;
+			}
 		}
 		.one-column {
 			@include one-column();

@@ -15,6 +15,8 @@ import {
 	executeAddressAction
 } from '../../../services/api/address-service'
 import { executeUserAction } from '../../../services/api/user-service'
+import { postOrderAndItems } from '../../../services/api/order-service'
+import { executePayment } from '../../../services/api/payment-service'
 
 export default function Checkout() {
 	const { total, basket, cleaningBasket } = useCartContext()
@@ -37,24 +39,31 @@ export default function Checkout() {
 	})
 
 	useEffect(() => {
-		const fetchAddresses = async () =>
-			await getAddressesUser(loggedUser.id)
+		if (!currentAddresses.length) {
+			getAddressesUser(loggedUser.id)
 				.then(addresses => {
 					setCurrentAddresses(addresses)
 				})
 				.catch(error => {
 					setError(error)
 				})
-
-		if (!currentAddresses.length) {
-			fetchAddresses()
 		}
+	}, [])
+
+	useEffect(() => {
+		if (!currentAddresses.length) return
 
 		const defaultAddress =
 			currentAddresses.find(address => address.default) || currentAddresses[0]
-		const { id: addressId, default: isDefaultAddress, ...restAddress } = defaultAddress || {}
-		defaultAddress && setUserData({ ...userData, ...restAddress, addressId, isDefaultAddress })
-	}, [])
+		const {
+			id: addressId,
+			default: isDefaultAddress,
+			...restAddress
+		} = defaultAddress
+
+		defaultAddress &&
+			setUserData({ ...userData, ...restAddress, addressId, isDefaultAddress })
+	}, [currentAddresses])
 
 	const previousStep = () => {
 		if (steps === 1) return
@@ -67,69 +76,98 @@ export default function Checkout() {
 	}
 
 	const handleSubmitCheckoutData = async data => {
-		const { name, surnames, phoneNumber, ...dataAddress } = data
+		try {
+			const { name, surnames, phoneNumber, ...dataAddress } = data
 
-		if (
-			dataAddress.street !== userData.street ||
-			dataAddress.secondLineStreet !== userData.secondLineStreet ||
-			dataAddress.postalCode !== userData.postalCode ||
-			dataAddress.city !== userData.city
-		) {
-			const formatedData = {
-				...dataAddress,
-				userId: loggedUser.id
+			if (
+				dataAddress.street !== userData.street ||
+				dataAddress.secondLineStreet !== userData.secondLineStreet ||
+				dataAddress.postalCode !== userData.postalCode ||
+				dataAddress.city !== userData.city
+			) {
+				const formatedData = {
+					...dataAddress,
+					userId: loggedUser.id
+				}
+				const addressResponse = await executeAddressAction(formatedData, 'post')
+				setCurrentAddresses([...currentAddresses, addressResponse])
+				setUserData({ ...data, addressId: addressResponse.id })
+			} else setUserData({ ...userData, ...data })
+
+			if (
+				name === loggedUser.name &&
+				!loggedUser.surnames &&
+				!loggedUser.phoneNumber
+			) {
+				const formatedData = { ...loggedUser, phoneNumber, surnames }
+				const userResponse = await executeUserAction(formatedData, 'put')
+				setLoggedUser(userResponse)
 			}
-			await executeAddressAction(formatedData, 'post')
-				.then(newAddress => {
-					setCurrentAddresses([...currentAddresses, newAddress])
-					setUserData({ ...data, addressId: newAddress.id })
-				})
-				.catch(error => setError(error))
-		} else (
-			setUserData({ ...userData, ...data })
-		)
 
-		if (phoneNumber !== userData.phoneNumber) {
-			const formatedData = { ...loggedUser, phoneNumber }
-			await executeUserAction(formatedData, 'put')
-				.then(user => {
-					setLoggedUser(user)
-				})
-				.catch(error => setError(error))
+			nextStep()
+		} catch (error) {
+			setError(error)
 		}
-
-		nextStep()
 	}
 
 	const handleSubmitPayment = async paymentMethodId => {
-		// TODO: Hacer petición /orders/with-items
-		
-		cleaningBasket()
-		nextStep()
+		try {
+			const orderData = {
+				order: {
+					phoneNumber: userData.phoneNumber,
+					addressee: `${userData.name} ${userData.surnames}`,
+					userId: loggedUser.id,
+					addressId: userData.addressId,
+					paymentMethodId,
+					total
+				},
+				items: basket.map(item => ({
+					price: item.price,
+					qty: item.qty,
+					gameId: item.gameId
+				}))
+			}
+
+			const orderResponse = await postOrderAndItems(orderData)
+
+			setOrder(orderResponse.order)
+
+			const paymentData = {
+				userId: loggedUser.id,
+				orderId: orderResponse.order.id,
+				paymentMethodId
+			}
+
+			const paymentResponse = await executePayment(paymentData)
+
+			cleaningBasket()
+			return paymentResponse
+		} catch (error) {
+			setError(error)
+		}
 	}
 
 	return (
-		<div>
+		<div className='checkout-container'>
 			<NavBar />
-			<div className='wrapper'>
-				{steps === 1 ? (
-					<FormCheckoutData
-						defaultFormValues={userData}
-						handleSubmitFormCheckout={handleSubmitCheckoutData}
-					/>
-				) : null}
+			{steps === 1 && (
+				<FormCheckoutData
+					key={userData.addressId}
+					defaultFormValues={userData}
+					handleSubmitFormCheckout={handleSubmitCheckoutData}
+				/>
+			)}
 
-				{steps === 2 ? (
-					<ConfirmCheckout
-						userData={userData}
-						basket={basket}
-						total={total}
-						previousStep={previousStep}
-						handleSubmitPayment={handleSubmitPayment}
-					/>
-				) : null}
-				{steps === 3 ? <PaymentSuccessful order={order} /> : null}
-			</div>
+			{steps === 2 && (
+				<ConfirmCheckout
+					userData={userData}
+					basket={basket}
+					total={total}
+					previousStep={previousStep}
+					handleSubmitPayment={handleSubmitPayment}
+				/>
+			)}
+			{steps === 3 && <PaymentSuccessful order={order} />}
 			<Footer />
 		</div>
 	)

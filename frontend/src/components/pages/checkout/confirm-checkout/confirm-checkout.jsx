@@ -1,9 +1,9 @@
-import { useState } from 'react'
-
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 
 import CardForm from './card-form'
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPES)
 
 export default function ConfirmCheckout({
 	basket,
@@ -12,11 +12,6 @@ export default function ConfirmCheckout({
     previousStep,
     handleSubmitPayment
 }) {
-
-	const [stripePromise, setStripePromise] = useState(() =>
-		loadStripe(import.meta.env.VITE_STRIPES)
-	)
-
 	return (
 		<div className='payment-container'>
 			<div className='payment-wrapper'>
@@ -34,7 +29,8 @@ export default function ConfirmCheckout({
 						)
 					})}
 					<div className='total-wrapper'>
-						<div>{`Total: ${Math.floor(total * 100) / 100}€`}</div>
+						{/* <div>{`Total: ${Math.floor(total * 100) / 100}€`}</div> */}
+						<div>{`Total: ${total.toFixed(2)}€`}</div>
 					</div>
 				</div>
 

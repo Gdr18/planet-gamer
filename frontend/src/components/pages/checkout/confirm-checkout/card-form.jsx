@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
-export default function CardForm({ handleSubmitPayment, previousStep }) {
+export default function CardForm({ handleSubmitPayment, previousStep, nextStep }) {
 	const stripe = useStripe()
 	const elements = useElements()
 
@@ -34,7 +34,6 @@ export default function CardForm({ handleSubmitPayment, previousStep }) {
 
 		setDisabledButton(true)
 
-		// TODO: Arreglar Stripes
 		const { error, paymentMethod } = await stripe.createPaymentMethod({
 			type: 'card',
 			card: elements.getElement(CardElement)
@@ -44,7 +43,18 @@ export default function CardForm({ handleSubmitPayment, previousStep }) {
 			setErrorText(error.message)
 			setDisabledButton(false)
 		} else {
-			handleSubmitPayment(paymentMethod.id)
+			const response = await handleSubmitPayment(paymentMethod.id)
+			if (response.status === 'requires_action') {
+				const { error: errorConfirm } = await stripe.confirmCardPayment(
+					response.client_secret
+				)
+				if (errorConfirm) {
+					setErrorText(errorConfirm.message)
+					setDisabledButton(false)
+					return
+				}
+				nextStep()
+			}
 		}
 	}
 

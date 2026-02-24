@@ -59,3 +59,11 @@ input[type='number']::-webkit-outer-spin-button {
 .success {
 	color: $success;
 }
+
+.checkout-container {
+	width: 100%;
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
