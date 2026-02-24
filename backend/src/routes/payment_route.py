@@ -17,7 +17,7 @@ payments = Blueprint("payments", __name__, url_prefix="/payments")
 def create_and_confirm_payment():
 	data = request.get_json()
 	order_id = data.get("order_id")
-	payment_method = data.get("payment_method_id")
+	payment_method_id = data.get("payment_method_id")
 	user_id = int(get_jwt_identity())
 	
 	payment = None
@@ -35,7 +35,7 @@ def create_and_confirm_payment():
 			order.payment_id = payment.id
 			db.session.commit()
 		
-		payment = confirm_payment_intent(order.payment_id, payment_method)
+		payment = confirm_payment_intent(order.payment_id, payment_method_id)
 		
 		if payment.status not in ["succeeded", "requires_action", "processing"]:
 			raise StripeCustomError(payment.status)
