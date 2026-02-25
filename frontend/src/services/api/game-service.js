@@ -1,27 +1,28 @@
 import { axiosInstance } from './api-client'
-import { handleErrors } from '../../core/handle-error'
+import { apiWrapper } from './api-wrapper'
 
 export const getGamesByPlatform = async platform => {
-	return await axiosInstance
-		.get(`/games/platforms/${platform}`)
-		.then(response => response.data)
-		.catch(error => {
-			return handleErrors(error, () => getGamesByPlatform(platform))
+	const fetch = () => {
+		return axiosInstance.get(`/games/platforms/${platform}`, {
+			withCredentials: true
 		})
+	}
+
+	return await apiWrapper(fetch)
 }
 
 export const executeGameAction = async (method, data) => {
-	return await axiosInstance({
-		method,
-		url: `/games/${method === 'post' ? '' : data.id}`,
-		data,
-		withCredentials: true,
-		headers: {
-			Authorization: `Bearer ${localStorage.getItem('access_token')}`
-		}
-	})
-		.then(response => response.data)
-		.catch(error => {
-			return handleErrors(error, () => executeGameAction(method, data))
+	const fetch = () => {
+		return axiosInstance({
+			method,
+			url: `/games/${method === 'post' ? '' : data.id}`,
+			data,
+			withCredentials: true,
+			headers: {
+				Authorization: `Bearer ${localStorage.getItem('access_token')}`
+			}
 		})
+	}
+
+	return await apiWrapper(fetch)
 }

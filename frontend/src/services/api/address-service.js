@@ -1,35 +1,32 @@
 import { axiosInstance } from './api-client'
-
-import { handleErrors } from '../../core/handle-error'
+import { apiWrapper } from './api-wrapper'
 
 export const getAddressesUser = async userId => {
-	const token = localStorage.getItem('access_token')
-	if (!token) return
-	return await axiosInstance({
-		method: 'get',
-		url: `/addresses/users/${userId}`,
-		headers: { Authorization: `Bearer ${token}` }
-	})
-		.then(response => response.data)
-		.catch(async error => {
-			return await handleErrors(error, () => getAddressesUser(userId))
+	const fetch = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
+		return axiosInstance.get(`/addresses/users/${userId}`, {
+			headers: { Authorization: `Bearer ${token}` },
+			withCredentials: true
 		})
+	}
+
+	return await apiWrapper(fetch)
 }
 
-export const executeAddressAction = async (addressData, methodHTTP) => {
-	const token = localStorage.getItem('access_token')
-	if (!token) return
+export const executeAddressAction = async (method, data) => {
+	const fetch = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
 
-	return await axiosInstance({
-		method: methodHTTP,
-		url: `/addresses/${methodHTTP !== 'post' ? addressData.id : ''}`,
-		data: methodHTTP !== 'delete' ? addressData : null,
-		headers: { Authorization: `Bearer ${token}` }
-	})
-		.then(response => response.data)
-		.catch(async error => {
-			return await handleErrors(error, () =>
-				executeAddressAction(addressData, methodHTTP)
-			)
+		return axiosInstance({
+			method,
+			url: `/addresses/${method !== 'post' ? data.id : ''}`,
+			data: method !== 'delete' ? data : null,
+			headers: { Authorization: `Bearer ${token}` },
+			withCredentials: true
 		})
+	}
+
+	return await apiWrapper(fetch)
 }

@@ -1,36 +1,35 @@
 import { axiosInstance } from './api-client'
+import { apiWrapper } from './api-wrapper'
 
-import { handleErrors } from '../../core/handle-error'
+export const executeBasketAction = async (method, data) => {
+	const fetch = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
 
-export const executeBasketAction = async (basketItemData, methodHTTP) => {
-	const token = localStorage.getItem('access_token')
-	if (!token) return
-
-	return await axiosInstance({
-		method: methodHTTP,
-		url: `/basket-items/${methodHTTP !== 'post' ? basketItemData.id : ''}`,
-		data: methodHTTP !== 'delete' ? basketItemData : null,
-		headers: { Authorization: `Bearer ${token}` }
-	})
-		.then(response => response.data)
-		.catch(async error => {
-			return await handleErrors(error, () =>
-				executeBasketAction(basketItemData, methodHTTP)
-			)
+		return axiosInstance({
+			method,
+			url: `/basket-items/${method !== 'post' ? data.id : ''}`,
+			data: method !== 'delete' ? data : null,
+			headers: { Authorization: `Bearer ${token}` },
+			withCredentials: true
 		})
+	}
+
+	return await apiWrapper(fetch)
 }
 
 export const deleteBasketsUser = async userId => {
-	const token = localStorage.getItem('access_token')
-	if (!token) return
+	const fetch = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
 
-	return await axiosInstance({
-		method: 'delete',
-		url: `/baskets/users/${userId}`,
-		headers: { Authorization: `Bearer ${token}` }
-	})
-		.then(response => response.data)
-		.catch(async error => {
-			return await handleErrors(error, () => deleteBasketsUser(userId))
+		return axiosInstance({
+			method: 'delete',
+			url: `/baskets/users/${userId}`,
+			headers: { Authorization: `Bearer ${token}` },
+			withCredentials: true
 		})
+	}
+
+	return await apiWrapper(fetch)
 }

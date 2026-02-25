@@ -53,7 +53,7 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
 		if (itemBasket.userId) {
-			await executeBasketAction(itemBasket, 'delete').catch(err => setError(err))
+			await executeBasketAction('delete', itemBasket).catch(err => setError(err))
 		}
 	}
 
@@ -75,7 +75,7 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts + 1)
 
 		if (itemBasket.userId) {
-			await executeBasketAction(itemBasket, 'post').then(
+			await executeBasketAction('post', itemBasket).then(
 				item => {
 					itemBasket = { ...itemBasket, id: item.id }
 				}
@@ -110,7 +110,7 @@ export const CartProvider = ({ children }) => {
 		setBasket([...games])
 
 		if (itemBasket.userId) {
-			await executeBasketAction(itemBasket, 'put').catch(err => setError(err))
+			await executeBasketAction('put', itemBasket).catch(err => setError(err))
 		}
 	}
 

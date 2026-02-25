@@ -103,7 +103,7 @@ export default function Profile() {
 			}
 			fetchUser()
 		}
-	}, [])
+	}, [loggedUser.id])
 
 	useEffect(() => {
 		if (!currentAddresses.length) {
