@@ -48,7 +48,7 @@ export default function Checkout() {
 					setError(error)
 				})
 		}
-	}, [])
+	}, [loggedUser.id])
 
 	useEffect(() => {
 		if (!currentAddresses.length) return
@@ -89,7 +89,7 @@ export default function Checkout() {
 					...dataAddress,
 					userId: loggedUser.id
 				}
-				const addressResponse = await executeAddressAction(formatedData, 'post')
+				const addressResponse = await executeAddressAction('post', formatedData)
 				setCurrentAddresses([...currentAddresses, addressResponse])
 				setUserData({ ...data, addressId: addressResponse.id })
 			} else setUserData({ ...userData, ...data })
@@ -100,7 +100,7 @@ export default function Checkout() {
 				!loggedUser.phoneNumber
 			) {
 				const formatedData = { ...loggedUser, phoneNumber, surnames }
-				const userResponse = await executeUserAction(formatedData, 'put')
+				const userResponse = await executeUserAction('put', formatedData)
 				setLoggedUser(userResponse)
 			}
 
@@ -122,9 +122,9 @@ export default function Checkout() {
 					total
 				},
 				items: basket.map(item => ({
-					price: item.price,
+					price: item.game.price,
 					qty: item.qty,
-					gameId: item.gameId
+					gameId: item.game.id
 				}))
 			}
 

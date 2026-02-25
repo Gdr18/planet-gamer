@@ -1,53 +1,49 @@
 import { axiosInstance } from './api-client'
-
-import { handleErrors } from '../../core/handle-error'
+import { apiWrapper } from './api-wrapper'
 
 export const getCurrentUser = async () => {
-	const token = localStorage.getItem('access_token')
-	if (!token) return
-	return await axiosInstance
-		.get('/users/me', {
-			headers: { Authorization: `Bearer ${token}` }
+	const fetch = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
+
+		return axiosInstance.get('/users/me', {
+			headers: { Authorization: `Bearer ${token}` },
+			withCredentials: true
 		})
-		.then(response => {
-			return response.data
-		})
-		.catch(async error => {
-			return await handleErrors(error, getCurrentUser)
-		})
+	}
+
+	return await apiWrapper(fetch)
 }
 
-export const executeUserAction = async (userData, methodHTTP) => {
-	const token = localStorage.getItem('access_token')
-	if (!token) return
-	
-	return await axiosInstance({
-		method: methodHTTP,
-		url: `/users/${methodHTTP !== 'post' ? userData.id : ''}`,
-		data: methodHTTP !== 'delete' ? userData : null,
-		headers: { Authorization: `Bearer ${token}` }
-	})
-		.then(response => response.data)
-		.catch(async error => {
-			return await handleErrors(error, () => executeUserAction(userData, methodHTTP))
+export const executeUserAction = async (method, data) => {
+	const fetch = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
+
+		return axiosInstance({
+			method,
+			url: `/users/${method !== 'post' ? data.id : ''}`,
+			data: method !== 'delete' ? data : null,
+			headers: { Authorization: `Bearer ${token}` },
+			withCredentials: true
 		})
+	}
+
+	return await apiWrapper(fetch)
 }
 
 export const getUserWithRelatedData = async userId => {
-	const token = localStorage.getItem('access_token')
-	if (!token) return
+	const fetch = () => {
+		const token = localStorage.getItem('access_token')
+		if (!token) return
 
-	return await axiosInstance
-		.get(`/users/${userId}/with-relations`,
-				{
-					withCredentials: true,
-					headers: {
-						Authorization: `Bearer ${localStorage.getItem('access_token')}`
-					}
-				}
-			)
-			.then(response => response.data)
-			.catch(async error => {
-				return await handleErrors(error, () => getUserWithRelatedData(userId))
-			})
+		return axiosInstance.get(`/users/${userId}/with-relations`, {
+			withCredentials: true,
+			headers: {
+				Authorization: `Bearer ${token}`
+			}
+		})
+	}
+
+	return await apiWrapper(fetch)
 }

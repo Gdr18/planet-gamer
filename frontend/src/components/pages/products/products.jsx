@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom'
 import { RotatingLines } from 'react-loader-spinner'
 import { BsFilterLeft } from 'react-icons/bs'
 
-import Checkbox from '../products/checkbox'
+import Checkbox from './checkbox'
 import NavBar from '../../nav-bar/nav-bar'
 import Footer from '../../footer'
 

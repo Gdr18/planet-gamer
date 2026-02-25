@@ -10,13 +10,12 @@ export class AppError extends Error {
 }
 
 const handleExpiredTokenError = async retryCallback => {
-	await refreshToken()
-		.then(async () => {
-			return await retryCallback()
-		})
-		.catch(error => {
-			return handleErrors(error, refreshToken)
-		})
+	try {
+		await refreshToken()
+		return await retryCallback()
+	} catch (error) {
+		return handleErrors(error, refreshToken)
+	}
 }
 
 export const handleErrors = async (error, requestFunction) => {
@@ -30,7 +29,7 @@ export const handleErrors = async (error, requestFunction) => {
 		case 'expired_token':
 		case 'invalid_token':
 		case 'revoked_token':
-			if (requestFunction !== refreshToken) {
+			if (requestFunction.name !== 'refresh') {
 				return await handleExpiredTokenError(requestFunction)
 			}
 			localStorage.removeItem('access_token')
@@ -50,7 +49,8 @@ export const handleErrors = async (error, requestFunction) => {
 			break
 		case 'db_integrity_error':
 			if (apiMsg && apiMsg.includes('user_model.email')) {
-				message = 'El correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.'
+				message =
+					'El correo electrónico ya está registrado. Por favor, utiliza otro correo o inicia sesión.'
 				errorUi = 'email_duplicated'
 			} else {
 				errorUi = 'go_home'
