@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 
-import Ps5Icon from '../icons/ps5-icon'
-import Ps4Icon from '../icons/ps4-icon'
-import XboxIcon from '../icons/xbox-icon'
-import SwitchIcon from '../icons/switch-icon'
+import Ps5Icon from '../icons/Ps5Icon'
+import Ps4Icon from '../icons/Ps4Icon'
+import XboxIcon from '../icons/XboxIcon'
+import SwitchIcon from '../icons/SwitchIcon'
 
 export default function LogosWrapper({ handlePlatforms }) {
 	return (

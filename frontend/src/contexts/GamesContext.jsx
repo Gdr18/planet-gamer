@@ -1,7 +1,8 @@
 import { createContext, useContext, useState } from 'react'
 
 import { getGamesByPlatform } from '../services/api/game-service'
-import { useErrorContext } from './error-context'
+
+import { useApiWithErrors } from '../hooks/useApiWithErrors'
 
 const GamesContext = createContext([[]])
 
@@ -10,17 +11,16 @@ export const useGamesContext = () => useContext(GamesContext)
 export const GamesProvider = ({ children }) => {
 	const [games, setGames] = useState([])
 
-	const { setError } = useErrorContext()
+	const { callApi } = useApiWithErrors()
 
 	const getGames = async platform => {
-		return await getGamesByPlatform(platform)
-			.then(fetchedGames => {
-				setGames([...games, ...fetchedGames])
-				return fetchedGames
-			})
-			.catch(error => {
-				setError(error)
-			})
+		const { ok, response: fetchedGames } = await callApi(() =>
+			getGamesByPlatform(platform)
+		)
+		if (ok) {
+			setGames([...games, ...fetchedGames])
+			return fetchedGames
+		}
 	}
 
 	return (

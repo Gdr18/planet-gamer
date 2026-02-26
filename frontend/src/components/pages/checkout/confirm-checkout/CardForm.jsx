@@ -44,7 +44,7 @@ export default function CardForm({ handleSubmitPayment, previousStep, nextStep }
 			setDisabledButton(false)
 		} else {
 			const response = await handleSubmitPayment(paymentMethod.id)
-			if (response.status === 'requires_action') {
+			if (response && response.status === 'requires_action') {
 				const { error: errorConfirm } = await stripe.confirmCardPayment(
 					response.client_secret
 				)

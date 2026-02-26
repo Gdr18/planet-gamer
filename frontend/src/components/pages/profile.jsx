@@ -8,14 +8,15 @@ import {
 } from '../../services/api/user-service'
 import { executeAddressAction } from '../../services/api/address-service'
 
-import NavBar from '../nav-bar/nav-bar'
-import Footer from '../footer'
+import NavBar from '../nav-bar/NavBar'
+import Footer from '../Footer'
 
 import { TbEdit } from 'react-icons/tb'
 
-import { useAuthContext } from '../../contexts/auth-context'
-import { useCartContext } from '../../contexts/cart/cart-context'
-import { useErrorContext } from '../../contexts/error-context'
+import { useApiWithErrors } from '../../hooks/useApiWithErrors'
+
+import { useAuthContext } from '../../contexts/AuthContext'
+import { useCartContext } from '../../contexts/cart-context/CartContext'
 
 export default function Profile() {
 	const {
@@ -28,13 +29,14 @@ export default function Profile() {
 		currentOrders
 	} = useAuthContext()
 	const { cleaningBasket } = useCartContext()
-	const { setError } = useErrorContext()
 
 	const [editUser, setEditUser] = useState(true)
 	const [editAddress, setEditAddress] = useState([])
 	const [successMessageAddress, setSuccessMessageAddress] = useState('')
 	const [successMessageProfile, setSuccessMessageProfile] = useState('')
 	const [changePassword, setChangePassword] = useState(true)
+
+	const { callApi } = useApiWithErrors()
 
 	const {
 		register: registerUser,
@@ -81,27 +83,20 @@ export default function Profile() {
 
 	useEffect(() => {
 		if (!currentAddresses.length && !currentOrders.length) {
-			const fetchUser = async () => {
-				await getUserWithRelatedData(loggedUser.id)
-					.then(user => {
-						if (Object.keys(user).length) {
-							const {
-								basket: userBasket,
-								addresses: userAddresses,
-								orders: userOrders,
-								...userData
-							} = user
-							setCurrentBasket(userBasket)
-							setCurrentOrders(userOrders)
-							setLoggedUser({ ...userData })
-							setCurrentAddresses(userAddresses)
-						}
-					})
-					.catch(error => {
-						setError(error)
-					})
-			}
-			fetchUser()
+			callApi(() => getUserWithRelatedData(loggedUser.id)).then(({ ok, response: data }) => {
+				if (ok && Object.keys(data).length) {
+					const {
+						basket: userBasket,
+						addresses: userAddresses,
+						orders: userOrders,
+						...userData
+					} = data
+					setCurrentBasket(userBasket)
+					setCurrentOrders(userOrders)
+					setLoggedUser({ ...userData })
+					setCurrentAddresses(userAddresses)
+				}
+			})
 		}
 	}, [loggedUser.id])
 
@@ -122,20 +117,21 @@ export default function Profile() {
 			? data.password
 			: loggedUser.password
 
-		await executeUserAction({ ...data, password: passwordToSend }, 'put')
-			.then(user => {
-				setEditUser(!editUser)
-				setLoggedUser({ ...user })
-				setSuccessMessageProfile(
-					'Los datos del perfil han sido actualizados correctamente.'
-				)
-				setTimeout(() => {
-					setSuccessMessageProfile('')
-				}, 3000)
-			})
-			.catch(error => {
-				setError(error)
-			})
+		const method = 'put'
+		const dataToSend = { ...data, password: passwordToSend }
+		const { ok, response } = await callApi(() =>
+			executeUserAction(method, dataToSend)
+		)
+		if (ok) {
+			setEditUser(!editUser)
+			setLoggedUser({ ...response })
+			setSuccessMessageProfile(
+				'Los datos del perfil han sido actualizados correctamente.'
+			)
+			setTimeout(() => {
+				setSuccessMessageProfile('')
+			}, 3000)
+		}
 	})
 
 	const handleSubmitLocalization = index =>
@@ -145,31 +141,30 @@ export default function Profile() {
 			)
 			if (!confirmEdit) return
 
-			const currentAddress = { ...data.addresses[index], userId: loggedUser.id }
-			const methodHTTP = currentAddress.id ? 'put' : 'post'
+			const dataToSend = { ...data.addresses[index], userId: loggedUser.id }
+			const method = dataToSend.id ? 'put' : 'post'
 
-			await executeAddressAction(currentAddress, methodHTTP)
-				.then(address => {
-					setEditAddress(prev => {
-						const next = [...prev]
-						next[index] = !next[index]
-						return next
-					})
-					setCurrentAddresses(prev => [
-						...prev.slice(0, index),
-						address,
-						...prev.slice(index + 1)
-					])
-					setSuccessMessageAddress(
-						'Los datos de la dirección han sido actualizados correctamente.'
-					)
-					setTimeout(() => {
-						setSuccessMessageAddress('')
-					}, 3000)
+			const { ok, response } = await callApi(() =>
+				executeAddressAction(method, dataToSend)
+			)
+			if (ok) {
+				setEditAddress(prev => {
+					const next = [...prev]
+					next[index] = !next[index]
+					return next
 				})
-				.catch(error => {
-					setError(error)
-				})
+				setCurrentAddresses(prev => [
+					...prev.slice(0, index),
+					response,
+					...prev.slice(index + 1)
+				])
+				setSuccessMessageAddress(
+					'Los datos de la dirección han sido actualizados correctamente.'
+				)
+				setTimeout(() => {
+					setSuccessMessageAddress('')
+				}, 3000)
+			}
 		})
 
 	const deletingUser = async () => {
@@ -178,16 +173,16 @@ export default function Profile() {
 		)
 
 		if (confirmDelete) {
-			await executeUserAction(loggedUser, 'delete')
-				.then(() => {
-					setLoggedUser({})
-					localStorage.removeItem('access_token')
-					localStorage.removeItem('refresh_token')
-					cleaningBasket()
-				})
-				.catch(error => {
-					setError(error)
-				})
+			const { ok } = await callApi(() =>
+				executeUserAction(loggedUser, 'delete')
+			)
+			if (ok) {
+				setLoggedUser({})
+				localStorage.removeItem('access_token')
+				localStorage.removeItem('refresh_token')
+				cleaningBasket()
+				alert('Lamentamos verte partir, pero gracias por habernos dado una oportunidad!!👋')
+			}
 		} else {
 			alert('Gracias por continuar con nosotrxs!!🤗')
 		}

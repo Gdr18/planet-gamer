@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 
-import NavBar from '../nav-bar/nav-bar'
-import Footer from '../footer'
+import NavBar from '../nav-bar/NavBar'
+import Footer from '../Footer'
 
-import SaturnoIcon from '../icons/saturno-icon'
+import SaturnoIcon from '../icons/SaturnoIcon'
 import { TfiInstagram, TfiTwitter, TfiLinkedin } from 'react-icons/tfi'
 
 export default function Contact() {

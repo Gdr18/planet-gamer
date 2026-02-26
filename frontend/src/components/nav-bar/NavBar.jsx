@@ -2,16 +2,16 @@ import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { CSSTransition } from 'react-transition-group'
 
-import LoginComponent from './auth'
-import LogosWrapper from './logos-wrapper'
-import Basket from './basket'
+import LoginComponent from './Auth'
+import LogosWrapper from './LogosWrapper'
+import Basket from './Basket'
 
-import { useCartContext } from '../../contexts/cart/cart-context'
+import { useCartContext } from '../../contexts/cart-context/CartContext'
 
 import { CgMenu } from 'react-icons/cg'
 import { FaUserAstronaut } from 'react-icons/fa'
 import { BsFillBasket3Fill } from 'react-icons/bs'
-import SaturnoIcon from '../icons/saturno-icon'
+import SaturnoIcon from '../icons/SaturnoIcon'
 
 export default function NavBar() {
 	const [handlePlatforms, setHandlePlatforms] = useState(false)
