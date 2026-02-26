@@ -8,14 +8,14 @@ status_order = ["pending", "paid", "failed"]
 
 
 class OrderSchema(ma.SQLAlchemyAutoSchema):
+	total = ma.Decimal(as_string=True, places=2, required=True, validate=validate.Range(min=0.1,
+	                                                                                    error="El campo 'total' debe ser un entero positivo mayor que 0."))
 	addressee = ma.String(required=True, validate=validate.Length(min=1, max=150))
 	phone_number = ma.String(
 		validate=validate.Regexp(regex=r"^(?:\+34\s?)?(6\d{8}|7[1-9]\d{7})$",
 		                         error="El campo 'phone_number' no cumple con el patrón, ejemplos válidos: '666666666' o '+34666666666'"),
 		data_key="phoneNumber"
 	)
-	total = ma.Decimal(as_string=True, places=2, required=True, validate=validate.Range(min=0.1,
-	                                                                                    error="El campo 'total' debe ser un entero positivo mayor que 0."))
 	address_id = ma.Integer(required=True, foreign_key="address_model.id", data_key="addressId",
 	                        validate=validate.Range(min=1,
 	                                                error="El campo 'addressId' debe ser un entero positivo mayor que 0."))

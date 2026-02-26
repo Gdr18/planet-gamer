@@ -1,21 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import GameSidebarList from '../games-manager/game-sidebar-list'
-import NavBar from '../../nav-bar/nav-bar'
-import Footer from '../../footer'
+import GameSidebarList from '../games-manager/GameSidebarList'
+import NavBar from '../../nav-bar/NavBar'
+import Footer from '../../Footer'
 
-import { GENDERS } from '../../../core/accepted-genders'
-import { PLATFORM_API_MAP } from '../../../core/platform-api-map'
+import { PLATFORM_API_MAP, GENDERS } from '../../../core/api-game-validations'
 
 import { executeGameAction } from '../../../services/api/game-service'
 
-import { useGamesContext } from '../../../contexts/games-context'
-import { useErrorContext } from '../../../contexts/error-context'
+import { useGamesContext } from '../../../contexts/GamesContext'
 
+import { useApiWithErrors } from '../../../hooks/useApiWithErrors'
 export default function GamesManager() {
 	const { games, setGames, getGames } = useGamesContext()
-	const { setError } = useErrorContext()
+	const { callApi } = useApiWithErrors()
 
 	const [selectedPlatform, setSelectedPlatform] = useState('PlayStation 4')
 
@@ -55,19 +54,16 @@ export default function GamesManager() {
 
 	const handleSubmitGameForm = handleSubmit(async data => {
 		const method = data.id ? 'put' : 'post'
-		await executeGameAction(method, data)
-			.then(game => {
-				reset(initialValuesForm)
-				if (method === 'post') {
-					setGames([...games, game])
-				} else {
+		const { ok, response: game } = await callApi(() => executeGameAction(method, data))
+		if (ok) {
+			reset(initialValuesForm)
+			if (method === 'post') {
+				setGames([...games, game])
+			} else {
 					const provGames = games.filter(oldGame => oldGame.id !== game.id)
 					setGames([...provGames, game])
 				}
-			})
-			.catch(error => {
-				setError(error)
-			})
+		}
 	})
 
 	const handleEditClick = game => {
@@ -75,14 +71,11 @@ export default function GamesManager() {
 	}
 
 	const handleDeleteClick = game => {
-		executeGameAction('delete', game)
-			.then(() => {
-				const updatedGames = games.filter(oldGame => oldGame.id !== game.id)
-				setGames(updatedGames)
-			})
-			.catch(error => {
-				setError(error)
-			})
+		const { ok, } = callApi(() => executeGameAction('delete', game))
+		if (ok) {
+			const updatedGames = games.filter(oldGame => oldGame.id !== game.id)
+			setGames(updatedGames)
+		}
 	}
 
 	const filteredGames = games.filter(game => game.platform === selectedPlatform)

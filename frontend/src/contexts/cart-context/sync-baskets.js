@@ -1,19 +1,25 @@
 import { executeBasketAction } from '../../services/api/basket-service'
 
-export const syncFromLocal = async (localBasket, customerId) => {
-	const posted = await Promise.all(
+export const syncFromLocal = async (localBasket, customerId, callApi) => {
+	const postedResults = await Promise.all(
 		localBasket.map(item => {
 			const payload = { ...item, userId: customerId }
-			return executeBasketAction('post', payload)
+			return callApi(() => executeBasketAction('post', payload))
 		})
 	)
+
+	const posted = postedResults
+		.filter(result => result && result.ok)
+		.map(result => result.response)
+
 	return [...posted]
 }
 
 export const syncMergeBaskets = async (
 	serverBasket,
 	localBasket,
-	customerId
+	customerId,
+	callApi
 ) => {
 	let merged = []
 	const updatedServerIds = []
@@ -25,10 +31,14 @@ export const syncMergeBaskets = async (
 			)
 			if (existLocalItem) {
 				updatedServerIds.push(existLocalItem.game.id)
-				return executeBasketAction('put', {
-					...serverItem,
-					qty: serverItem.qty + existLocalItem.qty
-				})
+				const { ok, response } = await callApi(() =>
+					executeBasketAction('put', {
+						...serverItem,
+						qty: serverItem.qty + existLocalItem.qty
+					})
+				)
+
+				return ok ? response : serverItem
 			}
 			return serverItem
 		})
@@ -37,12 +47,15 @@ export const syncMergeBaskets = async (
 	const itemsNotInServer = localBasket.filter(
 		localItem => !updatedServerIds.includes(localItem.game.id)
 	)
-	const localItemsPosted = await Promise.all(
+	const localItemsResults = await Promise.all(
 		itemsNotInServer.map(item => {
 			const payload = { ...item, userId: customerId }
-			return executeBasketAction('post', payload)
+			return callApi(() => executeBasketAction('post', payload))
 		})
 	)
+	const localItemsPosted = localItemsResults
+		.filter(result => result && result.ok)
+		.map(result => result.response)
 
 	merged = [...updatedFromDb, ...localItemsPosted]
 	return merged

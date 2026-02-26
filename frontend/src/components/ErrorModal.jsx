@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { useErrorContext } from '../contexts/error-context'
+import { useErrorContext } from '../contexts/ErrorContext'
 
-import SaturnoIcon from './icons/saturno-icon'
+import SaturnoIcon from './icons/SaturnoIcon'
 
 export const ErrorModal = () => {
 	const { error, clearError } = useErrorContext()

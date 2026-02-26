@@ -4,12 +4,12 @@ import { useParams, Link } from 'react-router-dom'
 import { RotatingLines } from 'react-loader-spinner'
 import { BsFilterLeft } from 'react-icons/bs'
 
-import Checkbox from './checkbox'
-import NavBar from '../../nav-bar/nav-bar'
-import Footer from '../../footer'
+import Checkbox from './Checkbox'
+import NavBar from '../../nav-bar/NavBar'
+import Footer from '../../Footer'
 
-import { useCartContext } from '../../../contexts/cart/cart-context'
-import { useGamesContext } from '../../../contexts/games-context'
+import { useCartContext } from '../../../contexts/cart-context/CartContext'
+import { useGamesContext } from '../../../contexts/GamesContext'
 
 export default function Products() {
 	const params = useParams()
@@ -124,8 +124,10 @@ export default function Products() {
 											<Link to={`/game/${game.id}`}>
 												<img src={game.imgUrl} />
 											</Link>
-											<div className="title-price">
-												<Link to={`/game/${game.id}`} className='title'><strong>{game.title}</strong></Link>
+											<div className='title-price'>
+												<Link to={`/game/${game.id}`} className='title'>
+													<strong>{game.title}</strong>
+												</Link>
 												<div className='price'>{`${game.price}€`}</div>
 											</div>
 											<button onClick={() => addItemBasket(game)}>

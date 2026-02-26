@@ -1,24 +1,12 @@
-import { refreshToken } from '../services/api/auth-service'
-
 export class AppError extends Error {
 	constructor(errorKey, message, errorUi) {
-		super(errorKey, message, errorUi)
+		super(message)
 		this.errorKey = errorKey
-		this.message = message
 		this.errorUi = errorUi
 	}
 }
 
-const handleExpiredTokenError = async retryCallback => {
-	try {
-		await refreshToken()
-		return await retryCallback()
-	} catch (error) {
-		return handleErrors(error, refreshToken)
-	}
-}
-
-export const handleErrors = async (error, requestFunction) => {
+export const handleErrors = (error) => {
 	console.log(error)
 	const { err: errorKey, msg: apiMsg } = error.response?.data
 	let errorUi = 'not_modal'
@@ -29,23 +17,22 @@ export const handleErrors = async (error, requestFunction) => {
 		case 'expired_token':
 		case 'invalid_token':
 		case 'revoked_token':
-			if (requestFunction.name !== 'refresh') {
-				return await handleExpiredTokenError(requestFunction)
-			}
-			localStorage.removeItem('access_token')
-			localStorage.removeItem('refresh_token')
+		case 'not_token':
 			errorUi = 'not_token'
 			message = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'
 			break
 		case 'not_found':
-			if (!message.toLowerCase().includes('usuario')) {
+			if (apiMsg && !apiMsg.toLowerCase().includes('usuario')) {
 				errorUi = 'go_home'
-				message = error.response?.data?.msg
+				message = apiMsg
+			} else {
+				message = 'El correo electrónico no está registrado.'
+				errorUi = 'user_not_found'
 			}
-			message = 'El correo electrónico no está registrado.'
 			break
 		case 'password_mismatch':
 			message = 'La contraseña ingresada es incorrecta.'
+			errorUi = 'password_mismatch'
 			break
 		case 'db_integrity_error':
 			if (apiMsg && apiMsg.includes('user_model.email')) {
@@ -71,5 +58,5 @@ export const handleErrors = async (error, requestFunction) => {
 			break
 	}
 
-	return new AppError(errorKey || 'unknown_error', message, errorUi)
+	throw new AppError(errorKey || 'unknown_error', message, errorUi)
 }

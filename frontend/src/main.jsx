@@ -3,13 +3,13 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 
-import { ErrorModal } from './components/error-modal.jsx'
-import App from './components/app.jsx'
+import { ErrorModal } from './components/ErrorModal'
+import App from './components/App'
 
-import { AuthProvider } from './contexts/auth-context'
-import { CartProvider } from './contexts/cart/cart-context'
-import { GamesProvider } from './contexts/games-context'
-import { ErrorProvider } from './contexts/error-context'
+import { AuthProvider } from './contexts/AuthContext'
+import { CartProvider } from './contexts/cart-context/CartContext'
+import { GamesProvider } from './contexts/GamesContext'
+import { ErrorProvider } from './contexts/ErrorContext'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>

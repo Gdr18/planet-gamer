@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 
-import NavBar from '../../nav-bar/nav-bar'
-import Footer from '../../footer'
-import FormCheckoutData from './form-checkout-data'
-import PaymentSuccessful from './payment-successful'
-import ConfirmCheckout from './confirm-checkout/confirm-checkout'
+import NavBar from '../../nav-bar/NavBar'
+import Footer from '../../Footer'
+import FormCheckoutData from './FormCheckoutData'
+import PaymentSuccessful from './PaymentSuccessful'
+import ConfirmCheckout from './confirm-checkout/ConfirmCheckout'
 
-import { useCartContext } from '../../../contexts/cart/cart-context'
-import { useAuthContext } from '../../../contexts/auth-context'
-import { useErrorContext } from '../../../contexts/error-context'
+import { useCartContext } from '../../../contexts/cart-context/CartContext'
+import { useAuthContext } from '../../../contexts/AuthContext'
+
+import { useApiWithErrors } from '../../../hooks/useApiWithErrors'
 
 import {
 	getAddressesUser,
@@ -22,7 +23,8 @@ export default function Checkout() {
 	const { total, basket, cleaningBasket } = useCartContext()
 	const { loggedUser, setLoggedUser, currentAddresses, setCurrentAddresses } =
 		useAuthContext()
-	const { setError } = useErrorContext()
+
+	const { callApi } = useApiWithErrors()
 
 	const [steps, setSteps] = useState(1)
 	const [order, setOrder] = useState({})
@@ -40,13 +42,11 @@ export default function Checkout() {
 
 	useEffect(() => {
 		if (!currentAddresses.length) {
-			getAddressesUser(loggedUser.id)
-				.then(addresses => {
-					setCurrentAddresses(addresses)
-				})
-				.catch(error => {
-					setError(error)
-				})
+			callApi(() => getAddressesUser(loggedUser.id)).then(res => {
+				if (res.ok) {
+					setCurrentAddresses(res.response)
+				}
+			})
 		}
 	}, [loggedUser.id])
 
@@ -76,75 +76,78 @@ export default function Checkout() {
 	}
 
 	const handleSubmitCheckoutData = async data => {
-		try {
-			const { name, surnames, phoneNumber, ...dataAddress } = data
+		const { name, surnames, phoneNumber, ...dataAddress } = data
 
-			if (
-				dataAddress.street !== userData.street ||
-				dataAddress.secondLineStreet !== userData.secondLineStreet ||
-				dataAddress.postalCode !== userData.postalCode ||
-				dataAddress.city !== userData.city
-			) {
-				const formatedData = {
-					...dataAddress,
-					userId: loggedUser.id
-				}
-				const addressResponse = await executeAddressAction('post', formatedData)
-				setCurrentAddresses([...currentAddresses, addressResponse])
-				setUserData({ ...data, addressId: addressResponse.id })
-			} else setUserData({ ...userData, ...data })
-
-			if (
-				name === loggedUser.name &&
-				!loggedUser.surnames &&
-				!loggedUser.phoneNumber
-			) {
-				const formatedData = { ...loggedUser, phoneNumber, surnames }
-				const userResponse = await executeUserAction('put', formatedData)
-				setLoggedUser(userResponse)
+		if (
+			dataAddress.street !== userData.street ||
+			dataAddress.secondLineStreet !== userData.secondLineStreet ||
+			dataAddress.postalCode !== userData.postalCode ||
+			dataAddress.city !== userData.city
+		) {
+			const formatedData = {
+				...dataAddress,
+				userId: loggedUser.id
 			}
+			const { ok, response } = await callApi(() =>
+				executeAddressAction('post', formatedData)
+			)
+			if (ok) {
+				setCurrentAddresses([...currentAddresses, response])
+				setUserData({ ...data, addressId: response.id })
+			}
+		} else setUserData({ ...userData, ...data })
 
-			nextStep()
-		} catch (error) {
-			setError(error)
+		if (
+			name === loggedUser.name &&
+			!loggedUser.surnames &&
+			!loggedUser.phoneNumber
+		) {
+			const formatedData = { ...loggedUser, phoneNumber, surnames }
+			const { ok, response } = await callApi(() =>
+				executeUserAction('put', formatedData)
+			)
+			if (ok) setLoggedUser(response)
 		}
+
+		nextStep()
 	}
 
 	const handleSubmitPayment = async paymentMethodId => {
-		try {
-			const orderData = {
-				order: {
-					phoneNumber: userData.phoneNumber,
-					addressee: `${userData.name} ${userData.surnames}`,
-					userId: loggedUser.id,
-					addressId: userData.addressId,
-					paymentMethodId,
-					total
-				},
-				items: basket.map(item => ({
-					price: item.game.price,
-					qty: item.qty,
-					gameId: item.game.id
-				}))
-			}
+		const orderData = {
+			order: {
+				phoneNumber: userData.phoneNumber,
+				addressee: `${userData.name} ${userData.surnames}`,
+				userId: loggedUser.id,
+				addressId: userData.addressId,
+				paymentMethodId,
+				total
+			},
+			items: basket.map(item => ({
+				price: item.game.price,
+				qty: item.qty,
+				gameId: item.game.id
+			}))
+		}
 
-			const orderResponse = await postOrderAndItems(orderData)
+		const { ok, response: responseOrder } = await postOrderAndItems(orderData)
 
-			setOrder(orderResponse.order)
+		if (ok) {
+			setOrder(responseOrder.order)
 
 			const paymentData = {
 				userId: loggedUser.id,
-				orderId: orderResponse.order.id,
+				orderId: responseOrder.order.id,
 				paymentMethodId
 			}
 
-			const paymentResponse = await executePayment(paymentData)
-
-			cleaningBasket()
-			return paymentResponse
-		} catch (error) {
-			setError(error)
+			const { ok, response: responsePayment } = await executePayment(paymentData)
+			if (ok) {
+				cleaningBasket()
+				return responsePayment
+			}
 		}
+
+		return false
 	}
 
 	return (

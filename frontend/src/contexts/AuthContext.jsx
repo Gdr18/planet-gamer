@@ -2,7 +2,8 @@ import React, { useState, useContext, useEffect } from 'react'
 
 import { getCurrentUser } from '../services/api/user-service'
 import { logout } from '../services/api/auth-service'
-import { useErrorContext } from './error-context'
+
+import { useApiWithErrors } from '../hooks/useApiWithErrors'
 
 const AuthContext = React.createContext([[]])
 
@@ -14,7 +15,7 @@ export const AuthProvider = ({ children }) => {
 	const [currentAddresses, setCurrentAddresses] = useState([])
 	const [currentOrders, setCurrentOrders] = useState([])
 
-	const { setError } = useErrorContext()
+	const { callApi } = useApiWithErrors()
 
 	useEffect(() => {
 		const token = localStorage.getItem('access_token')
@@ -22,29 +23,24 @@ export const AuthProvider = ({ children }) => {
 			setLoggedUser({})
 		}
 		if (token && !Object.keys(loggedUser).length) {
-			const getUser = async () => {
-				await getCurrentUser()
-					.then(user => {
-						const { basket, ...userData } = user
-						setLoggedUser(userData)
-						setCurrentBasket(basket)
-					})
-					.catch(error => setError(error))
-			}
-			getUser()
+			callApi(() => getCurrentUser()).then(({ ok, response: user }) => {
+				if (ok) {
+					const { basket, ...userData } = user
+					setLoggedUser(userData)
+					setCurrentBasket(basket)
+				}
+			})
 		}
 	}, [loggedUser.id])
 
-
 	const logoutUser = async () => {
-		await logout()
-			.then(() => {
-				setLoggedUser({})
-				setCurrentBasket([])
-				setCurrentAddresses([])
-				setCurrentOrders([])
-			})
-			.catch(error => setError(error))
+		const { ok } = await callApi(() => logout())
+		if (ok) {
+			setLoggedUser({})
+			setCurrentBasket([])
+			setCurrentAddresses([])
+			setCurrentOrders([])
+		}
 	}
 
 	return (

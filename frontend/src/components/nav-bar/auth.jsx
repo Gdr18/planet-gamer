@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 
-import { useAuthContext } from '../../contexts/auth-context'
-import { useErrorContext } from '../../contexts/error-context'
+import { useAuthContext } from '../../contexts/AuthContext'
+import { useApiWithErrors } from '../../hooks/useApiWithErrors'
 
 import { login, register } from '../../services/api/auth-service'
 
@@ -11,8 +11,10 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 	const [advise, setAdvise] = useState('')
 	const [statusRegister, setStatusRegister] = useState(false)
 
-	const { loggedUser, setLoggedUser, logoutUser, setCurrentBasket } = useAuthContext()
-	const { setError } = useErrorContext()
+	const { callApi } = useApiWithErrors()
+
+	const { loggedUser, setLoggedUser, logoutUser, setCurrentBasket } =
+		useAuthContext()
 
 	const {
 		register: registerLogin,
@@ -38,30 +40,27 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 		}
 	})
 
-	const handleSubmitFormLogin = handleSubmitLogin(data => {
-		login(data)
-			.then(user => {
-				const { basket, ...userData } = user
-				setLoggedUser(userData)
-				setCurrentBasket(basket)
-			})
-			.catch(error => {
-				if (
-					error.errorKey === 'not_found' ||
-					error.errorKey === 'password_mismatch'
-				) {
-					setAdvise(error.message)
-					setTimeout(() => {
-						setAdvise('')
-					}, 3000)
-				} else {
-					setError(error)
-				}
-			})
+	const handleSubmitFormLogin = handleSubmitLogin(async data => {
+		const { ok, response } = await callApi(() => login(data))
+
+		if (ok) {
+			const { basket, ...userData } = response
+			setLoggedUser(userData)
+			setCurrentBasket(basket)
+		} else {
+			if (
+				response.errorUi === 'user_not_found' ||
+				response.errorUi === 'password_mismatch'
+			) {
+				setAdvise(response.message)
+				setTimeout(() => {
+					setAdvise('')
+				}, 3000)
+			}
+		}
 	})
 
-	const handleSubmitFormRegister = handleSubmitRegister(data => {
-
+	const handleSubmitFormRegister = handleSubmitRegister(async data => {
 		if (data.password !== data.confirmPassword) {
 			setAdvise('Las contraseñas no coinciden')
 			setTimeout(() => {
@@ -70,24 +69,22 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 			return
 		}
 
-		register(data)
-			.then(response => {
-				setAdvise(response.msg)
+		const { ok, response } = await callApi(() => register(data))
+		
+		if (ok) {
+			setAdvise(response.msg)
+			setTimeout(() => {
+				setStatusRegister(false)
+				setAdvise('')
+			}, 2000)
+		} else {
+			if (response.errorUi === 'email_duplicated') {
+				setAdvise(response.message)
 				setTimeout(() => {
-					setStatusRegister(false)
 					setAdvise('')
-				}, 2000)
-			})
-			.catch(error => {
-				if (error.errorUi === 'email_duplicated') {
-					setAdvise(error.message)
-					setTimeout(() => {
-						setAdvise('')
-					}, 3000)
-				} else {
-					setError(error)
-				}
-			})
+				}, 3000)
+			}
+		}
 	})
 
 	const handleClickLogout = () => {
@@ -139,7 +136,8 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 								message: `El campo 'Contraseña' debe tener como máximo 70 caracteres`
 							},
 							pattern: {
-								value: /^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
+								value:
+									/^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
 								message: `El campo 'Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (!@#$%^&*()_-+=[]{}|;:'",.<>?/).`
 							}
 						})}
@@ -226,7 +224,8 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 								message: `El campo 'Contraseña' debe tener como máximo 70 caracteres`
 							},
 							pattern: {
-								value: /^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
+								value:
+									/^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
 								message: `El campo 'Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (!@#$%^&*()_-+=[]{}|;:'",.<>?/).`
 							}
 						})}
@@ -252,17 +251,26 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 								message: `El campo 'Confirmar Contraseña' debe tener como máximo 70 caracteres`
 							},
 							pattern: {
-								value: /^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
+								value:
+									/^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
 								message: `El campo 'Confirmar Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (!@#$%^&*()_-+=[]{}|;:'",.<>?/).`
 							}
 						})}
 						placeholder='Confirmar Contraseña'
 					/>
 					{errorsRegister && errorsRegister.confirmPassword && (
-						<div className='errorTag'>{errorsRegister.confirmPassword.message}</div>
+						<div className='errorTag'>
+							{errorsRegister.confirmPassword.message}
+						</div>
 					)}
 
-					{advise ? <div className={`advise ${advise.includes('correcta') ? 'success' : ''}`}>{advise}</div> : null}
+					{advise ? (
+						<div
+							className={`advise ${advise.includes('correcta') ? 'success' : ''}`}
+						>
+							{advise}
+						</div>
+					) : null}
 
 					<div className='login-form-actions'>
 						<button type='submit'>Enviar</button>

@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 
 import { HiOutlineRocketLaunch } from 'react-icons/hi2'
 
-import NavBar from '../nav-bar/nav-bar'
-import Footer from '../footer'
+import NavBar from '../nav-bar/NavBar'
+import Footer from '../Footer'
 
 export default function NoMatch() {
 	return (

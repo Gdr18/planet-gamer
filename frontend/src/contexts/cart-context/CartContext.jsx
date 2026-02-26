@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react'
 
-import { useAuthContext } from '../auth-context'
-import { useErrorContext } from '../error-context'
+import { useAuthContext } from '../AuthContext'
+
+import { useApiWithErrors } from '../../hooks/useApiWithErrors'
 
 import { executeBasketAction } from '../../services/api/basket-service'
 import { syncFromLocal, syncMergeBaskets } from './sync-baskets'
@@ -17,24 +18,29 @@ export const CartProvider = ({ children }) => {
 	const [checkingCheckout, setCheckingCheckout] = useState(false)
 
 	const { loggedUser, currentBasket, setCurrentBasket } = useAuthContext()
-	const { setError } = useErrorContext()
+	const { callApi } = useApiWithErrors()
 
 	useEffect(() => {
 		if (Object.keys(loggedUser).length) {
-			syncBaskets().catch(err => setError(err))
+			syncBaskets().then(() => console.log('Baskets synchronized'))
 		} else {
 			cleaningBasket()
 		}
 	}, [loggedUser.id])
-	
+
 	const syncBaskets = async () => {
 		let basketUpdated = []
 		if (currentBasket.length && !basket.length) {
 			basketUpdated = [...currentBasket]
 		} else if (!currentBasket.length && basket.length) {
-			basketUpdated = await syncFromLocal(basket, loggedUser.id)
+			basketUpdated = await syncFromLocal(basket, loggedUser.id, callApi)
 		} else if (currentBasket.length && basket.length) {
-			basketUpdated = await syncMergeBaskets(currentBasket, basket, loggedUser.id)
+			basketUpdated = await syncMergeBaskets(
+				currentBasket,
+				basket,
+				loggedUser.id,
+				callApi
+			)
 		}
 
 		setBasket([...basketUpdated])
@@ -53,7 +59,7 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
 		if (itemBasket.userId) {
-			await executeBasketAction('delete', itemBasket).catch(err => setError(err))
+			await callApi(() => executeBasketAction('delete', itemBasket))
 		}
 	}
 
@@ -75,11 +81,12 @@ export const CartProvider = ({ children }) => {
 		setCountProducts(countProducts + 1)
 
 		if (itemBasket.userId) {
-			await executeBasketAction('post', itemBasket).then(
-				item => {
-					itemBasket = { ...itemBasket, id: item.id }
-				}
-			).catch(error => setError(error))
+			const { ok, response } = await callApi(() =>
+				executeBasketAction('post', itemBasket)
+			)
+			if (!ok) return
+
+			itemBasket = { ...itemBasket, id: response.id }
 		}
 
 		setBasket([...basket, itemBasket])
@@ -110,7 +117,7 @@ export const CartProvider = ({ children }) => {
 		setBasket([...games])
 
 		if (itemBasket.userId) {
-			await executeBasketAction('put', itemBasket).catch(err => setError(err))
+			await callApi(() => executeBasketAction('put', itemBasket))
 		}
 	}
 

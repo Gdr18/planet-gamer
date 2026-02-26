@@ -3,10 +3,10 @@ import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import { RotatingLines } from 'react-loader-spinner'
 
-import NavBar from '../nav-bar/nav-bar'
-import Footer from '../footer'
+import NavBar from '../nav-bar/NavBar'
+import Footer from '../Footer'
 
-import { useCartContext } from '../../contexts/cart/cart-context'
+import { useCartContext } from '../../contexts/cart-context/CartContext'
 
 export default function Game() {
 	const params = useParams()

@@ -1,16 +1,16 @@
 import { Routes, Route } from 'react-router-dom'
 
-import Home from './pages/home'
-import Contact from './pages/contact'
-import Products from './pages/products/products'
-import Game from './pages/game'
-import Checkout from './pages/checkout/checkout'
-import NoMatch from './pages/no-match'
-import GamesManager from './pages/games-manager/games-manager'
-import RolesManager from './pages/roles-manager'
-import Profile from './pages/profile'
+import Home from './pages/Home'
+import Contact from './pages/Contact'
+import Products from './pages/products/Products'
+import Game from './pages/Game'
+import Checkout from './pages/checkout/Checkout'
+import NoMatch from './pages/NoMatch'
+import GamesManager from './pages/games-manager/GamesManager'
+import RolesManager from './pages/RolesManager'
+import Profile from './pages/Profile'
 
-import { useAuthContext } from '../contexts/auth-context'
+import { useAuthContext } from '../contexts/AuthContext'
 
 export default function App() {
 	const { loggedUser } = useAuthContext()
