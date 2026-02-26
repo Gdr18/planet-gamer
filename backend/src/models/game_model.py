@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from src.core.extensions import db
 
@@ -14,5 +15,5 @@ class GameModel(db.Model):
 	price = db.Column(db.Numeric(precision=10, scale=2, asdecimal=True), nullable=False)
 	img_url = db.Column(db.String(250), unique=True, nullable=False)
 	stock = db.Column(db.Integer, nullable=False, default=20)
-	created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+	created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=datetime.now(ZoneInfo("Europe/Madrid")))
 	items_order = db.relationship("OrderItemModel", backref="game", lazy="raise")
