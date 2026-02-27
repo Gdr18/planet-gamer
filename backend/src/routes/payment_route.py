@@ -6,18 +6,23 @@ from ..core.api_responses import payment_response_success
 from ..core.exceptions.custom_exceptions import ResourceCustomError, StripeCustomError, AuthCustomError
 from ..core.extensions import db
 from ..models.order_model import OrderModel
+from ..schemas.payment_schema import PaymentSchema
 from ..services.stripe_service import create_payment_intent, confirm_payment_intent, get_payment_intent, \
 	create_webhook_event
 
 payments = Blueprint("payments", __name__, url_prefix="/payments")
 
 
-@payments.route("/", methods=["POST"])
+@payments.route("", methods=["POST"])
 @jwt_required()
 def create_and_confirm_payment():
 	data = request.get_json()
-	order_id = data.get("order_id")
-	payment_method = data.get("payment_method_id")
+	
+	payment_schema = PaymentSchema()
+	validated_data = payment_schema.load(data)
+	
+	order_id = validated_data["order_id"]
+	payment_method_id = validated_data["payment_method_id"]
 	user_id = int(get_jwt_identity())
 	
 	payment = None
@@ -35,7 +40,7 @@ def create_and_confirm_payment():
 			order.payment_id = payment.id
 			db.session.commit()
 		
-		payment = confirm_payment_intent(order.payment_id, payment_method)
+		payment = confirm_payment_intent(order.payment_id, payment_method_id)
 		
 		if payment.status not in ["succeeded", "requires_action", "processing"]:
 			raise StripeCustomError(payment.status)
