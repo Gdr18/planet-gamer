@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 	}, [loggedUser.id])
 
 	const logoutUser = async () => {
-		const { ok } = await callApi(() => logout())
+		const { ok, } = await callApi(() => logout())
 		if (ok) {
 			setLoggedUser({})
 			setCurrentBasket([])

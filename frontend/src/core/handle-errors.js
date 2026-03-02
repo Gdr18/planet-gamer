@@ -1,14 +1,15 @@
 export class AppError extends Error {
 	constructor(errorKey, message, errorUi) {
-		super(message)
+		super(message, errorKey, errorUi)
 		this.errorKey = errorKey
 		this.errorUi = errorUi
+		this.message = message
 	}
 }
 
-export const handleErrors = (error) => {
-	console.log(error)
-	const { err: errorKey, msg: apiMsg } = error.response?.data
+export const handleErrors = error => {
+	console.log(error, 'error in handleErrors')
+	const { err: errorKey, msg: apiMsg } = error.response?.data || {err: 'unknown_error', msg: ''}
 	let errorUi = 'not_modal'
 	let message =
 		'Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.'
@@ -58,5 +59,5 @@ export const handleErrors = (error) => {
 			break
 	}
 
-	throw new AppError(errorKey || 'unknown_error', message, errorUi)
+	throw new AppError(errorKey, message, errorUi)
 }

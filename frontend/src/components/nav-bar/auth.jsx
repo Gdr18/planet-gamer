@@ -104,14 +104,6 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 							required: {
 								value: true,
 								message: `El campo 'Email' es requerido`
-							},
-							maxLength: {
-								value: 100,
-								message: `El campo 'Email' debe tener como máximo 100 caracteres`
-							},
-							pattern: {
-								value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-								message: `El campo 'Email' debe tener un formato como el siguiente: ejemplo@dominio.com`
 							}
 						})}
 						placeholder='Email'
@@ -126,19 +118,6 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 							required: {
 								value: true,
 								message: `El campo 'Contraseña' es requerido`
-							},
-							minLength: {
-								value: 7,
-								message: `El campo 'Contraseña' debe tener como mínimo 7 caracteres`
-							},
-							maxLength: {
-								value: 70,
-								message: `El campo 'Contraseña' debe tener como máximo 70 caracteres`
-							},
-							pattern: {
-								value:
-									/^(?=.*[a-záéíóúüñ])(?=.*[A-ZÁÉÍÓÚÜÑ])(?=.*\d)(?=.*[!@#$%^&*()_\-+=[\]{}|;:'",.<>?/]).{7,70}$/,
-								message: `El campo 'Contraseña' debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (!@#$%^&*()_-+=[]{}|;:'",.<>?/).`
 							}
 						})}
 						placeholder='Contraseña'

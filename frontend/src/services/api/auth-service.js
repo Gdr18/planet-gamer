@@ -16,9 +16,10 @@ export const login = data => {
 }
 
 export const logout = () => {
-	const request = privateClient.post('/auth/logout').then(() => {
+	const request = privateClient.post('/auth/logout').then((response) => {
 		localStorage.removeItem('access_token')
 		localStorage.removeItem('refresh_token')
+		return response.data
 	})
 	return apiWrapper(request)
 }

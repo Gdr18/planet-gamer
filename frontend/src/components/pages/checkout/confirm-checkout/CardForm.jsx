@@ -1,9 +1,13 @@
 import { useState } from 'react'
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 
-export default function CardForm({ handleSubmitPayment, previousStep, nextStep }) {
-	const stripe = useStripe()
+export default function CardForm({
+	handleSubmitPayment,
+	previousStep,
+	setLoading
+}) {
 	const elements = useElements()
+	const stripe = useStripe()
 
 	const [errorText, setErrorText] = useState('')
 	const [disabledButton, setDisabledButton] = useState(false)
@@ -32,30 +36,28 @@ export default function CardForm({ handleSubmitPayment, previousStep, nextStep }
 	const handleSubmitCard = async event => {
 		event.preventDefault()
 
+		setLoading(true)
 		setDisabledButton(true)
 
-		const { error, paymentMethod } = await stripe.createPaymentMethod({
-			type: 'card',
-			card: elements.getElement(CardElement)
-		})
-
-		if (error) {
-			setErrorText(error.message)
+		if (!elements) {
+			setErrorText(
+				'No se ha podido inicializar el formulario de pago. Inténtalo de nuevo en unos segundos.'
+			)
+			setLoading(false)
 			setDisabledButton(false)
-		} else {
-			const response = await handleSubmitPayment(paymentMethod.id)
-			if (response && response.status === 'requires_action') {
-				const { error: errorConfirm } = await stripe.confirmCardPayment(
-					response.client_secret
-				)
-				if (errorConfirm) {
-					setErrorText(errorConfirm.message)
-					setDisabledButton(false)
-					return
-				}
-				nextStep()
-			}
+			return
 		}
+
+		const cardElement = elements.getElement(CardElement)
+
+		const { ok, message } = await handleSubmitPayment(cardElement, stripe)
+
+		if (!ok) {
+			setErrorText(message)
+			setDisabledButton(false)
+		}
+
+		setLoading(false)
 	}
 
 	return (

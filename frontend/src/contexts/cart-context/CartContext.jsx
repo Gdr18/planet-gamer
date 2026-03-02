@@ -22,7 +22,7 @@ export const CartProvider = ({ children }) => {
 
 	useEffect(() => {
 		if (Object.keys(loggedUser).length) {
-			syncBaskets().then(() => console.log('Baskets synchronized'))
+			syncBaskets()
 		} else {
 			cleaningBasket()
 		}

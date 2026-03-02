@@ -11,6 +11,6 @@ export const executeBasketAction = (method, data) => {
 }
 
 export const deleteBasketsUser = userId => {
-	const request = privateClient.delete(`/baskets/users/${userId}`)
+	const request = privateClient.delete(`/basket-items/users/${userId}`)
 	return apiWrapper(request)
 }
