@@ -35,6 +35,7 @@ export default function Profile() {
 	const [successMessageAddress, setSuccessMessageAddress] = useState('')
 	const [successMessageProfile, setSuccessMessageProfile] = useState('')
 	const [changePassword, setChangePassword] = useState(true)
+	const [filteredOrders, setFilteredOrders] = useState([])
 
 	const { callApi } = useApiWithErrors()
 
@@ -108,6 +109,13 @@ export default function Profile() {
 			setEditAddress(new Array(currentAddresses.length).fill(true))
 		}
 	}, [currentAddresses])
+
+	useEffect(() => {
+		if (currentOrders.length) {
+			const filtered = currentOrders.filter(order => order.status === 'paid')
+			setFilteredOrders(filtered)
+		}
+	}, [currentOrders])
 
 	const handleSubmitProfile = handleSubmitUser(async data => {
 		const confirmEdit = confirm('Quieres guardar los nuevos datos del perfil?')
@@ -540,11 +548,11 @@ export default function Profile() {
 						)
 					})}
 
-					{currentOrders.length > 0 && (
+					{filteredOrders.length > 0 && (
 						<div className='form-wrapper'>
 							<div className='universal-title'>Pedidos</div>
 							<div className='orders-wrapper'>
-								{currentOrders.map(order => {
+								{filteredOrders.map(order => {
 									return (
 										<div key={order.id} className='order-item'>
 											<span>{`#${order.id}`}</span>

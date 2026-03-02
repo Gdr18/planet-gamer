@@ -1,9 +1,11 @@
+import { RotatingLines } from 'react-loader-spinner'
+import { useState } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 
 import CardForm from './CardForm'
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPES)
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE)
 
 export default function ConfirmCheckout({
 	basket,
@@ -12,6 +14,8 @@ export default function ConfirmCheckout({
 	previousStep,
 	handleSubmitPayment
 }) {
+	const [loading, setLoading] = useState(false)
+
 	return (
 		<div className='payment-container'>
 			<div className='details-container'>
@@ -47,16 +51,26 @@ export default function ConfirmCheckout({
 				<div className='title-checkout'>Pago</div>
 				<img
 					src='https://uniemprendia.es/wp-content/uploads/2018/10/Visa-MasterCard-1024x393.png'
-					alt=''
+					alt='Logos Visa y Mastercard'
 				/>
 			</div>
-
 			<Elements stripe={stripePromise}>
 				<CardForm
 					handleSubmitPayment={handleSubmitPayment}
 					previousStep={previousStep}
+					setLoading={setLoading}
 				/>
 			</Elements>
+
+			{loading && (
+				<RotatingLines
+					strokeColor='#5de659'
+					strokeWidth='5'
+					animationDuration='0.75'
+					width='96'
+					visible={true}
+				/>
+			)}
 		</div>
 	)
 }

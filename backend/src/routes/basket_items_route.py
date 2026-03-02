@@ -8,7 +8,7 @@ from ..core.extensions import db
 from ..models.basket_item_model import BasketItemModel
 from ..schemas.basket_item_schema import BasketItemSchema
 
-basket_items = Blueprint("items_basket", __name__, url_prefix="/basket-items")
+basket_items = Blueprint("basket_items", __name__, url_prefix="/basket-items")
 
 basket_items_schema = BasketItemSchema(many=True)
 

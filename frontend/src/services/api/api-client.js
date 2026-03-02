@@ -40,7 +40,7 @@ privateClient.interceptors.response.use(
 			originalRequest._retry = true
 
 			return publicClient
-				.post('/auth/refresh-token', null, {
+				.get('/auth/refresh-token', null, {
 					headers: {
 						Authorization: `Bearer ${refreshToken}`
 					}

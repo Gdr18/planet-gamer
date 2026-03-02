@@ -18,6 +18,8 @@ import {
 import { executeUserAction } from '../../../services/api/user-service'
 import { postOrderAndItems } from '../../../services/api/order-service'
 import { executePayment } from '../../../services/api/payment-service'
+import { deleteBasketsUser } from '../../../services/api/basket-service'
+
 
 export default function Checkout() {
 	const { total, basket, cleaningBasket } = useCartContext()
@@ -99,8 +101,7 @@ export default function Checkout() {
 
 		if (
 			name === loggedUser.name &&
-			!loggedUser.surnames &&
-			!loggedUser.phoneNumber
+			(!loggedUser.surnames || !loggedUser.phoneNumber)
 		) {
 			const formatedData = { ...loggedUser, phoneNumber, surnames }
 			const { ok, response } = await callApi(() =>
@@ -112,14 +113,30 @@ export default function Checkout() {
 		nextStep()
 	}
 
-	const handleSubmitPayment = async paymentMethodId => {
+	const handleSubmitPayment = async (card, stripe) => {
+		if (!stripe) {
+			return {
+				ok: false,
+				message: 'No se ha podido inicializar el pago. Inténtalo de nuevo.'
+			}
+		}
+
+		const { error, paymentMethod } = await stripe.createPaymentMethod({
+			type: 'card',
+			card
+		})
+
+		if (error) {
+			return { ok: false, message: error.message }
+		}
+
 		const orderData = {
 			order: {
 				phoneNumber: userData.phoneNumber,
 				addressee: `${userData.name} ${userData.surnames}`,
 				userId: loggedUser.id,
 				addressId: userData.addressId,
-				paymentMethodId,
+				paymentMethodId: paymentMethod.id,
 				total
 			},
 			items: basket.map(item => ({
@@ -129,25 +146,49 @@ export default function Checkout() {
 			}))
 		}
 
-		const { ok, response: responseOrder } = await postOrderAndItems(orderData)
+		const { ok: okOrder, response: responseOrder } = await callApi(() =>
+			postOrderAndItems(orderData)
+		)
 
-		if (ok) {
-			setOrder(responseOrder.order)
-
-			const paymentData = {
-				userId: loggedUser.id,
-				orderId: responseOrder.order.id,
-				paymentMethodId
-			}
-
-			const { ok, response: responsePayment } = await executePayment(paymentData)
-			if (ok) {
-				cleaningBasket()
-				return responsePayment
+		if (!okOrder) {
+			return {
+				ok: false,
+				message: 'No se ha podido crear el pedido. Inténtalo de nuevo.'
 			}
 		}
 
-		return false
+		setOrder(responseOrder.order)
+
+		const paymentData = {
+			orderId: responseOrder.order.id,
+			paymentMethodId: paymentMethod.id
+		}
+
+		const { ok: okPayment, response: responsePayment } = await callApi(() =>
+			executePayment(paymentData)
+		)
+
+		if (!okPayment) {
+			return {
+				ok: false,
+				message: 'No se ha podido procesar el pago. Inténtalo de nuevo.'
+			}
+		}
+
+		if (responsePayment.status === 'requires_action') {
+			const { error: errorConfirm } = await stripe.confirmCardPayment(
+				responsePayment.client_secret
+			)
+			if (errorConfirm) {
+				return { ok: false, message: errorConfirm.message }
+			}
+		}
+
+		// TODO: Plantearse hacer todo este flujo desde el backend
+		cleaningBasket()
+		await callApi(() => deleteBasketsUser(loggedUser.id))
+		nextStep()
+		return { ok: true, message: 'Pago realizado correctamente' }
 	}
 
 	return (

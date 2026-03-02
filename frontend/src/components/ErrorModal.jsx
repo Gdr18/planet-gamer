@@ -13,7 +13,12 @@ export const ErrorModal = () => {
 
 	useEffect(() => {
 		if (!Object.keys(error).length) return
-		if (error.errorUi === 'go_home' || error.errorUi === 'not_token') return
+
+		const needModal = ['go_home', 'not_token', 'show_modal'].includes(error.errorUi)
+		if (!needModal) {
+			clearError()
+			return
+		}
 
 		timeout = setTimeout(() => {
 			handleCase()
@@ -49,7 +54,7 @@ export const ErrorModal = () => {
 				</div>
 				<div className='error-information-container'>
 					<h2>Error</h2>
-					<p>{error?.message}</p>
+					<p>{error.message}</p>
 					<button onClick={handleManualClose}>Cerrar</button>
 				</div>
 			</div>
