@@ -9,10 +9,18 @@ export class AppError extends Error {
 
 export const handleErrors = error => {
 	console.log(error, 'error in handleErrors')
-	const { err: errorKey, msg: apiMsg } = error.response?.data || {err: 'unknown_error', msg: ''}
+	
 	let errorUi = 'not_modal'
 	let message =
-		'Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.'
+	'Ha ocurrido un error inesperado. Por favor, inténtalo más tarde.'
+	
+	
+	let { err: errorKey, msg: apiMsg } = error.response?.data || {err: 'unknown_error', msg: ''}
+	
+	if (error.code === 'ERR_CANCELED') {
+		errorKey = 'request_canceled'
+		message = error.message || 'La solicitud ha sido cancelada. Por favor, inténtalo de nuevo.'
+	}
 
 	switch (errorKey) {
 		case 'expired_token':
@@ -52,9 +60,6 @@ export const handleErrors = error => {
 		case 'forbidden_action':
 		case 'forbidden':
 			message = 'No tienes permiso para realizar esta acción.'
-			errorUi = 'go_home'
-			break
-		default:
 			errorUi = 'go_home'
 			break
 	}

@@ -18,11 +18,7 @@ export const AuthProvider = ({ children }) => {
 	const { callApi } = useApiWithErrors()
 
 	useEffect(() => {
-		const token = localStorage.getItem('access_token')
-		if (!token) {
-			setLoggedUser({})
-		}
-		if (token && !Object.keys(loggedUser).length) {
+		if (!Object.keys(loggedUser).length) {
 			callApi(() => getCurrentUser()).then(({ ok, response: user }) => {
 				if (ok) {
 					const { basket, ...userData } = user

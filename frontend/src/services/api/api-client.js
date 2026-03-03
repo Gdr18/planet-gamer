@@ -8,11 +8,42 @@ const baseConfig = {
 export const publicClient = axios.create(baseConfig)
 export const privateClient = axios.create(baseConfig)
 
-privateClient.interceptors.request.use(config => {
-	const token = localStorage.getItem('access_token')
+const getAccessWithRefresh = async refreshToken => {
+	try {
+		const response = await publicClient.get('/auth/refresh-token', {
+			headers: {
+				Authorization: `Bearer ${refreshToken}`
+			}
+		})
+		const newAccessToken = response.data?.access_token || null
+		if (newAccessToken) {
+			localStorage.setItem('access_token', newAccessToken)
+			return newAccessToken
+		}
+	} catch (refreshError) {
+		localStorage.removeItem('access_token')
+		localStorage.removeItem('refresh_token')
+		throw refreshError
+	}
+}
 
-	if (token) {
-		config.headers.Authorization = `Bearer ${token}`
+privateClient.interceptors.request.use(async config => {
+	const accessToken = localStorage.getItem('access_token')
+	const refreshToken = localStorage.getItem('refresh_token')
+
+	if (accessToken) {
+		config.headers.Authorization = `Bearer ${accessToken}`
+	} else if (refreshToken) {
+		const newAccessToken = await getAccessWithRefresh(refreshToken)
+		if (newAccessToken) {
+			config.headers.Authorization = `Bearer ${newAccessToken}`
+		}
+	} else {
+		return Promise.reject(
+			new axios.Cancel(
+				'No se puede recuperar al usuario. Por favor, inicia sesión de nuevo.'
+			)
+		)
 	}
 
 	return config
@@ -20,7 +51,7 @@ privateClient.interceptors.request.use(config => {
 
 privateClient.interceptors.response.use(
 	response => response,
-	error => {
+	async error => {
 		const originalRequest = error.config
 		const errorCode = error.response?.data?.err
 
@@ -39,26 +70,17 @@ privateClient.interceptors.response.use(
 
 			originalRequest._retry = true
 
-			return publicClient
-				.get('/auth/refresh-token', null, {
-					headers: {
-						Authorization: `Bearer ${refreshToken}`
-					}
-				})
-				.then(response => {
-					const accessToken = response.data.access_token
-					localStorage.setItem('access_token', accessToken)
+			try {
+				const newAccessToken = await getAccessWithRefresh(refreshToken)
 
-					originalRequest.headers = originalRequest.headers ?? {}
-					originalRequest.headers.Authorization = `Bearer ${accessToken}`
+				if (newAccessToken) {
+					originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
 
 					return privateClient(originalRequest)
-				})
-				.catch(refreshError => {
-					localStorage.removeItem('access_token')
-					localStorage.removeItem('refresh_token')
-					return Promise.reject(refreshError)
-				})
+				}
+			} catch (refreshError) {
+				return Promise.reject(refreshError)
+			}
 		}
 
 		return Promise.reject(error)

@@ -35,6 +35,7 @@ export default function Products() {
 	}
 
 	useEffect(() => {
+		
 		getGames(platform)
 		setLoading(false)
 	}, [platform])
