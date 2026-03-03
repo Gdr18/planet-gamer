@@ -10,6 +10,7 @@ import Footer from '../../Footer'
 
 import { useCartContext } from '../../../contexts/cart-context/CartContext'
 import { useGamesContext } from '../../../contexts/GamesContext'
+import { PLATFORM_API_MAP } from '../../../core/api-game-validations'
 
 export default function Products() {
 	const params = useParams()
@@ -23,22 +24,21 @@ export default function Products() {
 	const [filteringGames, setFilteringGames] = useState([])
 	const [filterIcon, setFilterIcon] = useState(false)
 	const [loading, setLoading] = useState(true)
+	const [filteredGames, setFilteredGames] = useState([])
 
 	const { addItemBasket } = useCartContext()
 	const { games, getGames } = useGamesContext()
 
-	const platformMap = {
-		ps4: 'PlayStation 4',
-		ps5: 'PlayStation 5',
-		xbox: 'Xbox Series',
-		switch: 'Nintendo Switch'
-	}
-
 	useEffect(() => {
-		
-		getGames(platform)
-		setLoading(false)
-	}, [platform])
+		const isPlatform = games.find(game => PLATFORM_API_MAP[game.platform] === platform)
+		if (!isPlatform) {
+			setLoading(true)
+			getGames(platform)
+		} else {
+			setFilteredGames(games.filter(game => PLATFORM_API_MAP[game.platform] === platform))
+			setLoading(false)
+		}
+	}, [platform, games])
 
 	const handleCheckbox = ({ target }) => {
 		setGamesPlatform({
@@ -47,7 +47,7 @@ export default function Products() {
 		})
 		if (target.checked) {
 			const gamesList = games.filter(
-				game => game.platform === platformMap[target.value]
+				game => PLATFORM_API_MAP[game.platform] === target.value
 			)
 			setFilteringGames([...filteringGames, ...gamesList])
 		} else {
@@ -55,7 +55,7 @@ export default function Products() {
 				return null
 			} else {
 				const gamesList = filteringGames.filter(
-					game => game.platform !== platformMap[target.value]
+					game => PLATFORM_API_MAP[game.platform] !== target.value
 				)
 				setFilteringGames([...gamesList])
 			}
@@ -118,7 +118,7 @@ export default function Products() {
 							</div>
 						</div>
 						<div className='products-wrapper'>
-							{games.map(game => {
+							{filteredGames.map(game => {
 								return (
 									<div key={game.id} className='game-item'>
 										<div className='game-img'>
