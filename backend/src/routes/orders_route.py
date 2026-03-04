@@ -1,4 +1,4 @@
-from flask import request, Blueprint, jsonify
+from flask import request, Blueprint
 from flask_jwt_extended import jwt_required, current_user
 
 from ..core.api_responses import response_success
@@ -6,7 +6,6 @@ from ..core.enums import RoleType
 from ..core.exceptions.custom_exceptions import ResourceCustomError, AuthCustomError
 from ..core.extensions import db
 from ..models.order_model import OrderModel
-from ..schemas.order_item_schema import OrderItemSchema
 from ..schemas.order_schema import OrderSchema
 
 orders = Blueprint("orders", __name__, url_prefix="/orders")
@@ -91,40 +90,3 @@ def get_orders_user(user_id):
 		raise AuthCustomError("forbidden_action", "ver los pedidos de otro usuario")
 	user_orders = OrderModel.query.filter_by(user_id=user_id).all()
 	return orders_schema.jsonify(user_orders), 200
-
-
-@orders.route("/with-items", methods=["POST"])
-@jwt_required()
-def add_order_with_items():
-	data = request.get_json()
-	order_data = data.get("order")
-	items_data = data.get("items")
-	
-	order_item_schema = OrderItemSchema(load_instance=True)
-	order_schema = OrderSchema(load_instance=True)
-	
-	new_order = order_schema.load(order_data)
-	
-	if current_user.role != RoleType.ADMIN.value and new_order.user_id != current_user.id:
-		raise AuthCustomError("forbidden_action", "crear un pedido para otro usuario")
-	
-	try:
-		db.session.add(new_order)
-		db.session.flush()
-		
-		for item in items_data:
-			item["orderId"] = new_order.id
-			new_item = order_item_schema.load(item)
-			db.session.add(new_item)
-		
-		db.session.commit()
-		
-		result = {
-			"order": order_schema.dump(new_order),
-			"items": order_item_schema.dump(new_order.items, many=True),
-		}
-		
-		return jsonify(result), 201
-	except Exception as e:
-		db.session.rollback()
-		raise e

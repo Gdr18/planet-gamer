@@ -31,6 +31,9 @@ class ResourceCustomError(Exception):
 		elif self.error == "invalid_data":
 			self.message = f"{resource.capitalize()} inválido"
 			self.code = 400
+		elif self.error == "total_mismatch":
+			self.message = "El total no coincide con la suma de los precios de los productos"
+			self.code = 400
 	
 	def json_response(self):
 		return jsonify(err=self.error, msg=self.message), self.code

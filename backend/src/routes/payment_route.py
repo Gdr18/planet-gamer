@@ -1,30 +1,38 @@
 from flask import Blueprint, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, current_user
 
 from config import WEBHOOK_SECRET_STRIPE
 from ..core.api_responses import payment_response_success
+from ..core.enums import RoleType
 from ..core.exceptions.custom_exceptions import ResourceCustomError, StripeCustomError, AuthCustomError
 from ..core.extensions import db
 from ..models.order_model import OrderModel
 from ..schemas.payment_schema import PaymentSchema
+from ..services.order_service import OrderService
 from ..services.stripe_service import create_payment_intent, confirm_payment_intent, get_payment_intent, \
 	create_webhook_event
 
 payments = Blueprint("payments", __name__, url_prefix="/payments")
 
 
-@payments.route("", methods=["POST"])
+@payments.route("/checkout", methods=["POST"])
 @jwt_required()
 def create_and_confirm_payment():
 	data = request.get_json()
-	order_id = data.get("order_id")
-	payment_method_id = data.get("payment_method_id")
+	order_data = data.get("order")
+	items_order_data = data.get("items")
+	payment_method_id = data.get("paymentMethodId")
+	
+	if current_user.role != RoleType.ADMIN.value and order_data["userId"] != current_user.id:
+		raise AuthCustomError("forbidden_action", "crear un pedido para otro usuario")
+	
+	order_and_items_posted = OrderService.post_order_and_items(order_data, items_order_data)
+	order_id = order_and_items_posted["order"]["id"]
 	
 	payment_schema = PaymentSchema()
-	validated_data = payment_schema.load(data)
+	payment_object = payment_schema.load(payment_method_id)
 	
-	order_id = validated_data["order_id"]
-	payment_method_id = validated_data["payment_method_id"]
+	payment_method_id = payment_object.payment_method_id
 	user_id = int(get_jwt_identity())
 	
 	payment = None
