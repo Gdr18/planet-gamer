@@ -70,7 +70,7 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 		}
 
 		const { ok, response } = await callApi(() => register(data))
-		
+
 		if (ok) {
 			setAdvise(response.msg)
 			setTimeout(() => {
@@ -126,9 +126,11 @@ export default function AuthComponent({ handleIconLogin, messageRegister }) {
 						<div className='errorTag'>{errorsLogin.password.message}</div>
 					)}
 
-					{messageRegister ? (
-						<div>Necesitas registrarte para seguir con la compra.</div>
-					) : null}
+					{messageRegister && (
+						<div className='advise'>
+							Necesitas hacer login para seguir con la compra.
+						</div>
+					)}
 
 					{advise !== '' ? <div className='advise'>{advise}</div> : null}
 					<div className='login-form-actions'>

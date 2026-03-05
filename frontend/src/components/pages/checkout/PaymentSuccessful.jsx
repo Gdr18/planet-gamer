@@ -19,7 +19,7 @@ export default function PaymentSuccessful({ order }) {
 				</div>
 				<div className='total-success'>
 					<span>Importe: </span>
-					{`${Math.floor(order.total * 100) / 100}€`}
+					{`${order.total}€`}
 				</div>
 				<div className='thanks'>Gracias por comprar en Planet Gamer!</div>
 			</div>

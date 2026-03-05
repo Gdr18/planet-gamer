@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 
 export default function CardForm({
@@ -33,10 +33,18 @@ export default function CardForm({
 		}
 	}
 
+	useEffect(() => {
+		if (errorText === '') return
+		const timeoutId = setTimeout(() => {
+			setErrorText('')
+		}, 5000)
+
+		return () => clearTimeout(timeoutId)
+	}, [errorText])
+
 	const handleSubmitCard = async event => {
 		event.preventDefault()
 
-		setLoading(true)
 		setDisabledButton(true)
 
 		if (!elements) {
@@ -49,6 +57,8 @@ export default function CardForm({
 		}
 
 		const cardElement = elements.getElement(CardElement)
+
+		setLoading(true)
 
 		const { ok, message } = await handleSubmitPayment(cardElement, stripe)
 
@@ -64,7 +74,7 @@ export default function CardForm({
 		<form className='card-wrapper' onSubmit={handleSubmitCard}>
 			<CardElement options={CARD_ELEMENT_OPTIONS} />
 			{errorText !== '' ? (
-				<div className='error-text'>{`Error: ${errorText}`}</div>
+				<div className='advise'>{errorText}</div>
 			) : null}
 			<div className='buttons-wrapper'>
 				<button

@@ -83,21 +83,23 @@ export default function Profile() {
 	})
 
 	useEffect(() => {
-		if (!currentAddresses.length && !currentOrders.length) {
-			callApi(() => getUserWithRelatedData(loggedUser.id)).then(({ ok, response: data }) => {
-				if (ok && Object.keys(data).length) {
-					const {
-						basket: userBasket,
-						addresses: userAddresses,
-						orders: userOrders,
-						...userData
-					} = data
-					setCurrentBasket(userBasket)
-					setCurrentOrders(userOrders)
-					setLoggedUser({ ...userData })
-					setCurrentAddresses(userAddresses)
+		if (!currentAddresses.length || !currentOrders.length) {
+			callApi(() => getUserWithRelatedData(loggedUser.id)).then(
+				({ ok, response: data }) => {
+					if (ok && Object.keys(data).length) {
+						const {
+							basket: userBasket,
+							addresses: userAddresses,
+							orders: userOrders,
+							...userData
+						} = data
+						setCurrentBasket(userBasket)
+						setCurrentOrders(userOrders)
+						setLoggedUser({ ...userData })
+						setCurrentAddresses(userAddresses)
+					}
 				}
-			})
+			)
 		}
 	}, [loggedUser.id])
 
@@ -111,10 +113,8 @@ export default function Profile() {
 	}, [currentAddresses])
 
 	useEffect(() => {
-		if (currentOrders.length) {
-			const filtered = currentOrders.filter(order => order.status === 'paid')
-			setFilteredOrders(filtered)
-		}
+		const filtered = currentOrders.filter(order => order.status === 'paid')
+		setFilteredOrders(filtered)
 	}, [currentOrders])
 
 	const handleSubmitProfile = handleSubmitUser(async data => {
@@ -189,7 +189,9 @@ export default function Profile() {
 				localStorage.removeItem('access_token')
 				localStorage.removeItem('refresh_token')
 				cleaningBasket()
-				alert('Lamentamos verte partir, pero gracias por habernos dado una oportunidad!!👋')
+				alert(
+					'Lamentamos verte partir, pero gracias por habernos dado una oportunidad!!👋'
+				)
 			}
 		} else {
 			alert('Gracias por continuar con nosotrxs!!🤗')
@@ -563,8 +565,8 @@ export default function Profile() {
 												Artículos: <span>{order.items.length}</span>
 											</div>
 											<div className='divs'>
-												Importe:{' '}
-												<span>{Math.floor(order.total * 100) / 100}</span>€
+												Importe:
+												<span>{` ${order.total}€`}</span>
 											</div>
 										</div>
 									)

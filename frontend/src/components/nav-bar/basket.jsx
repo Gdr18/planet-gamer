@@ -64,7 +64,7 @@ export default function Basket({
 				})}
 				{basket.length ? (
 					<div className='total-wrapper'>
-						<div>Total: <span>{`${(Math.round(total * 100) / 100).toFixed(2)}€`}</span></div>
+						<div>Total: <span>{`${total}€`}</span></div>
 						<button disabled={basket.length === 0} onClick={() => handlePurchaseBotton()}>
 							Tramitar pedido
 						</button>

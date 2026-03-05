@@ -1,9 +1,11 @@
 .success-wrapper {
-	background-color: $gris-claro;
+	background-color: $gris-fuerte;
+	color: $gris-claro;
 	border-radius: 3px;
-	padding: 20px;
+	padding: 2em;
 	@include white-shadow();
 	margin-bottom: 40px;
+	align-self: center;
 	.branding {
 		display: flex;
 		align-items: center;
@@ -16,14 +18,14 @@
 	}
 	.header-success {
 		padding: 20px;
+		span {
+			color: $morado-activo;
+		}
 		.success-icon-team {
 			display: flex;
 			align-items: center;
 			div {
 				margin-right: 5px;
-				span {
-					color: $morado;
-				}
 			}
 			.icon-rocket {
 				color: $verde-marca;
@@ -33,9 +35,6 @@
 	}
 	.total-success {
 		padding: 20px;
-		span {
-			color: $morado;
-		}
 	}
 }
 

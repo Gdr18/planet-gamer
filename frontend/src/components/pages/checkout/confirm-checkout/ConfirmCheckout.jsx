@@ -18,6 +18,17 @@ export default function ConfirmCheckout({
 
 	return (
 		<div className='payment-container'>
+			{loading && (
+				<div className='payment-spinner-wrapper'>
+					<RotatingLines
+						strokeColor='#5de659'
+						strokeWidth='5'
+						animationDuration='0.75'
+						width='96'
+						visible={true}
+					/>
+				</div>
+			)}
 			<div className='details-container'>
 				<div className='order-details-wrapper'>
 					<div className='title-checkout'>Detalles Pedido</div>
@@ -33,7 +44,7 @@ export default function ConfirmCheckout({
 						)
 					})}
 					<div className='total-wrapper'>
-						<div>{`Total: ${total.toFixed(2)}€`}</div>
+						<div>{`Total: ${total}€`}</div>
 					</div>
 				</div>
 				<div className='address-details-wrapper'>
@@ -61,16 +72,6 @@ export default function ConfirmCheckout({
 					setLoading={setLoading}
 				/>
 			</Elements>
-
-			{loading && (
-				<RotatingLines
-					strokeColor='#5de659'
-					strokeWidth='5'
-					animationDuration='0.75'
-					width='96'
-					visible={true}
-				/>
-			)}
 		</div>
 	)
 }

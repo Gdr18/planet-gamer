@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
 		setBasket([...basketUpdated])
 		setCountProducts(basketUpdated.reduce((acc, item) => acc + item.qty, 0))
 		setTotal(
-			basketUpdated.reduce((acc, item) => acc + item.game.price * item.qty, 0)
+			basketUpdated.reduce((acc, item) => acc + item.game.price * item.qty, 0).toFixed(2, 2)
 		)
 		setCurrentBasket([])
 	}

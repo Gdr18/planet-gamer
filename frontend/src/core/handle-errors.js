@@ -54,8 +54,7 @@ export const handleErrors = error => {
 			break
 		case 'paid_rejected':
 			message =
-				'Tu pago ha sido rechazado. Por favor, verifica tu información de pago o intenta con otro método de pago.'
-			errorUi = 'show_modal'
+				'Tu pago ha sido rechazado. Verifica la información de pago o intenta con otro método.'
 			break
 		case 'forbidden_action':
 		case 'forbidden':

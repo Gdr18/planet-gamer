@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CSSTransition } from 'react-transition-group'
 
-import LoginComponent from './Auth'
+import AuthComponent from './Auth'
 import LogosWrapper from './LogosWrapper'
 import Basket from './Basket'
 
@@ -17,12 +17,21 @@ export default function NavBar() {
 	const [handlePlatforms, setHandlePlatforms] = useState(false)
 	const [loginActive, setLoginActive] = useState(false)
 	const [basketActive, setBasketActive] = useState(false)
-	const [messageRegister, setMessageRegister] = useState(false)
+	const [messageRegister, setMessageRegister] = useState('')
 
 	const { countProducts } = useCartContext()
 
 	const nodeRefLogin = useRef(null)
 	const nodeRefBasket = useRef(null)
+
+	useEffect(() => {
+		if (messageRegister !== '') {
+			const timeoutId = setTimeout(() => {
+				setMessageRegister('')
+			}, 5000)
+			return () => clearTimeout(timeoutId)
+		}
+	}, [messageRegister])
 
 	const handleIconLogin = () => {
 		if (basketActive) {
@@ -72,7 +81,7 @@ export default function NavBar() {
 				>
 					<div ref={nodeRefLogin}>
 						{loginActive ? (
-							<LoginComponent
+							<AuthComponent
 								messageRegister={messageRegister}
 								handleIconLogin={handleIconLogin}
 							/>

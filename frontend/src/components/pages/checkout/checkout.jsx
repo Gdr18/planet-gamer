@@ -16,7 +16,6 @@ import {
 	executeAddressAction
 } from '../../../services/api/address-service'
 import { executeUserAction } from '../../../services/api/user-service'
-import { postOrderAndItems } from '../../../services/api/order-service'
 import { executePayment } from '../../../services/api/payment-service'
 import { deleteBasketsUser } from '../../../services/api/basket-service'
 
@@ -44,9 +43,9 @@ export default function Checkout() {
 
 	useEffect(() => {
 		if (!currentAddresses.length) {
-			callApi(() => getAddressesUser(loggedUser.id)).then(res => {
-				if (res.ok) {
-					setCurrentAddresses(res.response)
+			callApi(() => getAddressesUser(loggedUser.id)).then(({ ok, response }) => {
+				if (ok) {
+					setCurrentAddresses(response)
 				}
 			})
 		}
@@ -130,48 +129,31 @@ export default function Checkout() {
 			return { ok: false, message: error.message }
 		}
 
-		const orderData = {
+		const paymentData = {
 			order: {
 				phoneNumber: userData.phoneNumber,
 				addressee: `${userData.name} ${userData.surnames}`,
 				userId: loggedUser.id,
 				addressId: userData.addressId,
-				paymentMethodId: paymentMethod.id,
 				total
 			},
 			items: basket.map(item => ({
 				price: item.game.price,
 				qty: item.qty,
 				gameId: item.game.id
-			}))
-		}
-
-		const { ok: okOrder, response: responseOrder } = await callApi(() =>
-			postOrderAndItems(orderData)
-		)
-
-		if (!okOrder) {
-			return {
-				ok: false,
-				message: 'No se ha podido crear el pedido. Inténtalo de nuevo.'
-			}
-		}
-
-		setOrder(responseOrder.order)
-
-		const paymentData = {
-			orderId: responseOrder.order.id,
-			paymentMethodId: paymentMethod.id
+			})),
+			payment: { paymentMethodId: paymentMethod.id }
 		}
 
 		const { ok: okPayment, response: responsePayment } = await callApi(() =>
 			executePayment(paymentData)
 		)
-
+		
+		console.log(responsePayment, 'responsePayment')
 		if (!okPayment) {
 			return {
 				ok: false,
-				message: 'No se ha podido procesar el pago. Inténtalo de nuevo.'
+				message: responsePayment?.message || 'Ha ocurrido un error al procesar el pago. Inténtalo de nuevo.'
 			}
 		}
 
@@ -184,7 +166,8 @@ export default function Checkout() {
 			}
 		}
 
-		// TODO: Plantearse hacer todo este flujo desde el backend
+		setOrder(responsePayment.order)
+
 		cleaningBasket()
 		await callApi(() => deleteBasketsUser(loggedUser.id))
 		nextStep()

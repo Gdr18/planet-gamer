@@ -8,6 +8,18 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
+	.payment-spinner-wrapper {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 10;
+	}
 	.title-checkout {
 		font-weight: 600;
 		font-size: 1.2em;
@@ -15,6 +27,7 @@
 		margin-bottom: 1em;
 	}
 	.details-container {
+		position: relative;
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		.order-details-wrapper {
