@@ -9,11 +9,12 @@ def response_success(resource: str, action: str, status_code: int = 200) -> tupl
 	return jsonify(msg=msg_success(resource, action)), status_code
 
 
-def payment_response_success(payment_id: str, client_secret: str, status: str) -> tuple:
+def payment_response_success(payment_id: str, client_secret: str, status: str, order: dict) -> tuple:
 	response_data = {
 		"payment_id": payment_id,
 		"client_secret": client_secret,
-		"status": status
+		"status": status,
+		"order": order
 	}
 	return jsonify(**response_data), 200
 

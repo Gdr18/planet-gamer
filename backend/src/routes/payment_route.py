@@ -7,6 +7,7 @@ from ..core.enums import RoleType
 from ..core.exceptions.custom_exceptions import ResourceCustomError, StripeCustomError, AuthCustomError
 from ..core.extensions import db
 from ..models.order_model import OrderModel
+from ..schemas.order_schema import OrderSchema
 from ..schemas.payment_schema import PaymentSchema
 from ..services.order_service import OrderService
 from ..services.stripe_service import create_payment_intent, confirm_payment_intent, get_payment_intent, \
@@ -17,44 +18,30 @@ payments = Blueprint("payments", __name__, url_prefix="/payments")
 
 @payments.route("/checkout", methods=["POST"])
 @jwt_required()
-def create_and_confirm_payment():
+def checkout():
 	data = request.get_json()
 	order_data = data.get("order")
 	items_order_data = data.get("items")
-	payment_method_id = data.get("paymentMethodId")
+	payment_data = data.get("payment")
 	
 	if current_user.role != RoleType.ADMIN.value and order_data["userId"] != current_user.id:
 		raise AuthCustomError("forbidden_action", "crear un pedido para otro usuario")
 	
-	order_and_items_posted = OrderService.post_order_and_items(order_data, items_order_data)
-	order_id = order_and_items_posted["order"]["id"]
+	payment_object = PaymentSchema().load(payment_data)
 	
-	payment_schema = PaymentSchema()
-	payment_object = payment_schema.load(payment_method_id)
+	order = OrderService.post_order_and_items(order_data, items_order_data)
 	
-	payment_method_id = payment_object.payment_method_id
-	user_id = int(get_jwt_identity())
-	
-	payment = None
-	order = None
 	try:
-		order = OrderModel.query.get(order_id)
-		if not order:
-			raise ResourceCustomError("not_found", "pedido")
+		create_payment = create_payment_intent(order)
+		order.payment_id = create_payment.id
+		db.session.commit()
 		
-		if order.user_id != user_id:
-			raise AuthCustomError("forbidden_action", "realizar un pago para un pedido de otro usuario")
+		confirm_payment = confirm_payment_intent(create_payment.id, payment_object["payment_method_id"])
 		
-		if not order.payment_id and order.status != "paid":
-			payment = create_payment_intent(order)
-			order.payment_id = payment.id
-			db.session.commit()
-		
-		payment = confirm_payment_intent(order.payment_id, payment_method_id)
-		
-		if payment.status not in ["succeeded", "requires_action", "processing"]:
-			raise StripeCustomError(payment.status)
-		return payment_response_success(payment.id, payment.client_secret, payment.status)
+		if confirm_payment.status not in ["succeeded", "requires_action", "processing"]:
+			raise StripeCustomError(confirm_payment.status)
+		return payment_response_success(confirm_payment.id, confirm_payment.client_secret, confirm_payment.status,
+		                                OrderSchema().dump(order))
 	except Exception as e:
 		if order:
 			order.status = "failed"

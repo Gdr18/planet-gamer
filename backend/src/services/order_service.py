@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from src.core.exceptions.custom_exceptions import ResourceCustomError
 from src.core.extensions import db
 from src.schemas.order_item_schema import OrderItemSchema
@@ -8,14 +10,13 @@ class OrderService:
 	
 	@staticmethod
 	def post_order_and_items(order, items):
-		prices_to_sum = []
-		for item in items:
-			result = item["qty"] * item["price"]
-			prices_to_sum.append(result)
+		total_order = sum(
+			Decimal(str(item["price"])) * Decimal(str(item["qty"]))
+			for item in items
+		).quantize(Decimal("0.01"))
 		
-		total_order = sum(prices_to_sum)
-		
-		if total_order != order["total"]:
+		print(f"Total calculado: {type(total_order)}, Total proporcionado: {type(Decimal(str(order["total"])))}")
+		if total_order != Decimal(str(order["total"])):
 			raise ResourceCustomError("total_mismatch")
 		
 		order_item_schema = OrderItemSchema(load_instance=True)
@@ -34,12 +35,7 @@ class OrderService:
 			
 			db.session.commit()
 			
-			result = {
-				"order": order_schema.dump(new_order),
-				"items": order_item_schema.dump(new_order.items, many=True),
-			}
-			
-			return result
+			return new_order
 		except Exception as e:
 			db.session.rollback()
 			raise e
