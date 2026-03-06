@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 
 import Home from './pages/Home'
 import Contact from './pages/Contact'
@@ -10,10 +10,13 @@ import GamesManager from './pages/games-manager/GamesManager'
 import RolesManager from './pages/RolesManager'
 import Profile from './pages/Profile'
 
+import { useCartContext } from '../contexts/cart-context/CartContext'
+
 import { useAuthContext } from '../contexts/AuthContext'
 
 export default function App() {
 	const { loggedUser } = useAuthContext()
+	const { basket, isCheckoutInProgress } = useCartContext()
 	return (
 		<div className='app'>
 			<Routes>
@@ -21,14 +24,44 @@ export default function App() {
 				<Route path='/platform/:platform' element={<Products />} />
 				<Route path='/game/:game' element={<Game />} />
 				<Route path='/contact' element={<Contact />} />
-				{loggedUser.id && <Route path='/profile' element={<Profile />} />}
-				{loggedUser.id && <Route path='/checkout' element={<Checkout />} />}
-				{loggedUser.role < 3 && (
-					<Route path='/games-manager' element={<GamesManager />} />
-				)}
-				{loggedUser.role === 1 && (
-					<Route path='/roles-manager' element={<RolesManager />} />
-				)}
+				<Route
+					path='/profile'
+					element={loggedUser.id ? <Profile /> : <Navigate to='/' replace />}
+				/>
+				<Route
+					path='/checkout'
+					element={
+						loggedUser?.id && (basket.length || isCheckoutInProgress) ? (
+							<Checkout />
+						) : (
+							<Navigate to='/' replace />
+						)
+					}
+				/>
+				{
+					<Route
+						path='/games-manager'
+						element={
+							loggedUser?.role < 3 ? (
+								<GamesManager />
+							) : (
+								<Navigate to='/' replace />
+							)
+						}
+					/>
+				}
+				{
+					<Route
+						path='/roles-manager'
+						element={
+							loggedUser?.role === 1 ? (
+								<RolesManager />
+							) : (
+								<Navigate to='/' replace />
+							)
+						}
+					/>
+				}
 				<Route path='*' element={<NoMatch />} />
 			</Routes>
 		</div>

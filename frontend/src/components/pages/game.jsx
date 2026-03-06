@@ -1,36 +1,29 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import axios from 'axios'
 import { RotatingLines } from 'react-loader-spinner'
 
 import NavBar from '../nav-bar/NavBar'
 import Footer from '../Footer'
 
 import { useCartContext } from '../../contexts/cart-context/CartContext'
+import { useGamesContext } from '../../contexts/GamesContext'
 
 export default function Game() {
 	const params = useParams()
-	const idGame = params.game
+	const idGame = Number(params.game)
 	const [gameComplete, setGameComplete] = useState({})
 	const [loading, setLoading] = useState(true)
 
 	const { handleGamesBasket } = useCartContext()
+	const { games } = useGamesContext()	
 
-	useEffect(() => gettingGame(), [])
-
-	const gettingGame = () => {
-		axios
-			.get(`${import.meta.env.VITE_BACKEND_URL}/games/${idGame}`, {
-				withCredentials: true
-			})
-			.then(response => {
-				setGameComplete(response.data)
-				setLoading(false)
-			})
-			.catch(error => {
-				console.log('An error ocurred', error)
-			})
-	}
+	useEffect(() => {
+		const game = games.find(item => item.id === idGame)
+		if (game) {
+			setGameComplete(game)
+			setLoading(false)
+		}
+	}, [])
 
 	return (
 		<div className='game-page'>
@@ -67,7 +60,7 @@ export default function Game() {
 							<div className='title-game-page'>{gameComplete.title}</div>
 							<p className='description-wrapper'>{gameComplete.description}</p>
 							<div className='price-button-wrapper'>
-								<h3>{`${gameComplete.price}€`}</h3>
+								<h3>{`${(gameComplete.price / 100).toFixed(2)}€`}</h3>
 								<button onClick={() => handleGamesBasket(gameComplete)}>
 									Añadir
 								</button>

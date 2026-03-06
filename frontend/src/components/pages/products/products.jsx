@@ -129,7 +129,7 @@ export default function Products() {
 												<Link to={`/game/${game.id}`} className='title'>
 													<strong>{game.title}</strong>
 												</Link>
-												<div className='price'>{`${game.price}€`}</div>
+												<div className='price'>{`${(game.price / 100).toFixed(2)}€`}</div>
 											</div>
 											<button onClick={() => addItemBasket(game)}>
 												Añadir

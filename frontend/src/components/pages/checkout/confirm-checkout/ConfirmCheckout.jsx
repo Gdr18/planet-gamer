@@ -16,6 +16,8 @@ export default function ConfirmCheckout({
 }) {
 	const [loading, setLoading] = useState(false)
 
+	const totalFormatted = (total / 100).toFixed(2)
+
 	return (
 		<div className='payment-container'>
 			{loading && (
@@ -38,13 +40,13 @@ export default function ConfirmCheckout({
 								<img src={basketGame.game.imgUrl} />
 								<div className='title-price-wrapper'>
 									<div>{basketGame.game.title}</div>
-									<p>{`${basketGame.qty} x ${basketGame.game.price}`}</p>
+									<p>{`${basketGame.qty} x ${(basketGame.game.price / 100).toFixed(2)}€`}</p>
 								</div>
 							</div>
 						)
 					})}
 					<div className='total-wrapper'>
-						<div>{`Total: ${total}€`}</div>
+						<div>{`Total: ${totalFormatted}€`}</div>
 					</div>
 				</div>
 				<div className='address-details-wrapper'>

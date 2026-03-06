@@ -19,9 +19,9 @@ import { executeUserAction } from '../../../services/api/user-service'
 import { executePayment } from '../../../services/api/payment-service'
 import { deleteBasketsUser } from '../../../services/api/basket-service'
 
-
 export default function Checkout() {
-	const { total, basket, cleaningBasket } = useCartContext()
+	const { total, basket, cleaningBasket, setIsCheckoutInProgress } =
+		useCartContext()
 	const { loggedUser, setLoggedUser, currentAddresses, setCurrentAddresses } =
 		useAuthContext()
 
@@ -41,13 +41,22 @@ export default function Checkout() {
 		city: ''
 	})
 
+	const totalFormatted = (total / 100).toFixed(2)
+
+	useEffect(() => {
+		setIsCheckoutInProgress(true)
+		return () => setIsCheckoutInProgress(false)
+	}, [])
+
 	useEffect(() => {
 		if (!currentAddresses.length) {
-			callApi(() => getAddressesUser(loggedUser.id)).then(({ ok, response }) => {
-				if (ok) {
-					setCurrentAddresses(response)
+			callApi(() => getAddressesUser(loggedUser.id)).then(
+				({ ok, response }) => {
+					if (ok) {
+						setCurrentAddresses(response)
+					}
 				}
-			})
+			)
 		}
 	}, [loggedUser.id])
 
@@ -138,7 +147,7 @@ export default function Checkout() {
 				total
 			},
 			items: basket.map(item => ({
-				price: item.game.price,
+				price: item.game.price / 100,
 				qty: item.qty,
 				gameId: item.game.id
 			})),
@@ -148,12 +157,13 @@ export default function Checkout() {
 		const { ok: okPayment, response: responsePayment } = await callApi(() =>
 			executePayment(paymentData)
 		)
-		
-		console.log(responsePayment, 'responsePayment')
+
 		if (!okPayment) {
 			return {
 				ok: false,
-				message: responsePayment?.message || 'Ha ocurrido un error al procesar el pago. Inténtalo de nuevo.'
+				message:
+					responsePayment?.message ||
+					'Ha ocurrido un error al procesar el pago. Inténtalo de nuevo.'
 			}
 		}
 

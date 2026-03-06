@@ -13,6 +13,8 @@ export default function Basket({
 	const { total, basket, updateItemBasket, deleteItemBasket } = useCartContext()
 	const { loggedUser } = useAuthContext()
 
+	const totalFormatted = (total / 100).toFixed(2)
+
 	const navigate = useNavigate()
 
 	const handlePurchaseBotton = () => {
@@ -50,7 +52,7 @@ export default function Basket({
 								</div>
 								<div className='title-item'>{itemBasket.game.title}</div>
 								<div className='title-item'>{`${
-									(Math.round(itemBasket.game.price * itemBasket.qty * 100) / 100).toFixed(2)
+									(itemBasket.game.price * itemBasket.qty / 100).toFixed(2)
 								}€`}</div>
 								<VscClose
 									className='basket-icon'
@@ -64,7 +66,7 @@ export default function Basket({
 				})}
 				{basket.length ? (
 					<div className='total-wrapper'>
-						<div>Total: <span>{`${total}€`}</span></div>
+						<div>Total: <span>{`${totalFormatted}€`}</span></div>
 						<button disabled={basket.length === 0} onClick={() => handlePurchaseBotton()}>
 							Tramitar pedido
 						</button>

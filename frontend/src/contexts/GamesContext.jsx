@@ -18,6 +18,9 @@ export const GamesProvider = ({ children }) => {
 			getGamesByPlatform(platform)
 		)
 		if (ok) {
+			fetchedGames.forEach(game => {
+				game.price = Math.round(Number(game.price) * 100)
+			})
 			setGames([...games, ...fetchedGames])
 			return fetchedGames
 		}

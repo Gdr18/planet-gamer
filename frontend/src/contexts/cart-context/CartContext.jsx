@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
 	const [basket, setBasket] = useState([])
 	const [total, setTotal] = useState(0)
 	const [countProducts, setCountProducts] = useState(0)
-	const [checkingCheckout, setCheckingCheckout] = useState(false)
+	const [isCheckoutInProgress, setIsCheckoutInProgress] = useState(false)
 
 	const { loggedUser, currentBasket, setCurrentBasket } = useAuthContext()
 	const { callApi } = useApiWithErrors()
@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
 		setBasket([...basketUpdated])
 		setCountProducts(basketUpdated.reduce((acc, item) => acc + item.qty, 0))
 		setTotal(
-			basketUpdated.reduce((acc, item) => acc + item.game.price * item.qty, 0).toFixed(2, 2)
+			basketUpdated.reduce((acc, item) => acc + item.game.price * item.qty, 0)
 		)
 		setCurrentBasket([])
 	}
@@ -54,7 +54,7 @@ export const CartProvider = ({ children }) => {
 	const deleteItemBasket = async itemBasket => {
 		const result = basket.filter(item => item.id !== itemBasket.id)
 		setTotal(
-			total - Math.round(itemBasket.game.price * itemBasket.qty * 100) / 100
+			total - itemBasket.game.price * itemBasket.qty
 		)
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
@@ -133,12 +133,12 @@ export const CartProvider = ({ children }) => {
 				basket,
 				total,
 				countProducts,
-				checkingCheckout,
+				isCheckoutInProgress,
 				addItemBasket,
 				updateItemBasket,
 				deleteItemBasket,
 				cleaningBasket,
-				setCheckingCheckout
+				setIsCheckoutInProgress
 			}}
 		>
 			{children}
