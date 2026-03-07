@@ -5,8 +5,8 @@ from ..models.order_item_model import OrderItemModel
 
 
 class OrderItemSchema(ma.SQLAlchemyAutoSchema):
-	price = ma.Decimal(as_string=True, places=2, required=True, validate=validate.Range(min=0.01,
-	                                                                                    error="El campo 'price' debe ser un entero positivo mayor que cero."))
+	price_in_cents = ma.Integer(required=True, data_key="priceInCents", validate=validate.Range(min=1,
+	                                                                                            error="El campo 'priceInCents' debe ser un entero positivo."))
 	qty = ma.Integer(required=True, validate=validate.Range(min=1, error="El campo 'qty' debe ser un entero positivo."))
 	game_id = ma.Integer(required=True, foreign_key="game_model.id", data_key="gameId",
 	                     validate=validate.Range(min=1, error="El campo 'game_id' debe ser un entero positivo."))

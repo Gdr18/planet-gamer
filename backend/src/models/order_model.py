@@ -6,7 +6,7 @@ from ..core.extensions import db
 
 class OrderModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	total = db.Column(db.Numeric(precision=10, scale=2, asdecimal=True), nullable=False)
+	total_in_cents = db.Column(db.Integer, nullable=False)
 	addressee = db.Column(db.String(150), nullable=False)
 	phone_number = db.Column(db.String(14), nullable=False)
 	address_id = db.Column(db.Integer, db.ForeignKey("address_model.id"))

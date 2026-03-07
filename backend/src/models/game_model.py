@@ -12,7 +12,7 @@ class GameModel(db.Model):
 	gender = db.Column(db.String(30), nullable=False)
 	pegi = db.Column(db.String(3), nullable=False)
 	release = db.Column(db.Integer(), nullable=False)
-	price = db.Column(db.Numeric(precision=10, scale=2, asdecimal=True), nullable=False)
+	price_in_cents = db.Column(db.Integer, nullable=False)
 	img_url = db.Column(db.String(250), unique=True, nullable=False)
 	stock = db.Column(db.Integer, nullable=False, default=20)
 	created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=datetime.now(ZoneInfo("Europe/Madrid")))
