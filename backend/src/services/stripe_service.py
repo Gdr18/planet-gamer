@@ -8,7 +8,7 @@ stripe.api_key = API_KEY_STRIPE
 
 def create_payment_intent(order_instance: OrderModel) -> stripe.PaymentIntent:
 	payment_attr = {
-		"amount": int(order_instance.total * 100),
+		"amount": order_instance.total,
 		"currency": "eur",
 		"payment_method_types": ["card"],
 		"metadata": {
