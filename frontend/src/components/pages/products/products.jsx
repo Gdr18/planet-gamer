@@ -30,12 +30,16 @@ export default function Products() {
 	const { games, getGames } = useGamesContext()
 
 	useEffect(() => {
-		const isPlatform = games.find(game => PLATFORM_API_MAP[game.platform] === platform)
+		const isPlatform = games.find(
+			game => PLATFORM_API_MAP[game.platform] === platform
+		)
 		if (!isPlatform) {
 			setLoading(true)
 			getGames(platform)
 		} else {
-			setFilteredGames(games.filter(game => PLATFORM_API_MAP[game.platform] === platform))
+			setFilteredGames(
+				games.filter(game => PLATFORM_API_MAP[game.platform] === platform)
+			)
 			setLoading(false)
 		}
 	}, [platform, games])
@@ -129,7 +133,7 @@ export default function Products() {
 												<Link to={`/game/${game.id}`} className='title'>
 													<strong>{game.title}</strong>
 												</Link>
-												<div className='price'>{`${(game.price / 100).toFixed(2)}€`}</div>
+												<div className='price'>{`${(game.priceInCents / 100).toFixed(2)}€`}</div>
 											</div>
 											<button onClick={() => addItemBasket(game)}>
 												Añadir

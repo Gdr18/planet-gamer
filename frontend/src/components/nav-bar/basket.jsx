@@ -52,7 +52,7 @@ export default function Basket({
 								</div>
 								<div className='title-item'>{itemBasket.game.title}</div>
 								<div className='title-item'>{`${
-									(itemBasket.game.price * itemBasket.qty / 100).toFixed(2)
+									(itemBasket.game.priceInCents * itemBasket.qty / 100).toFixed(2)
 								}€`}</div>
 								<VscClose
 									className='basket-icon'

@@ -15,7 +15,7 @@ export default function Game() {
 	const [loading, setLoading] = useState(true)
 
 	const { handleGamesBasket } = useCartContext()
-	const { games } = useGamesContext()	
+	const { games } = useGamesContext()
 
 	useEffect(() => {
 		const game = games.find(item => item.id === idGame)
@@ -60,7 +60,7 @@ export default function Game() {
 							<div className='title-game-page'>{gameComplete.title}</div>
 							<p className='description-wrapper'>{gameComplete.description}</p>
 							<div className='price-button-wrapper'>
-								<h3>{`${(gameComplete.price / 100).toFixed(2)}€`}</h3>
+								<h3>{`${(gameComplete.priceInCents / 100).toFixed(2)}€`}</h3>
 								<button onClick={() => handleGamesBasket(gameComplete)}>
 									Añadir
 								</button>

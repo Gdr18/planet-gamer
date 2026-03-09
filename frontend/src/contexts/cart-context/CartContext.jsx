@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
 		setBasket([...basketUpdated])
 		setCountProducts(basketUpdated.reduce((acc, item) => acc + item.qty, 0))
 		setTotal(
-			basketUpdated.reduce((acc, item) => acc + item.game.price * item.qty, 0)
+			basketUpdated.reduce((acc, item) => acc + item.game.priceInCents * item.qty, 0)
 		)
 		setCurrentBasket([])
 	}
@@ -54,7 +54,7 @@ export const CartProvider = ({ children }) => {
 	const deleteItemBasket = async itemBasket => {
 		const result = basket.filter(item => item.id !== itemBasket.id)
 		setTotal(
-			total - itemBasket.game.price * itemBasket.qty
+			total - itemBasket.game.priceInCents * itemBasket.qty
 		)
 		setCountProducts(countProducts - itemBasket.qty)
 		setBasket(result)
@@ -77,7 +77,7 @@ export const CartProvider = ({ children }) => {
 			game: { ...newItem },
 			qty: 1
 		}
-		setTotal(total + itemBasket.game.price * 1)
+		setTotal(total + itemBasket.game.priceInCents * 1)
 		setCountProducts(countProducts + 1)
 
 		if (itemBasket.userId) {
@@ -110,7 +110,7 @@ export const CartProvider = ({ children }) => {
 
 		setTotal(
 			operator === 'add'
-				? total + itemBasket.game.price * 1
+				? total + itemBasket.game.priceInCents * 1
 				: total - itemBasket.game.price * 1
 		)
 		setCountProducts(operator === 'add' ? countProducts + 1 : countProducts - 1)

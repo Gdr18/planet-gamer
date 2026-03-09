@@ -41,8 +41,6 @@ export default function Checkout() {
 		city: ''
 	})
 
-	const totalFormatted = (total / 100).toFixed(2)
-
 	useEffect(() => {
 		setIsCheckoutInProgress(true)
 		return () => setIsCheckoutInProgress(false)
@@ -147,7 +145,7 @@ export default function Checkout() {
 				total
 			},
 			items: basket.map(item => ({
-				price: item.game.price / 100,
+				price: item.game.price,
 				qty: item.qty,
 				gameId: item.game.id
 			})),

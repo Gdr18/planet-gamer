@@ -26,7 +26,7 @@ export default function GamesManager() {
 		gender: '',
 		pegi: '',
 		release: '',
-		price: '',
+		priceInCents: '',
 		imgUrl: '',
 		stock: ''
 	}
@@ -54,6 +54,7 @@ export default function GamesManager() {
 
 	const handleSubmitGameForm = handleSubmit(async data => {
 		const method = data.id ? 'put' : 'post'
+		data.priceInCents = Math.round(data.priceInCents * 100)
 		const { ok, response: game } = await callApi(() => executeGameAction(method, data))
 		if (ok) {
 			reset(initialValuesForm)
@@ -67,7 +68,7 @@ export default function GamesManager() {
 	})
 
 	const handleEditClick = game => {
-		reset({ ...game })
+		reset({ ...game, priceInCents: (game.priceInCents / 100).toFixed(2) })
 	}
 
 	const handleDeleteClick = game => {
@@ -174,7 +175,7 @@ export default function GamesManager() {
 
 							<div className='three-column'>
 								<input
-									type='number'
+									type='text'
 									placeholder='PEGI'
 									{...register('pegi', {
 										required: {
@@ -196,7 +197,7 @@ export default function GamesManager() {
 									type='number'
 									placeholder='Precio'
 									step='0.01'
-									{...register('price', {
+									{...register('priceInCents', {
 										required: {
 											value: true,
 											message: "El campo 'Precio' es requerido"
@@ -208,8 +209,8 @@ export default function GamesManager() {
 										}
 									})}
 								/>
-								{errors.price && (
-									<div className='errorTag'>{errors.price.message}</div>
+								{errors.priceInCents && (
+									<div className='errorTag'>{errors.priceInCents.message}</div>
 								)}
 
 								<input
