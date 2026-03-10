@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
 	const [currentBasket, setCurrentBasket] = useState([])
 	const [currentAddresses, setCurrentAddresses] = useState([])
 	const [currentOrders, setCurrentOrders] = useState([])
+	const [currentUserRoles, setCurrentUserRoles] = useState([])
 
 	const { callApi } = useApiWithErrors()
 
@@ -46,11 +47,13 @@ export const AuthProvider = ({ children }) => {
 				currentBasket,
 				currentAddresses,
 				currentOrders,
+				currentUserRoles,
 				setLoggedUser,
 				logoutUser,
 				setCurrentBasket,
 				setCurrentAddresses,
-				setCurrentOrders
+				setCurrentOrders,
+				setCurrentUserRoles
 			}}
 		>
 			{children}

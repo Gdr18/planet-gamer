@@ -207,9 +207,9 @@ export default function Profile() {
 						<div className='profile-title'>Perfil</div>
 						{loggedUser.role < 3 && (
 							<div className='admin-wrapper'>
-								<Link to={'/games-manager'}>Games Manager</Link>
+								<Link to={'/games-manager'}>Gestión de Videojuegos</Link>
 								{loggedUser.role === 1 && (
-									<Link to={'/roles-manager'}>Roles Manager</Link>
+									<Link to={'/roles-manager'}>Gestión de Roles</Link>
 								)}
 							</div>
 						)}

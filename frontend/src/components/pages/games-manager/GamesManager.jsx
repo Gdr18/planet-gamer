@@ -87,7 +87,7 @@ export default function GamesManager() {
 			<div className='game-manager-container'>
 				<div className='game-manager-wrapper'>
 					<div className='left-column'>
-						<div className='header-manager'>Game Manager</div>
+						<div className='header-manager'>Gestión de Videojuegos</div>
 						<form onSubmit={handleSubmitGameForm} className='game-form-wrapper'>
 							<div className='one-column'>
 								<input
