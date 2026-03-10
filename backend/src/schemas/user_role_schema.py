@@ -32,3 +32,13 @@ class UserRoleSchema(ma.SQLAlchemyAutoSchema):
 		):
 			raise ValidationError("El campo 'email' no se puede modificar.")
 		return data
+	
+	@pre_load
+	def validate_and_transform_role(self, data, **kwargs):
+		role_value = data.get("role")
+		
+		if role_value in [role.name.lower() for role in RoleType]:
+			data["role"] = RoleType[role_value]
+			return data
+		
+		raise ValidationError("El campo 'role' debe ser un rol válido: 'admin', 'staff' o 'customer'.")
